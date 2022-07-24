@@ -2,7 +2,6 @@
 layout: post
 title:  "Set up GitHub Pages on macOS"
 date:   2022-07-24 18:20:49 +0800
-mathjax: true
 categories: software
 ---
 
