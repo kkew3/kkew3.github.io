@@ -42,8 +42,21 @@ bundle add webrick
 
 # set up mathjax etc.
 # follow https://github.com/jeffreytse/jekyll-spaceship#installation
-# then,
+# but in Gemfile, add `gem "jekyll-spaceship", "~> 0.9.9"` instead of
+# using the latest version by not specifying version (see Issue #81 of
+# 'jeffreytse/jekyll-spaceship' at GitHub)
+
 bundle install
+
+# Mathjax can now be rendered locally, but not on GitHub. That's because
+# jekyll-spaceship is not in its whitelist. See
+# https://github.com/marketplace/actions/jekyll-deploy-action for detail.
+# Follow its instruction (including adding the github workflow file,
+# creating 'gh-pages' orphan branch). Then ensure the GitHub Personal
+# Access Token (PAT) has sufficient permission (for workflow specifically).
+# Push master to GitHub.
+
+# Mathjax should already be ready.
 
 #####################################################
 # The only command needed to run over and over again:
