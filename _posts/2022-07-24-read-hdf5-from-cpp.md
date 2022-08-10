@@ -27,6 +27,7 @@ int main()
 	// `_dims` must be 0;
 	// `shape` shouldn't be touched
 	int _dims = filespace.getSimpleExtentDims(shape);
+	H5::DataSpace mspace(0, shape);  // where 0 comes from `_dims`
 	double buf[1];
 	dataset.read(buf, H5::PredType::NATIVE_DOUBLE, mspace, filespace);
 
@@ -52,6 +53,7 @@ int main()
 	// `_dims` is the actual N in N-D array; should be the same as
 	// previously set; `shape` has now been set
 	int _dims = filespace.getSimpleExtentDims(shape);
+	H5::DataSpace mspace(1, shape); // replace `1` with `2` if like above
 	double *buf = new double[shape[0]];
 	// if reading 2D array the previous line should be replaced by:
 	//double *buf = new double[shape[0] * shape[1]];
@@ -88,6 +90,7 @@ int main()
 	// `_dims` is the actual N in N-D array; should be the same as
 	// previously set; `shape` has now been set
 	int _dims = filespace.getSimpleExtentDims(shape);
+	H5::DataSpace mspace(1, shape); // replace `1` with `2` if like above
 	// must preserve enough space here
 	std::vector<double> buf(shape[0]);
 	// likewise, previous line should be written as
