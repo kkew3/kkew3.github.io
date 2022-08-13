@@ -39,9 +39,7 @@ extensions = [
         extra_link_args=[
             ...
         ],
-        language=[
-            ...
-        ],
+        language='...',
     ),
     ...
 ]
