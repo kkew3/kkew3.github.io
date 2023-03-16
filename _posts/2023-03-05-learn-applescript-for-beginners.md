@@ -9,6 +9,8 @@ categories: applescript
 
 > [youtube link](https://www.youtube.com/playlist?list=PL5iB9WEZe2j04doUAKVxqxaCv3JJ8TxQr)
 
+> Good referential text: [AppleScript Language Guide](https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html)
+
 # Script editor
 
 `log "message"` can be used to log messages that will be shown in "Messages" accessory pane at the bottom.
