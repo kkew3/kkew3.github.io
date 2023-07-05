@@ -159,6 +159,7 @@ ssh my-wsl
 ## 自动更新 Windows 的端口转发
 
 WSL 的 IP 地址可能会变化, 因此每次重启 Windows 后可能需要更新端口转发规则.
+Powershell 脚本:
 
 ```powershell
 $wsl_ip = wsl hostname -I
