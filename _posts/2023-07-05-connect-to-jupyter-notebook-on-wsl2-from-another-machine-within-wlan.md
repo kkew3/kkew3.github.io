@@ -7,7 +7,7 @@ categories: network
 
 # 摘要
 
-[上一篇文章](2023-07-05-connect-to-wsl2-from-another-machine-within-wlan.md)介绍了如何从本地连接到同一 WLAN 下的另一台 Windows 计算机中的 WSL2 实例.
+[上一篇文章](https://kkew3.github.io/network/2023/07/05/connect-to-wsl2-from-another-machine-within-wlan.html)介绍了如何从本地连接到同一 WLAN 下的另一台 Windows 计算机中的 WSL2 实例.
 这篇文章进一步介绍如何连接到该 WSL2 实例中运行的 [Jupyter Notebook](https://jupyter.org).
 
 # 原理
