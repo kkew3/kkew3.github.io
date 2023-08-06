@@ -95,6 +95,8 @@ To compute $\boldsymbol w^\top\phi(\boldsymbol x)$ in above equations, simply pl
 
 ## Compute the intercept in dual formulation
 
+> Reference: Chih-Chung Chang and Chih-Jen Lin. Libsvm: a library for support vector machines. ACM transactions on intelligent systems and technology (TIST), 2(3):1–27, 2011.
+
 The dual SVM problem is:
 
 $$
@@ -240,4 +242,5 @@ b &= y_j (1 - y_j\sum_{i=1}^m \alpha_i y_i \phi(\boldsymbol x_i)^\top\phi(\bolds
 \end{aligned}
 $$
 
-However, since $y_j^2=1$, it can be easily shown that the two equations are the same.
+But $y_j^2=1$.
+Therefore, it can be easily shown that the two equations are the same.
