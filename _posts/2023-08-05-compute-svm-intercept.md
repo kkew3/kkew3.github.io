@@ -224,7 +224,7 @@ Clearly, $\beta$ is the intercept, and $\nu_i$ is the slack variable $\xi_i$ bou
 
 ## Show that the two apporaches are equivalent
 
-Recall that in primal formulation,
+Recall that in primal and dual formulations,
 
 $$
 \begin{aligned}
