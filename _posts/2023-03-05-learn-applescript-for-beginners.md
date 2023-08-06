@@ -9,7 +9,10 @@ categories: applescript
 
 > [youtube link](https://www.youtube.com/playlist?list=PL5iB9WEZe2j04doUAKVxqxaCv3JJ8TxQr)
 
-> Good referential text: [AppleScript Language Guide](https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html)
+> Good referential text:
+>
+> - [AppleScript Language Guide](https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html)
+> - [AppleScript Language Guide (PDF)](https://applescriptlibrary.files.wordpress.com/2013/11/applescriptlanguageguide-2013.pdf)
 
 ## Script editor
 
