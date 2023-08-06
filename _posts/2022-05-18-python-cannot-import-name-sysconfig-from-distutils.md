@@ -7,12 +7,12 @@ categories: python ubuntu
 
 搜索这个问题时看到了[这篇博客](https://www.jianshu.com/p/49e4bfd61467)，感觉略麻烦。我就想有没有更简单的方式。后来摸索出来了，记在这里。
 
-# 环境
+## 环境
 
 - Python 3.9.12
 - Ubuntu 18.04 LTS
 
-# 安装 Python3.9
+## 安装 Python3.9
 
 详见[这篇回答](https://zhuanlan.zhihu.com/p/343237962)。简要转述如下：
 
@@ -23,7 +23,7 @@ sudo add-apt-repository ppa:deadsnakes/ppa
 sudo apt install python3.9
 ```
 
-# 问题
+## 问题
 
 ```bash
 python3.9 -m pip -V
@@ -48,7 +48,7 @@ Traceback (most recent call last):
 ImportError: cannot import name 'sysconfig' from 'distutils' (/usr/lib/python3.9/distutils/__init__.py)
 ```
 
-# 解决方法
+## 解决方法
 
 注意到上文中`ppa:deadsnakes/ppa`里包含`python3.9-venv`，而`venv`显然依赖`pip`。安装`python3.9-venv`便能自动处理好依赖。
 

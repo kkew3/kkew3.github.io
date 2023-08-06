@@ -5,11 +5,11 @@ date:   2020-05-23 02:24:21 +0800
 categories: pytorch math
 ---
 
-# Intro
+## Intro
 
 [PyTorch](https://pytorch.org) provides a variety of means to crop images. For example, [torchvision.transforms](https://pytorch.org/docs/stable/torchvision/transforms.html) provides several functions to crop `PIL` images; [PyTorch Forum](https://discuss.pytorch.org/t/how-to-crop-image-tensor-in-model/8409/3) provides an answer of how to crop image in a differentiable way (differentiable with respect to the image). However, sometimes we need a fully differentiable approach for the *cropping* action itself. How shall we implement that?
 
-# Theory: Affine transformation
+## Theory: Affine transformation
 
 Before reaching the answer, we need first to learn about the image coordinate system in PyTorch. It is a left-handed Cartesian system origined at the middle of an image. The coordinate has been normalized to range $[-1,1]$, where $(-1,-1)$ indicates the top-left corner, and $(1,1)$ indicates the bottom-right corner, as pointed out by [the doc](https://pytorch.org/docs/stable/nn.functional.html#grid-sample).
 
@@ -57,7 +57,7 @@ $$
 
 where $x'\ge x, y' \ge y$.
 
-# Coding time
+## Coding time
 
 We'll need two functions:
 
@@ -88,6 +88,6 @@ f = F.affine_grid(theta, size=(B, C, H//2, W//2), align_corners=False)
 I_cropped = F.grid_sample(I, f, align_corners=False)
 ```
 
-# Read also
+## Read also
 
 - [https://discuss.pytorch.org/t/cropping-a-minibatch-of-images-each-image-a-bit-differently/12247](https://discuss.pytorch.org/t/cropping-a-minibatch-of-images-each-image-a-bit-differently/12247)

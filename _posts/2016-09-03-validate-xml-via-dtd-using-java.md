@@ -5,11 +5,11 @@ date:   2016-09-03 00:26:30 +0800
 categories: java
 ---
 
-# 摘要
+## 摘要
 
 本文记述了如何使用`Java 8`API 解析但不验证、按照XML文件头的`DOCTYPE`声明验证、使用本地文件验证XML的方法。本文不涉及如何读取、修改XML节点，以及创建XML文档的内容。
 
-# 解析但不验证
+## 解析但不验证
 
 ```java
 import java.io.FileInputStream;
@@ -43,7 +43,7 @@ public class XMLParser {
 	}
 ```
 
-# 使用XML文件头部声明的DOCTYPE验证
+## 使用XML文件头部声明的DOCTYPE验证
 
 ```java
 import java.io.FileInputStream;
@@ -142,7 +142,7 @@ public class XMLParser {
 	}
 ```
 
-# 使用本地DTD文件验证
+## 使用本地DTD文件验证
 
 ```java
 import java.io.FileInputStream;

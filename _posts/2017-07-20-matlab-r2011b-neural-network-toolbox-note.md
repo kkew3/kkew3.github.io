@@ -7,7 +7,7 @@ categories: matlab
 
 这是记录了我使用神经网络工具箱时遇到的坑，供自己和他人参考。先写一点，以后遇到再更新。
 
-# 1
+## 1
 
 ```matlab
 net = feedforwardnet;

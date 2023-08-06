@@ -11,18 +11,18 @@ categories: applescript
 
 > Good referential text: [AppleScript Language Guide](https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html)
 
-# Script editor
+## Script editor
 
 `log "message"` can be used to log messages that will be shown in "Messages" accessory pane at the bottom.
 
-# File formats
+## File formats
 
 - Text: save as plain text
 - Script: save as compiled library
 - Application: used to create applet;
     If in code `on open(droppedFiles) ... end open` is written, then it becomes a dropplet, which allows drag-n-drop action on the created applet.
 
-# Dictionaries
+## Dictionaries
 
 Words inside square bracket are optional arguments.
 Words on the right of right arrow is what will be returned.
@@ -33,7 +33,7 @@ For example,
 set myDoc to make new document
 ```
 
-# Variables
+## Variables
 
 ```applescript
 on run
@@ -42,7 +42,7 @@ on run
 end run
 ```
 
-## Scope of variable
+### Scope of variable
 
 By default within current handler, e.g. `on run` handler, `on sub_handler()` handler (subroutine).
 However, if claiming a variable as property at the top of script:
@@ -53,7 +53,7 @@ property theName : null
 
 `theName` will become a global variable.
 
-# Data types
+## Data types
 
 - number (integer or real) `set x to 23.25`
 - string: `set x to "23.25"`; but `set x to "23.25" as number` cast `x` again to a number
@@ -97,7 +97,7 @@ set var1 to {|First|: "Jon", |Last|: "Voight"}
 set theResult to |First| of var1 & space |Last| of var2
 ```
 
-# First script
+## First script
 
 ```applescript
 on run  # explicit on run handler, responding to double clicking
@@ -121,7 +121,7 @@ on idle
 end idle
 ```
 
-# Commenting
+## Commenting
 
 Block comment:
 
@@ -134,7 +134,7 @@ Block comment:
 
 in line comment: led by `--` or `#`
 
-# Repeat loops
+## Repeat loops
 
 ```applescript
 on run
@@ -162,7 +162,7 @@ end run
 
 Use `exit repeat` to break out of `repeat` earlier.
 
-# Conditionals
+## Conditionals
 
 ```applescript
 on run
@@ -177,7 +177,7 @@ on run
 end run
 ```
 
-# Error handling
+## Error handling
 
 ```applescript
 on run
@@ -205,7 +205,7 @@ on run
 end run
 ```
 
-# Aias, HFS and POSIX
+## Aias, HFS and POSIX
 
 ```applescript
 on run
@@ -225,7 +225,7 @@ on run
 end run
 ```
 
-# Handlers (aka functions)
+## Handlers (aka functions)
 
 A handler is a collection of applescript statements that you give a descriptive name.
 
@@ -265,7 +265,7 @@ tell application "Numbers"
 end tell
 ```
 
-# Quit handler
+## Quit handler
 
 ```applescript
 on run
@@ -288,7 +288,7 @@ on quit
 end quit
 ```
 
-# Case study: most recent modified file from a folder
+## Case study: most recent modified file from a folder
 
 ```applescript
 on run
@@ -337,7 +337,7 @@ on convertPathTo(inputPath, requestedForm)
 end convertPathTo
 ```
 
-# Case study: automatically scale images
+## Case study: automatically scale images
 
 ```applescript
 on run
@@ -356,7 +356,7 @@ on resizeImageWidth(filePath, pxls)
 end resizeImageWidth
 ```
 
-# Case study: simple hot folder creation
+## Case study: simple hot folder creation
 
 A hot folder is a folder where a script monitor whatever is drag-n-dropped to that folder and perform actions on the object.
 

@@ -5,7 +5,7 @@ date:   2022-06-02 16:55:34 +0800
 categories: python cpp Cython
 ---
 
-# 从C++传到Python
+## 从C++传到Python
 
 常见的教程如[这个问题及回答](https://stackoverflow.com/q/17855032/7881370)是将大小已知的numpy数组传入传出C++，如确定会从C++传出大小为$M \times N$的矩阵。方法简单讲就是在Python端分配一个大小为$M \times N$的矩阵，把指向这个矩阵的指针传给C++，C++负责修改矩阵的内容，结束后矩阵就自动“传回”了。
 
@@ -89,7 +89,7 @@ def pyarange2d():
 2. C++传回一个`std::vector`并修改`shape`元素为合适的值
 3. 按照`shape`及`std::vector`的元素类型填写`buf`的属性，完成`std::vector`到numpy数组的转换
 
-# 从Python传到C++
+## 从Python传到C++
 
 这应该已经耳熟能详了，我就不在此赘述了。不过有一点需要注意。传`double`数组时没问题，各平台`double`都对应`numpy.float64`。传`int`数组时需注意，Windows下对应`numpy.int32`、Linux/Mac下对应`numpy.int64`。所以直接用传`double`数组的方法传`int`数组会报这个错：
 

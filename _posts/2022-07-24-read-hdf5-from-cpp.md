@@ -5,13 +5,13 @@ date:   2022-07-24 12:20:10 +0800
 categories: cpp
 ---
 
-# Introduction
+## Introduction
 
 [HDF5](https://portal.hdfgroup.org/display/HDF5/HDF5) is a cross-platform data format used to save (high dimensional) arrays.
 There are various language bindings out there for manipulating HDF5 files, including C++.
 I record here, after stumbling around many hours, how to read data using C++.
 
-# Read scalars
+## Read scalars
 
 ```cpp
 // note the header is not "hdf5.h"
@@ -37,7 +37,7 @@ int main()
 }
 ```
 
-# Read vector to array
+## Read vector to array
 
 ```cpp
 #include "H5Cpp.h"
@@ -71,7 +71,7 @@ Note that arrays are stored contiguously.
 Read arrays using something like `double buf[M][N]` is not allowed.
 See this [answer](https://stackoverflow.com/a/17110562/7881370).
 
-# Read vector to `std::vector`
+## Read vector to `std::vector`
 
 Basically the same ...
 
@@ -105,7 +105,7 @@ int main()
 }
 ```
 
-# Compile above code
+## Compile above code
 
 I'm not quite sure how to compile on Windows, but for Linux and macOS, `Makefile` should be written like this.
 

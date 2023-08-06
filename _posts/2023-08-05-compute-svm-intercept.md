@@ -5,7 +5,7 @@ date:   2023-08-05 16:08:26 +0800
 categories: math ML
 ---
 
-# Compute intercept in primal formulation
+## Compute intercept in primal formulation
 
 The primal SVM problem is:
 
@@ -93,7 +93,7 @@ The intercept is taken as the mean of the lower and upper bounds.
 
 To compute $\boldsymbol w^\top\phi(\boldsymbol x)$ in above equations, simply plug in $\boldsymbol w=\sum_{i=1}^m\alpha_i y_i \phi(\boldsymbol x_i)$ and compute the $\phi(\boldsymbol x_i)^\top\phi(\boldsymbol x)$ with the underlying kernel function $\kappa(\boldsymbol x_i,\boldsymbol x)$.
 
-# Compute the intercept in dual formulation
+## Compute the intercept in dual formulation
 
 The dual SVM problem is:
 
@@ -175,7 +175,7 @@ $$
 
 The intercept is taken as the mean of the lower and upper bounds.
 
-## $\beta$ is the intercept
+### $\beta$ is the intercept
 
 To show that $\beta$ is in fact the intercept in primal problem, we go further from Equation $(4)$, plugging in the stationarity conditions of Equation $(5)$, and it follows that
 
@@ -220,7 +220,7 @@ $$
 
 Clearly, $\beta$ is the intercept, and $\nu_i$ is the slack variable $\xi_i$ bounded to each sample in the dataset.
 
-# Show that the two apporaches are equivalent
+## Show that the two apporaches are equivalent
 
 Recall that in primal formulation,
 
