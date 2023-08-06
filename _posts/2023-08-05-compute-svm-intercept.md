@@ -91,8 +91,6 @@ $$
 
 The intercept is taken as the mean of the lower and upper bounds.
 
-## Some details
-
 To compute $\boldsymbol w^\top\phi(\boldsymbol x)$ in above equations, simply plug in $\boldsymbol w=\sum_{i=1}^m\alpha_i y_i \phi(\boldsymbol x_i)$ and compute the $\phi(\boldsymbol x_i)^\top\phi(\boldsymbol x)$ with the underlying kernel function $\kappa(\boldsymbol x_i,\boldsymbol x)$.
 
 # Compute the intercept in dual formulation
@@ -177,7 +175,7 @@ $$
 
 The intercept is taken as the mean of the lower and upper bounds.
 
-## Some details
+## $\beta$ is the intercept
 
 To show that $\beta$ is in fact the intercept in primal problem, we go further from Equation $(4)$, plugging in the stationarity conditions of Equation $(5)$, and it follows that
 
@@ -221,3 +219,25 @@ $$
 $$
 
 Clearly, $\beta$ is the intercept, and $\nu_i$ is the slack variable $\xi_i$ bounded to each sample in the dataset.
+
+# Show that the two apporaches are equivalent
+
+Recall that in primal formulation,
+
+$$
+\begin{aligned}
+b &= y_j - \sum_{i=1}^m\alpha_i y_i \phi(\boldsymbol x_i)^\top\phi(\boldsymbol x_j) &\text{(primal formulation)}\\
+b &= y_j (1-(\mathbf Q\boldsymbol\alpha)_j) &\text{(dual formulation)}\\
+\end{aligned}
+$$
+
+If we plug in the definitions of $\boldsymbol w$ and $\mathbf Q$, it follows that
+
+$$
+\begin{aligned}
+b &= y_j - \sum_{i=1}^m \alpha_i y_i \phi(\boldsymbol x_i)^\top\phi(\boldsymbol x_j)\\
+b &= y_j (1 - y_j\sum_{i=1}^m \alpha_i y_i \phi(\boldsymbol x_i)^\top\phi(\boldsymbol x_j))\\
+\end{aligned}
+$$
+
+However, since $y_j^2=1$, it can be easily shown that the two equations are the same.
