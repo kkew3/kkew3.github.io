@@ -244,3 +244,75 @@ $$
 
 But $y_j^2=1$.
 Therefore, it can be easily shown that the two equations are the same.
+
+## Verify the conclusion by experiment
+
+We will need [`numpy`](https://numpy.org/) and [`scikit-learn`](https://scikit-learn.org/stable/) to perform the experiment.
+
+Get to know `SVC` class in `scikit-learn` [here](https://scikit-learn.org/stable/modules/svm.html#svc).
+In summary, given a classifier `clf = SVC(...).fit(X, y)`,
+
+- `clf.dual_coef_` holds the product $y_i \alpha_i$ for each $\alpha_i > 0$;
+- `clf.support_vector_` holds the support vectors of shape `(n_SV, n_feature)` where `n_SV` is the number of support vectors;
+- `clf.intercept_` holds the intercept term.
+
+In addition,
+
+- `clf.coef_` holds the $\boldsymbol w$ in primal problem. We will use it for convenience below (linear kernel).
+
+Codes:
+
+```python
+import numpy as np
+from sklearn.svm import SVC
+from sklearn.datasets import load_iris
+
+
+X, y = load_iris(return_X_y=True)
+# Restrict the classification problem to two-class;
+# otherwise, the problem will become unnecessarily complex.
+i = (y == 0) | (y == 2)
+X, y = X[i], y[i]
+# Make y take values {0, 1} rather than {0, 2}.
+y //= 2
+
+clf = SVC(kernel='linear', random_state=123)
+clf.fit(X, y)
+# The y for support vectors.
+# The `*2-1` operation is used to make it pick the values {1, -1}
+# rather than {1, 0}.
+y_supp = y[clf.support_] * 2 - 1
+# The filter that removes upper bounded alpha's.
+S = np.ravel(np.abs(clf.dual_coef_)) < 1
+
+# Verify that the `clf.coef_` is indeed computed from `clf.dual_coef_`.
+# We'll use `clf.coef_` for convenience below.
+assert np.allclose(
+    np.ravel(clf.coef_),
+    np.sum(np.ravel(clf.dual_coef_) * clf.support_vectors_.T, axis=1))
+# The intercept estimations in primal formulation. Only support vectors are
+# required, since otherwise the dual coefficients will be zero and won't count
+# any.
+b_estimates_primal = y_supp[S] - np.dot(clf.support_vectors_[S], np.ravel(clf.coef_))
+### Verify that the mean of the estimations is indeed the intercept. ###
+assert np.allclose(np.mean(b_estimates_primal), clf.intercept_)
+
+# The kernel matrix.
+K = np.dot(clf.support_vectors_, clf.support_vectors_.T)
+# The Q matrix times alpha. Notice that when computing Q, only support vectors
+# are required for the same reason as above.
+Q_alpha = np.sum(np.ravel(clf.dual_coef_)[:, np.newaxis] * K, axis=0) * y_supp
+# The intercept estimations in dual formulation.
+b_estimates_dual = y_supp[S] * (1 - Q_alpha[S])
+### Verify that the mean of the estimations is indeed the intercept. ###
+assert np.allclose(clf.intercept_, np.mean(b_estimates_dual))
+```
+
+The following has been mentioned in the comment above, but I feel it necessary to redeclare them formally here:
+Recall that $\boldsymbol w = \sum_{i=1}^m\alpha_i y_i \phi(\boldsymbol x_i)$, and all $m$ $\alpha$'s are involved when computing $\mathbf Q\boldsymbol\alpha$.
+In fact, only those $i$ such that $\alpha_i > 0$ (corresponding to the support vectors) are necessary.
+That's why we are able to find $\boldsymbol w$ and $\mathbf Q\boldsymbol\alpha$ even if `scikit-learn` stores only data related to support vectors.
+
+*Caveat*:
+I find it quite hard to construct an example where there's no free $\alpha$'s (i.e. those $\alpha_i$ such that $0 < \alpha_i < C$) at all.
+So strictly speaking, such edge case is not verified empirically in this post.
