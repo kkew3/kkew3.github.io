@@ -58,6 +58,11 @@ sudo service ssh status
 ```
 
 如果输出中包含 "Active: active (running)", 说明 SSH 服务器安装成功.
+否则, 可以尝试以下命令手动开始 ssh 服务.
+
+```bash
+sudo service ssh start
+```
 
 ### 设置 Windows 防火墙以允许从其它计算机接入端口 (例如 4000)
 
