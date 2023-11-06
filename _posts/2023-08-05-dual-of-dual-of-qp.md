@@ -74,7 +74,7 @@ $$
 or
 
 $$
-\boldsymbol y = -\mathbf Q^{-1}(\mathbf A^\top\boldsymbol\lambda-\boldsymbol\mu+\boldsymbol p\,.\tag{6.2}
+\boldsymbol y = -\mathbf Q^{-1}(\mathbf A^\top\boldsymbol\lambda-\boldsymbol\mu+\boldsymbol p)\,.\tag{6.2}
 $$
 
 Plugging $(6.1)$ and $(6.2)$ back to $(3)$ gives
