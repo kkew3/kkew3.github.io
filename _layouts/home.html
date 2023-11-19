@@ -23,7 +23,7 @@ layout: default
         </h3>
         <span>
           {%- for tag in post.tags -%}
-            <code class="highlighter-rouge"><nobr>{{ site.data.tags[tag].name }}</nobr></code>{%- if forloop.last == false -%}&nbsp;|&nbsp;{%- endif -%}
+            {%- include in_display_tags.html -%}
           {%- endfor -%}
         </span>
         {%- if site.show_excerpts -%}

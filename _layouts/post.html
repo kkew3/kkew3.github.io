@@ -7,7 +7,7 @@ layout: default
     <h1 class="post-title p-name" itemprop="name headline">{{ page.title | escape }}</h1>
     <span>
       {%- for tag in page.tags -%}
-        <code class="highlighter-rouge"><nobr>{{ site.data.tags[tag].name }}</nobr></code>{%- if forloop.last == false -%}&nbsp;|&nbsp;{%- endif -%}
+        {%- include in_display_tags.html -%}
       {%- endfor -%}
     </span>
     <p class="post-meta">
