@@ -2,7 +2,7 @@
 layout: post
 title:  "Maximum a posteriori estimation of the covariance in Gaussian Mixture models"
 date:   2023-11-03 16:03:17 +0800
-tags:   math
+tags:   math--prob
 ---
 
 <center>

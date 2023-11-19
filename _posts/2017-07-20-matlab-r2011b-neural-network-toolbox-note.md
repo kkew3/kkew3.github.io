@@ -2,7 +2,7 @@
 layout: post
 title:  "MATLAB R2011b 神经网络工具箱注意事项"
 date:   2017-07-20 17:50:56 +0800
-categories: matlab
+tags:   dev--matlab
 ---
 
 这是记录了我使用神经网络工具箱时遇到的坑，供自己和他人参考。先写一点，以后遇到再更新。

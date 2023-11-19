@@ -2,7 +2,7 @@
 layout: post
 title:  "使用抽象语法树ast统计哪些Python包与模块被导入了"
 date:   2022-02-13 22:25:18 +0800
-categories: python
+tags:   dev--python
 ---
 
 长话短说，我的[Gist](https://gist.github.com/kkew3/3bd1e0255af63e3ac0801c7bbc89e7bf)。

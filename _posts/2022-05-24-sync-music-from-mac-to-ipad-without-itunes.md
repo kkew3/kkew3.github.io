@@ -2,7 +2,7 @@
 layout: post
 title:  "如何不通过iTunes将Mac上的音乐同步到iPad"
 date:   2022-05-24 20:09:10 +0800
-categories: ios macos
+tags:   os--ios os--macos
 ---
 
 本文记录了如何不通过iTunes（或Finder，如果是新系统的话）将苹果电脑上的文件（音乐、视频等）同步到iPad。本文以同步音乐为例。

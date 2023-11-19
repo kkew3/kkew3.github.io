@@ -2,7 +2,7 @@
 layout: post
 title:  "Apache Ant 扩展教程"
 date:   2016-12-27 15:23:04 +0800
-categories: java
+tags:   dev--java
 ---
 
 Apache Ant 致力于成为一款灵活方便的构建工具，尽管对 Java 支持更多，也可以通过一些第三方库来支持其它语言的构建，甚至一些常规维护任务。鉴于Apache Ant 使用 XML 作为配置语言，以描述性见长，而无法处理过于复杂的过程逻辑，因此便有了著名的 Ant-Contrib 扩展包（主页见[这里](http://ant-contrib.sourceforge.net/)）的用武之地。Ant-Contrib 的使用固然增加了 Apache Ant 的可编程性，但以笔者的观点看，违背了 Apache Ant 的设计初衷，同时 XML 本身即使具有了编程能力，传统编程语言的逻辑表现力绝非 XML 可比。事实上，通过其官方 API 扩展 Apache Ant 使其完成用户定制功能，从长远来看，具有更好的简洁性、健壮性、可维护性和稳定性，只不过相对亲切的 XML，阅读 API 的艰巨任务掩盖了扩展 Apache Ant 的优势罢了。

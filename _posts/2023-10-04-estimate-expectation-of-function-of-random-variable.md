@@ -2,7 +2,7 @@
 layout: post
 title:  "Estimate the expectation of the function of a random variable"
 date:   2023-10-04 15:36:32 +0800
-tags:   math
+tags:   math--prob
 ---
 
 First prepare the functions we'll use later.

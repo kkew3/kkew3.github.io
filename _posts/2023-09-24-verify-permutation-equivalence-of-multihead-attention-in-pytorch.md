@@ -2,7 +2,7 @@
 layout: post
 title:  "Verify permutation equivalence of Multi-Head Attention in PyTorch"
 date:   2023-09-24 16:54:32 +0800
-tags:   pytorch
+tags:   dev--pytorch ml
 ---
 
 It's well known that [Multi-Head Attention](https://arxiv.org/abs/1706.03762) is permutation equivalent (e.g. [here](https://uvadlc-notebooks.readthedocs.io/en/latest/tutorial_notebooks/tutorial6/Transformers_and_MHAttention.html)).

@@ -2,7 +2,7 @@
 layout: post
 title:  "像BSD ls 一样中英文混排字符串(Python3)"
 date:   2022-02-05 18:49:30 +0800
-categories: python
+tags:   dev--python
 ---
 
 [这里](https://www.cnblogs.com/LiuYanYGZ/p/14901218.html)有一个C语言实现的字符串打印功能。我没细看它支不支持中英文混排。我在此给一个Python3版的支持中英文混排的字符串打印代码。另见我的Gists：[cjkjust](https://gist.github.com/kkew3/8bb9aa225a6c82ae5e1a0fa609c9a65a)，[fmtstrings\_like\_ls](https://gist.github.com/kkew3/3dde88ec52df12d7cc855ffeb2091a7c)。下面的代码和Gists没有本质差别，只是我在下面新加了一点注释、精简了一点无关代码。

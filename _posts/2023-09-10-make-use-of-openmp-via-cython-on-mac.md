@@ -2,9 +2,7 @@
 layout: post
 title:  "Make use of openmp via cython on macOS"
 date:   2023-09-10 16:49:00 +0800
-tags:
-- Cython
-- openmp
+tags:   dev--cython
 ---
 
 ## Abstract

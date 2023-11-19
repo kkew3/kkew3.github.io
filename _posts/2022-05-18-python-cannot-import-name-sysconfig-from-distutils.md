@@ -2,7 +2,7 @@
 layout: post
 title:  "python cannot import name 'sysconfig' from 'distutils'"
 date:   2022-05-18 23:02:51 +0800
-categories: python ubuntu
+tags:   dev--python os--ubuntu
 ---
 
 搜索这个问题时看到了[这篇博客](https://www.jianshu.com/p/49e4bfd61467)，感觉略麻烦。我就想有没有更简单的方式。后来摸索出来了，记在这里。

@@ -2,7 +2,7 @@
 layout: post
 title:  "从另一台计算机 SSH 连接到 WSL2 服务器"
 date:   2023-07-05 12:59:03 +0800
-categories: network
+tags:   dev--network
 ---
 
 ## 原理

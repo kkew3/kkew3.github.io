@@ -2,7 +2,7 @@
 layout: post
 title:  "在 WLAN 下从另一台计算机连接到 WSL2 中的 Jupyter Notebook"
 date:   2023-07-05 15:57:59 +0800
-categories: network
+tags:   dev--network
 ---
 
 ## 摘要

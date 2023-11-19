@@ -2,7 +2,7 @@
 layout: post
 title:  "使用Java API通过DTD方式验证XML"
 date:   2016-09-03 00:26:30 +0800
-categories: java
+tags:   dev--java
 ---
 
 ## 摘要

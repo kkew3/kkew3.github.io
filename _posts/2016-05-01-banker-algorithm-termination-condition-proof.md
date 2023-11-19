@@ -2,7 +2,7 @@
 layout: post
 title:  "银行家算法结束条件的合理性证明"
 date:   2016-05-01 10:11:59 +0800
-categories: algorithm
+tags:   algorithm
 ---
 
 首先简要提一下银行家算法的流程（类Java的伪代码）。算法的具体说明请参见操作系统课本。

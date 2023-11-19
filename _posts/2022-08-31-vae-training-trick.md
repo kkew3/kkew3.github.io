@@ -2,7 +2,7 @@
 layout: post
 title:  "Variational Autoencoder training trick"
 date:   2022-08-31 19:48:35 +0800
-categories: ML
+tags:   ml
 ---
 
 A decent tutorial on Variational Autoencoder (VAE) can be found at [arXiv](https://arxiv.org/abs/1606.05908).

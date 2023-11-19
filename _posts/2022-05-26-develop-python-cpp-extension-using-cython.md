@@ -2,7 +2,7 @@
 layout: post
 title:  "使用Cython为Python开发C++扩展"
 date:   2022-05-26 22:19:31 +0800
-categories: python cpp
+tags:   dev--python dev--cpp
 ---
 
 [Cython](https://cython.org)的出现免去了为Python开发C/C++扩展的很多麻烦。本文以一个简单的例子来说明如何为Python开发C++扩展。

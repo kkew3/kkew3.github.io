@@ -2,7 +2,7 @@
 layout: post
 title:  "PyTorch crop images differentially"
 date:   2020-05-23 02:24:21 +0800
-categories: pytorch math
+tags:   dev--pytorch math--la
 ---
 
 ## Intro

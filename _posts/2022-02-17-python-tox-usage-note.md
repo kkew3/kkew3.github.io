@@ -2,7 +2,7 @@
 layout: post
 title:  "Python Tox 使用笔记"
 date:   2022-02-17 19:07:47 +0800
-categories: python tox
+tags:   dev--python
 ---
 
 [Tox](https://tox.wiki/en/latest/index.html)是一个项目自动化工具，在此记录下没在文档和网上tutorial找到的使用细节。试验中尽可能使用最小`tox.ini`。本文使用`tox --showconfig -- <args...>`的形式观察配置结果。如果文中没有提`<args...>`是什么（例如直接说“配置结果为”，而不是“运行...后配置结果为“），那么运行的是`tox --showconfig`。

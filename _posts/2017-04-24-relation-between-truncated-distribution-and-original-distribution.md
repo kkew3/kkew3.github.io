@@ -2,7 +2,7 @@
 layout: post
 title:  "被截短的随机分布与原分布的关系"
 date:   2017-04-24 00:29:35 +0800
-categories: math algorithm
+tags:   math--prob
 ---
 
 已知随机分布的概率密度函数为$f_X(x)$，定义域为$D$。现将其定义域截取为$E$，其中$E \subseteq D$，即不断按照该分布取随机变量直到变量值落在$E$中。截取后的随机变量的分布的概率密度函数与$f_X(x)$是什么关系呢？

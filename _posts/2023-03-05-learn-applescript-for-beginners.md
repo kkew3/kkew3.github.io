@@ -2,7 +2,7 @@
 layout: post
 title:  "Learn Applescript for Beginners"
 date:   2023-03-05 15:54:00 +0800
-categories: applescript
+tags:   dev--applescript
 ---
 
 <!-- TODO: proofread -->

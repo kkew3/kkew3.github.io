@@ -2,7 +2,7 @@
 layout: post
 title:  "The dual of the dual of a QP is itself"
 date:   2023-08-05 18:54:12 +0800
-categories: math
+tags:   math--la
 ---
 
 Given a Quadratic Program (QP), we will show that the dual of the dual of the QP is itself.

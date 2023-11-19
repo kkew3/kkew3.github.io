@@ -2,7 +2,7 @@
 layout: post
 title:  "How to compute the intercept of C-SVM in primal and dual formulations"
 date:   2023-08-05 16:08:26 +0800
-categories: math ML
+tags:   ml--svm
 ---
 
 ## Compute intercept in primal formulation

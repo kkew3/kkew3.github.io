@@ -2,7 +2,7 @@
 layout: post
 title:  "Notes on building Cython using setup.py"
 date:   2022-08-09 16:24:19 +0800
-categories: python Cython
+tags:   dev--python dev--cython
 ---
 
 ## Basic structure

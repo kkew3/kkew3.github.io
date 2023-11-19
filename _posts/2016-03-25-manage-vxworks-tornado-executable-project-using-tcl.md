@@ -2,7 +2,7 @@
 layout: post
 title:  "用TCL（工具命令语言）管理Tornado (for VxWorks) 可启动工程"
 date:   2016-03-25 23:33:31 +0800
-categories: tcl
+tags:   dev--tcl
 ---
 
 尽管多数情况下要写VxWorks嵌入式应用程序代码常用Tornado编程环境，但有时可能会需要在命令行下完成简单的Tornado工程管理。本教程教授了如何将简单的工程管理迁移到Tornado外部并在命令行下实现（虽然这样做无法体验Tornado下的一些方便的功能）。

@@ -2,7 +2,6 @@
 layout: post
 title:  "如何尽可能快地确定宝可梦属性"
 date:   2023-04-26 18:12:07 +0800
-categories: algorithm
 ---
 
 ## 确定宝可梦属性的方法

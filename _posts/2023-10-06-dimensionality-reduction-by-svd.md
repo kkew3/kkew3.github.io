@@ -2,7 +2,7 @@
 layout: post
 title:  "Dimensionality reduction by SVD"
 date:   2023-10-06 16:43:30 +0800
-tags:   math
+tags:   math--la
 ---
 
 Let $\mathbf X \in \mathbb R^{m \times d}$ be data matrix where the $t$-th row is the $t$-th item in the dataset.

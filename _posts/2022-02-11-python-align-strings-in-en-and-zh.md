@@ -2,7 +2,7 @@
 layout: post
 title:  "如何在Python中对齐中英文混排字符串"
 date:   2022-02-11 14:27:19 +0800
-categories: python
+tags:   dev--python
 ---
 
 Python中有`str.ljust`、`str.rjust`、`str.center`用于左对齐、右对齐和居中对齐字符串。例如`'hello'.ljust(10, '*')`返回`'hello*****'`，`'hello'.rjust(10, '*')`返回`'*****hello'`，等。每个中日韩文（CJK字符）在Python中被视为一个字符，然而它们的显示宽度为2，这个矛盾使`ljust`、`rjust`、`center`不能正确地对齐CJK字符：例如`'你好'.ljust(5, '*')`返回`'你好***'`而不是`'你好*'`。另见[此文](https://blog.csdn.net/qq_45537774/article/details/99727637)。

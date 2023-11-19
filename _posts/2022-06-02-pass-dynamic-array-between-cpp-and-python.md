@@ -2,7 +2,7 @@
 layout: post
 title:  "使用Cython在Python和C++间互传大小事先未知的numpy数组"
 date:   2022-06-02 16:55:34 +0800
-categories: python cpp Cython
+tags:   dev--python dev--cpp dev--cython
 ---
 
 ## 从C++传到Python
