@@ -2,6 +2,7 @@
 layout: post
 title:  "Set up GitHub Pages on macOS"
 date:   2022-07-24 18:20:49 +0800
+tags:   misc
 ---
 
 The steps are organized in a shell script like form:

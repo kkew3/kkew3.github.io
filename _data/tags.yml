@@ -32,3 +32,5 @@ ml--svm:
   name: machine learning/svm
 algorithm:
   name: algorithm
+misc:
+  name: misc
