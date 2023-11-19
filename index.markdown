@@ -4,7 +4,3 @@
 
 layout: home
 ---
-
-<h2>My Research in Spare Time</h2>
-
-{% include spare-time-research.md %}

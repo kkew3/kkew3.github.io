@@ -28,6 +28,7 @@ github_username:  kkew3
 google_analytics: G-2YQN8LEHLR
 header_pages:
   - tags/index.html
+  - docs.markdown
   - about.markdown
 
 # Build settings
