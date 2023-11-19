@@ -23,7 +23,7 @@ email: kps6326@hotmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   My blogs and research reports.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://kkew3.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  kkew3
 google_analytics: G-2YQN8LEHLR
 header_pages:
