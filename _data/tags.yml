@@ -1,0 +1,34 @@
+dev--python:
+  name: dev/python
+dev--cython:
+  name: dev/cython
+dev--network:
+  name: dev/network
+dev--tcl:
+  name: dev/tcl
+dev--cpp:
+  name: dev/c++
+dev--java:
+  name: dev/java
+dev--matlab:
+  name: dev/matlab
+dev--pytorch:
+  name: dev/pytorch
+dev--applescript:
+  name: dev/applescript
+os--ios:
+  name: os/ios
+os--macos:
+  name: os/macOS
+os--ubuntu:
+  name: os/ubuntu
+math--prob:
+  name: math/probability
+math--la:
+  name: math/linear algebra
+ml:
+  name: machine learning
+ml--svm:
+  name: machine learning/svm
+algorithm:
+  name: algorithm
