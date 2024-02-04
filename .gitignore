@@ -4,5 +4,4 @@ _site
 .jekyll-metadata
 vendor
 Gemfile.lock
-_new_post.py
-_gitcommit.sh
+/_posts/_scripts/
