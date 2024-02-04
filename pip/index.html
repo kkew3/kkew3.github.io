@@ -1,0 +1,11 @@
+---
+layout: default
+---
+
+<h1>Index of {{ page.path }}</h1>
+<ul>
+  {% assign pip_packages = site.static_files | where: "pip_package", true %}
+  {% for item in pip_packages %}
+    <li><a href="{{ site.baseurl }}{{ item.path }}">{{ item.path }}</a></li>
+  {% endfor %}
+</ul>
