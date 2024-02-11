@@ -36,3 +36,5 @@ algorithm:
   name: algorithm
 misc:
   name: misc
+math--approx:
+  name: math/approximation
