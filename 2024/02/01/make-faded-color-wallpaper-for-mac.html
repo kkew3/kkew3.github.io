@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>使用 matplotlib 制作用于 macOS 的渐变色桌面 | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.9.2">
+<meta property="og:title" content="使用 matplotlib 制作用于 macOS 的渐变色桌面">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="最近我喜欢上了纯色桌面，显得干净整洁。然而我发现一个问题，就是 Dock 在一些颜色下会变得不容易辨识。经过实验，Dock 在黑色下显得最清楚，但是使用纯黑色作桌面我感觉不是很美观。我希望有一个渐变色桌面，其中大部分是我想要的某种颜色，然后从偏底部至底部渐变为黑色，从而使 Dock 更清楚。然而 macOS 并没有提供这样的桌面。于是我决定使用 Python 的 matplotlib 自己画一个这样的桌面。">
+<meta property="og:description" content="最近我喜欢上了纯色桌面，显得干净整洁。然而我发现一个问题，就是 Dock 在一些颜色下会变得不容易辨识。经过实验，Dock 在黑色下显得最清楚，但是使用纯黑色作桌面我感觉不是很美观。我希望有一个渐变色桌面，其中大部分是我想要的某种颜色，然后从偏底部至底部渐变为黑色，从而使 Dock 更清楚。然而 macOS 并没有提供这样的桌面。于是我决定使用 Python 的 matplotlib 自己画一个这样的桌面。">
+<link rel="canonical" href="https://kkew3.github.io/2024/02/01/make-faded-color-wallpaper-for-mac.html">
+<meta property="og:url" content="https://kkew3.github.io/2024/02/01/make-faded-color-wallpaper-for-mac.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2024-02-01T03:22:51+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="使用 matplotlib 制作用于 macOS 的渐变色桌面">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-02-01T03:22:51+00:00","datePublished":"2024-02-01T03:22:51+00:00","description":"最近我喜欢上了纯色桌面，显得干净整洁。然而我发现一个问题，就是 Dock 在一些颜色下会变得不容易辨识。经过实验，Dock 在黑色下显得最清楚，但是使用纯黑色作桌面我感觉不是很美观。我希望有一个渐变色桌面，其中大部分是我想要的某种颜色，然后从偏底部至底部渐变为黑色，从而使 Dock 更清楚。然而 macOS 并没有提供这样的桌面。于是我决定使用 Python 的 matplotlib 自己画一个这样的桌面。","headline":"使用 matplotlib 制作用于 macOS 的渐变色桌面","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2024/02/01/make-faded-color-wallpaper-for-mac.html"},"url":"https://kkew3.github.io/2024/02/01/make-faded-color-wallpaper-for-mac.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">使用 matplotlib 制作用于 macOS 的渐变色桌面</h1>
+    <span><a href="https://kkew3.github.io/tags/os--macos"><code class="highlighter-rouge"><nobr>os/macOS</nobr></code></a> | <a href="https://kkew3.github.io/tags/misc"><code class="highlighter-rouge"><nobr>misc</nobr></code></a> | <a href="https://kkew3.github.io/tags/dev--python"><code class="highlighter-rouge"><nobr>dev/python</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2024-02-01T03:22:51+00:00" itemprop="datePublished">Feb 1, 2024 at 03:22:51
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>最近我喜欢上了纯色桌面，显得干净整洁。然而我发现一个问题，就是 Dock 在一些颜色下会变得不容易辨识。经过实验，Dock 在黑色下显得最清楚，但是使用纯黑色作桌面我感觉不是很美观。我希望有一个渐变色桌面，其中大部分是我想要的某种颜色，然后从偏底部至底部渐变为黑色，从而使 Dock 更清楚。然而 macOS 并没有提供这样的桌面。于是我决定使用 Python 的 <a href="https://matplotlib.org/"><code class="language-plaintext highlighter-rouge">matplotlib</code></a> 自己画一个这样的桌面。</p>
+
+<p>思路是：</p>
+
+<ol>
+  <li>使用 <code class="language-plaintext highlighter-rouge">system_profiler SPDisplaysDataType | grep Resolution</code> 获取屏幕的像素上的长宽；</li>
+  <li>使用 <code class="language-plaintext highlighter-rouge">matplotlib.pyplot.cm.colors.LinearSegmentedColormap</code> 制作一个由我想要的颜色渐变为黑色的 colormap；</li>
+  <li>构造一个以第 1 步为长宽、以第 2 步为 colormap 的矩阵，使其颜色满足上述渐变色要求；</li>
+  <li>保存为图片。</li>
+</ol>
+
+<p>主要问题出在第 4 步。我先去掉坐标轴，以为就没问题了，然而之后发现保存的图总是有一圈白色边框，怎么都去不掉（我尝试了<a href="https://stackoverflow.com/q/37809697/7881370">这个问题</a>下的若干评论）。最终我采用了<a href="https://stackoverflow.com/a/37812313/7881370">这个回答</a>的写法，虽然并不清楚原理 😅。总之问题就算解决了吧。</p>
+
+<p>完整代码如下：</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env python3
+</span><span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+
+<span class="n">matplotlib</span><span class="p">.</span><span class="n">use</span><span class="p">(</span><span class="s">'Agg'</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+
+<span class="k">def</span> <span class="nf">generate_wallpaper</span><span class="p">(</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">primary_color_rgb</span><span class="p">,</span>
+    <span class="n">start_fade_position</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">force_save</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="s">"""
+    Save faded color as wallpaper.
+
+    :param name: the name to save
+    :param primary_color_rgb: the RGB 3-tuple of uint8 value range
+    :param start_fade_position: the position to start fading
+    :param force_save: ``True`` to overwrite existing files
+    """</span>
+    <span class="n">whs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># 第 1 步，获取屏幕长宽
+</span>    <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="p">.</span><span class="n">run</span><span class="p">([</span><span class="s">'system_profiler'</span><span class="p">,</span> <span class="s">'SPDisplaysDataType'</span><span class="p">],</span>
+                          <span class="n">text</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                          <span class="n">capture_output</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                          <span class="n">check</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">re</span><span class="p">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s">'(.*)\n'</span><span class="p">,</span> <span class="n">proc</span><span class="p">.</span><span class="n">stdout</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="p">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s">'Resolution: (\d+) x (\d+)'</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">whs</span><span class="p">.</span><span class="n">append</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="p">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="p">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))))</span>
+
+    <span class="c1"># 第 2 步，构造渐变色 colormap
+</span>    <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="p">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">primary_color_rgb</span><span class="p">)</span> <span class="o">/</span> <span class="mi">255</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+    <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="p">.</span><span class="n">cm</span><span class="p">.</span><span class="n">colors</span><span class="p">.</span><span class="n">LinearSegmentedColormap</span><span class="p">.</span><span class="n">from_list</span><span class="p">(</span>
+        <span class="s">'colormap'</span><span class="p">,</span> <span class="n">colors</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">whs</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># 第 3 步，构造矩阵
+</span>        <span class="n">image</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">))</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">h</span> <span class="o">*</span> <span class="n">start_fade_position</span><span class="p">)</span>
+        <span class="n">steps</span> <span class="o">=</span> <span class="n">h</span> <span class="o">-</span> <span class="n">start</span>
+        <span class="c1"># 使用 linspace 构造渐变色
+</span>        <span class="n">image</span><span class="p">[</span><span class="n">start</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">steps</span><span class="p">)[:,</span> <span class="n">np</span><span class="p">.</span><span class="n">newaxis</span><span class="p">]</span>
+
+        <span class="c1"># 这里是不知道为什么能 work 的部分
+</span>        <span class="n">sizes</span> <span class="o">=</span> <span class="n">image</span><span class="p">.</span><span class="n">shape</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="p">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">fig</span><span class="p">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mf">1.</span> <span class="o">*</span> <span class="n">sizes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">sizes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">forward</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="p">.</span><span class="n">Axes</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">])</span>
+        <span class="n">ax</span><span class="p">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+        <span class="n">fig</span><span class="p">.</span><span class="n">add_axes</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s">'auto'</span><span class="p">)</span>
+
+        <span class="c1"># 保存为图片
+</span>        <span class="n">tofile</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s">.jpg'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">force_save</span> <span class="ow">and</span> <span class="n">tofile</span><span class="p">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="nb">FileExistsError</span>
+        <span class="n">fig</span><span class="p">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">tofile</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">sizes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">plt</span><span class="p">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+
+
+<span class="c1"># 一些命令行参数
+</span><span class="k">def</span> <span class="nf">make_parser</span><span class="p">():</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="p">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s">'Generate faded color wallpaper.'</span><span class="p">)</span>
+    <span class="n">parser</span><span class="p">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">'-n'</span><span class="p">,</span> <span class="s">'--name'</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">'default to "wallpaper"'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">'wallpaper'</span><span class="p">)</span>
+    <span class="n">parser</span><span class="p">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">'-c'</span><span class="p">,</span>
+        <span class="s">'--color'</span><span class="p">,</span>
+        <span class="n">nargs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">metavar</span><span class="o">=</span><span class="p">(</span><span class="s">'R'</span><span class="p">,</span> <span class="s">'G'</span><span class="p">,</span> <span class="s">'B'</span><span class="p">),</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s">'default to black'</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">parser</span><span class="p">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">'-p'</span><span class="p">,</span>
+        <span class="s">'--fade-start-position'</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s">'default to 0.0'</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">parser</span><span class="p">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">'-f'</span><span class="p">,</span>
+        <span class="s">'--force'</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s">'store_true'</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s">'force overwrite existing files'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">parser</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">make_parser</span><span class="p">().</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">generate_wallpaper</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">color</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">fade_start_position</span><span class="p">,</span>
+                       <span class="n">args</span><span class="p">.</span><span class="n">force</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">'__main__'</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>来跑一个试试：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 以上代码保存为 wallpaper_gen.py</span>
+python3 wallpaper_gen.py <span class="nt">-c</span> 0 54 9 <span class="nt">-p</span> 0.7
+</code></pre></div></div>
+
+<p>生成的图如下：</p>
+
+<p><img src="/assets/posts_imgs/2024-02-01/darkgreen.jpg" alt="darkgreen"></p>
+
+  </div>
+<a class="u-url" href="/2024/02/01/make-faded-color-wallpaper-for-mac.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
