@@ -32,6 +32,8 @@ ml--svm:
   name: machine learning/svm
 ml--dict:
   name: machine learning/dictionary learning
+ml--bayes:
+  name: machine learning/bayesian
 algorithm:
   name: algorithm
 misc:
