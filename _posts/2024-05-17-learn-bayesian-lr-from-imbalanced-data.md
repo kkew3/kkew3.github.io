@@ -115,6 +115,8 @@ Pefect!
 
 In this post, we see that under Bayesian framework, Bayesian LR is able to naturally combat imbalanced dataset by adjusting its prior belief.
 
+This [codebase](https://github.com/kkew3/bayeslr-imbalanced) generates all the figures in the post.
+
 ## Appendix
 
 Features and labels of the toy dataset.
