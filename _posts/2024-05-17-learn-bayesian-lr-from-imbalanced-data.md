@@ -52,7 +52,7 @@ $$
 Although both (2.1) and (2.2) are intractable, we may find $q(\mathbf W, \boldsymbol b) \approx p(\mathbf W, \boldsymbol b \mid \mathcal D)$ by variational inference, and estimate the predictive posterior by Monte Carlo after plugging in $q$.
 Since such procedure is out of scope, we won't include details about it.
 
-Let's see the decision boundary and the uncertanty (measured by entropy) of the Bayesian LR:
+Let's see the decision boundary and the uncertainty (measured by entropy) of the Bayesian LR:
 
 ![uninformative decision boundary](/assets/posts_imgs/2024-05-17/uninformative-db.png)
 
