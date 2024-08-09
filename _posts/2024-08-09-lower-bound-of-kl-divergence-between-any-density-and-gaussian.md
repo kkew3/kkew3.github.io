@@ -111,7 +111,7 @@ q'(x) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp(-\frac{x^2}{2\sigma^2})
 $$
 
 i.e., a Gaussian $\mathcal N(x \mid 0, \sigma^2)$.
-Therefore, according to [this chapter][kl-norm],
+Therefore, according to [Soch, Joram, et al. (2024)][kl-norm],
 
 $$
 D_{KL}(q \parallel p) \ge \frac{1}{2}(\sigma^2 - \log\sigma^2 - 1)
