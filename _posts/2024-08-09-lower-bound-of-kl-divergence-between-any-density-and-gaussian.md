@@ -13,7 +13,7 @@ In this post, I explain how to derive a lower bound of the [Kullback-Leibler div
 
 ## Framework
 
-We may cast the problem finding the lower bound to an constrained minimization problem:
+We may cast the problem finding the lower bound to a constrained minimization problem:
 
 <div id="eq-1"></div>
 
