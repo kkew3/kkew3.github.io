@@ -16,6 +16,8 @@ dev--pytorch:
   name: dev/pytorch
 dev--applescript:
   name: dev/applescript
+editor--vim:
+  name: editor/vim
 os--ios:
   name: os/ios
 os--macos:
