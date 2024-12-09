@@ -105,8 +105,7 @@ def groundtruth(mean1, scale_tril1, mean2, scale_tril2):
 
 def ours(mean1, scale_tril1, mean2, scale_tril2):
     y = torch.linalg.solve_triangular(
-        scale_tril2, (mean2 - mean1).unsqueeze(-1), upper=False)
-        .squeeze(-1)
+        scale_tril2, (mean2 - mean1).unsqueeze(-1), upper=False).squeeze(-1)
     y2 = y.square().sum(-1)
     M = torch.linalg.solve_triangular(scale_tril2, scale_tril1, upper=False)
     M2 = M.square().flatten(-2, -1).sum(-1)
