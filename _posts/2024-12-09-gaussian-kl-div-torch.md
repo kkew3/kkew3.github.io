@@ -2,7 +2,7 @@
 layout: post
 title:  "KL divergence between two full-rank Gaussians in PyTorch"
 date:   2024-12-09 16:03:00 +0800
-tags:   math--prob
+tags:   math--prob dev--pytorch
 ---
 
 ## Abstract
