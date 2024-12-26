@@ -42,3 +42,5 @@ misc:
   name: misc
 math--approx:
   name: math/approximation
+llm:
+  name: llm
