@@ -58,8 +58,6 @@ RUN_MIGRATIONS=1
 
 # 我喜欢 8050 这个端口号。
 LISTEN_ADDR=127.0.0.1:8050
-
-# 如果 RSS 里有 youtube，不要忘记在这里设置 HTTP_PROXY 和 HTTPS_PROXY。
 ```
 
 第四步，从 Miniflux 的 [Release][miniflux-release] 页面下载可执行程序。我是因特尔芯片的 Mac，所以下载 `miniflux-darwin-amd64`。把它放到方便的路径下，然后 bash 中运行：
@@ -76,6 +74,9 @@ mv miniflux-darwin-amd64 miniflux
 
 # 也可以用 tmux 后台运行：
 #tmux new -ds miniflux ./miniflux -c ~/.config/miniflux/config
+
+# 如果 RSS 源里有 youtube，不要忘记在运行 miniflux 前 export HTTP_PROXY 和
+# HTTPS_PROXY。这两个变量设置在配置文件里是没用的。
 ```
 
 最后，浏览器访问 `127.0.0.1:8050`，用户名填 `admin`, 密码填 `admin123`（即配置文件里填的那些），就可以使用了。
