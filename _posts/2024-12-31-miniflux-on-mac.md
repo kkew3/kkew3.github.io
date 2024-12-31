@@ -2,7 +2,7 @@
 layout: post
 title:  "在 macOS 上折腾 RSS 阅读器"
 date:   2024-12-31 16:39:31 +0800
-tags:   rss
+tags:   rss os--macos
 ---
 
 ## 背景
