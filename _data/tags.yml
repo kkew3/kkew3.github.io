@@ -44,3 +44,5 @@ math--approx:
   name: math/approximation
 llm:
   name: llm
+rss:
+  name: rss
