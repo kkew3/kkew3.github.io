@@ -1,0 +1,964 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.2">Jekyll</generator><link href="https://kkew3.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://kkew3.github.io/" rel="alternate" type="text/html" /><updated>2025-03-09T01:12:06+00:00</updated><id>https://kkew3.github.io/feed.xml</id><title type="html">Kaiwen’s personal website</title><subtitle>My blogs and research reports.</subtitle><entry><title type="html">在 macOS 上折腾 RSS 阅读器</title><link href="https://kkew3.github.io/2024/12/31/miniflux-on-mac.html" rel="alternate" type="text/html" title="在 macOS 上折腾 RSS 阅读器" /><published>2024-12-31T08:39:31+00:00</published><updated>2024-12-31T08:39:31+00:00</updated><id>https://kkew3.github.io/2024/12/31/miniflux-on-mac</id><content type="html" xml:base="https://kkew3.github.io/2024/12/31/miniflux-on-mac.html">&lt;h2 id=&quot;背景&quot;&gt;背景&lt;/h2&gt;
+
+&lt;p&gt;本来之前一直用 &lt;a href=&quot;https://netnewswire.com/&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;NetNewsWire&lt;/code&gt;&lt;/a&gt; 阅读 RSS，直到我自己 host 的 RSS 源的 IP 地址变了，而貌似 NetNewsWire 无法修改已订阅的 RSS 源的 IP 地址（以前的版本是&lt;a href=&quot;https://apple.stackexchange.com/a/20282&quot;&gt;可以&lt;/a&gt;修改的）。不得已切换到了 &lt;a href=&quot;https://vivaldi.com/zh-hans/&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Vivaldi&lt;/code&gt;&lt;/a&gt;，这是一个浏览器，但它有一个附加的阅读 RSS 的小功能。随着 RSS 积累得越来越多，最近逐渐开始变卡，明明 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;NetNewsWire&lt;/code&gt; 用了那么久都很流畅的说。在&lt;a href=&quot;https://lukesingham.com/rss-feed-reader/&quot;&gt;这篇博客&lt;/a&gt;的指点下我找到了 &lt;a href=&quot;https://miniflux.app/&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Miniflux&lt;/code&gt;&lt;/a&gt;，于是开始了一天的折腾。&lt;/p&gt;
+
+&lt;h2 id=&quot;docker-安装-miniflux&quot;&gt;Docker 安装 Miniflux&lt;/h2&gt;
+
+&lt;p&gt;首先尝试最简单的 &lt;a href=&quot;https://miniflux.app/docs/docker.html&quot;&gt;Docker 安装&lt;/a&gt;，就按照官网文档的样子写好 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-compose.yaml&lt;/code&gt;，然后&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;docker-compose up &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;就行了，不用安装 postgres 环境。但是服务起来后发现连不上自己 host 的 RSS，原来是因为那个 RSS 源也是在 Docker 容器里跑的，而且它的 network scope 为 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Local&lt;/code&gt;，意思是除非其它 Docker container 和它在一个 host 上，否则就无法连接。因为我在自己 Mac 上安装的 Miniflux 容器，而 RSS 源没有 host 在本地，那显然这条路是走不通的。&lt;/p&gt;
+
+&lt;h2 id=&quot;本地安装-miniflux&quot;&gt;本地安装 Miniflux&lt;/h2&gt;
+
+&lt;p&gt;首先安装 postgres，就用最简单的 &lt;a href=&quot;https://postgresapp.com/&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Postgres.app&lt;/code&gt;&lt;/a&gt;，按照网站流程一路安装即可，但是不用修改 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$PATH&lt;/code&gt; 环境变量，见下文。&lt;/p&gt;
+
+&lt;p&gt;然后按照 Miniflux 的 &lt;a href=&quot;https://miniflux.app/docs/database.html&quot;&gt;Database Configuration&lt;/a&gt; 页面配置 postgres，在&lt;em&gt;交互式&lt;/em&gt; bash 下：&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# 暂时把 Postgres.app 附带的命令行工具引入 PATH&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;export &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/Applications/Postgres.app/Contents/Versions/latest/bin:&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$PATH&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# 新建 postgres 用户，名为 miniflux。`-P` 是用来输入密码的。&lt;/span&gt;
+createuser &lt;span class=&quot;nt&quot;&gt;-P&lt;/span&gt; miniflux
+&lt;span class=&quot;c&quot;&gt;# 这里输入密码，然后再输一次。我输的是 secret。之后要用。&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# 在用户 miniflux 下新建名为 miniflux 的数据库。&lt;/span&gt;
+createdb &lt;span class=&quot;nt&quot;&gt;-O&lt;/span&gt; miniflux miniflux
+
+&lt;span class=&quot;c&quot;&gt;# 启用 hstore 扩展&lt;/span&gt;
+psql miniflux &lt;span class=&quot;nt&quot;&gt;-c&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&apos;create extension hstore&apos;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;第三步新建配置文件。这里也可以用环境变量的方式，但我倾向于用配置文件。文档见&lt;a href=&quot;https://miniflux.app/docs/configuration.html&quot;&gt;这里&lt;/a&gt;。我把配置文件搁在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~/.config/miniflux/&lt;/code&gt; 下。名字叫 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;config&lt;/code&gt;。配置文件路径其实是随意的。我是这么写的：&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# 格式为 postgres://{用户}:{密码}@localhost/{数据库名}?sslmode=disable。&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;DATABASE_URL&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;postgres://miniflux:secret@localhost/miniflux?sslmode&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;disable
+
+&lt;span class=&quot;c&quot;&gt;# 创建第一个用户，要不然 Miniflux 运行起来后无法登录。省去运行 `miniflux -create-admin`&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# 的麻烦。&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;CREATE_ADMIN&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;1
+&lt;span class=&quot;nv&quot;&gt;ADMIN_USERNAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;admin
+&lt;span class=&quot;c&quot;&gt;# 密码必须是六个字母及以上。&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;ADMIN_PASSWORD&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;admin123
+
+&lt;span class=&quot;c&quot;&gt;# 省去运行 `miniflux -migrate` 的麻烦。&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;RUN_MIGRATIONS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;1
+
+&lt;span class=&quot;c&quot;&gt;# 我喜欢 8050 这个端口号。&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;LISTEN_ADDR&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;127.0.0.1:8050
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;第四步，从 Miniflux 的 &lt;a href=&quot;https://github.com/miniflux/v2/releases&quot;&gt;Release&lt;/a&gt; 页面下载可执行程序。我是因特尔芯片的 Mac，所以下载 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;miniflux-darwin-amd64&lt;/code&gt;。把它放到方便的路径下，然后 bash 中运行：&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# 赋予可执行权限。&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;chmod &lt;/span&gt;u+x miniflux-darwin-amd64
+
+&lt;span class=&quot;c&quot;&gt;# 重命名一下以后敲起来方便。&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;mv &lt;/span&gt;miniflux-darwin-amd64 miniflux
+
+&lt;span class=&quot;c&quot;&gt;# 运行 Miniflux。&lt;/span&gt;
+./miniflux &lt;span class=&quot;nt&quot;&gt;-c&lt;/span&gt; ~/.config/miniflux/config
+
+&lt;span class=&quot;c&quot;&gt;# 也可以用 tmux 后台运行：&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;#tmux new -ds miniflux ./miniflux -c ~/.config/miniflux/config&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# 如果 RSS 源里有 youtube，不要忘记在运行 miniflux 前 export HTTP_PROXY 和&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# HTTPS_PROXY。这两个变量设置在配置文件里是没用的。&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;最后，浏览器访问 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;127.0.0.1:8050&lt;/code&gt;，用户名填 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;admin&lt;/code&gt;, 密码填 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;admin123&lt;/code&gt;（即配置文件里填的那些），就可以使用了。&lt;/p&gt;</content><author><name></name></author><category term="rss" /><category term="os--macos" /><summary type="html">背景</summary></entry><entry><title type="html">Share my unicode finder bot</title><link href="https://kkew3.github.io/2024/12/26/unicode-finder.html" rel="alternate" type="text/html" title="Share my unicode finder bot" /><published>2024-12-26T08:38:48+00:00</published><updated>2024-12-26T08:38:48+00:00</updated><id>https://kkew3.github.io/2024/12/26/unicode-finder</id><content type="html" xml:base="https://kkew3.github.io/2024/12/26/unicode-finder.html">&lt;p&gt;&lt;img src=&quot;/assets/posts_imgs/2024-12-26/unicode-finder-bot-chat.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I’d like to share my new bot &lt;a href=&quot;https://poe.com/unicode-finder&quot;&gt;unicode-finder&lt;/a&gt; on &lt;a href=&quot;https://poe.com/&quot;&gt;Poe&lt;/a&gt;.
+It echos unicode(s) given plain English description of it, so that you won’t need to search all over the Internet for such a seemingly simple task.
+The prompt is:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Your are a helpful assistant. Your task is to find unicode(s) given user&apos;s
+description. Your answer should be concise, including only the unicode itself
+and the unicode code point, so that the user may copy and paste from your
+answer with ease.  Note that the answer may involve multiple unicodes. For
+example, given description &quot;a&quot;, you should answer &quot;a U+0061&quot;; given description
+&quot;underlined c&quot;, you should answer &quot;c̲ U+0063 U+0332&quot;.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><category term="llm" /><summary type="html"></summary></entry><entry><title type="html">KL divergence between two full-rank Gaussians in PyTorch</title><link href="https://kkew3.github.io/2024/12/09/gaussian-kl-div-torch.html" rel="alternate" type="text/html" title="KL divergence between two full-rank Gaussians in PyTorch" /><published>2024-12-09T08:03:00+00:00</published><updated>2024-12-09T08:03:00+00:00</updated><id>https://kkew3.github.io/2024/12/09/gaussian-kl-div-torch</id><content type="html" xml:base="https://kkew3.github.io/2024/12/09/gaussian-kl-div-torch.html">&lt;h2 id=&quot;abstract&quot;&gt;Abstract&lt;/h2&gt;
+
+&lt;p&gt;In this post, we will go through the &lt;a href=&quot;https://pytorch.org/&quot;&gt;PyTorch&lt;/a&gt; code to compute the Kullback-Leibler divergence between two full-rank Gaussians.
+The code might be useful if one considers using full-rank Gaussian as variational posterior while training a &lt;a href=&quot;https://arxiv.org/abs/1312.6114&quot;&gt;variational autoencoder&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;kl-divergence-between-two-full-rank-gaussians&quot;&gt;KL divergence between two full-rank Gaussians&lt;/h2&gt;
+
+&lt;p&gt;It’s common practice to parameterize the covariance matrix $\boldsymbol\Sigma$ of a $d$-dimensional full-rank Gaussian using a $D$-dimensional vector of nonzero elements of $\mathbf L$, where $D = d(1+d)/2$ and $\boldsymbol\Sigma = \mathbf L \mathbf L^\top$ is the Cholesky decomposition.
+So we will assume it here.
+Note that the diagonal of $\mathbf L$ must be positive so that $\boldsymbol\Sigma$ is positive definite.
+We will enforce this by taking the exponential on the diagonal elements (e.g. the first $d$ elements of our parameterization).&lt;/p&gt;
+
+&lt;p&gt;Let the two Gaussians be $p(\boldsymbol x) = \mathcal N(\boldsymbol x \mid \boldsymbol\mu_1, \boldsymbol\Sigma_1)$ and $q(\boldsymbol x) = \mathcal N(\boldsymbol x \mid \boldsymbol\mu_2, \boldsymbol\Sigma_2)$.
+Per &lt;a href=&quot;https://statproofbook.github.io/P/mvn-kl&quot;&gt;The Book of Statistical Proofs&lt;/a&gt;, the KL divergence between them is:&lt;/p&gt;
+
+\[D_\mathrm{KL}(p \parallel q) = \frac{1}{2}\left((\boldsymbol\mu_2 - \boldsymbol\mu_1)^\top \boldsymbol\Sigma_2^{-1} (\boldsymbol\mu_2 - \boldsymbol\mu_1) + \operatorname{tr}(\boldsymbol\Sigma_2^{-1} \boldsymbol\Sigma_1) - \log \frac{\det \boldsymbol\Sigma_1}{\det \boldsymbol\Sigma_2} - d\right)\,.\]
+
+&lt;p&gt;Plugging in our parameterization of the covariance matrices:&lt;/p&gt;
+
+\[\begin{aligned}
+    D_\mathrm{KL}(p \parallel q)
+    &amp;amp;= \frac{1}{2}\left((\boldsymbol\mu_2 - \boldsymbol\mu_1)^\top \mathbf L_2^{-\top} \mathbf L_2^{-1} (\boldsymbol\mu_2 - \boldsymbol\mu_1) + \operatorname{tr}((\mathbf L_2 \mathbf L_2^\top)^{-1} (\mathbf L_1 \mathbf L_1^\top)) - \log \frac{\det(\mathbf L_1 \mathbf L_1^\top)}{\det(\mathbf L_2 \mathbf L_2^\top)} - d\right)\\
+    &amp;amp;= \frac{1}{2}\left((\mathbf L_2^{-1} (\boldsymbol\mu_2 - \boldsymbol\mu_1))^\top (\mathbf L_2^{-1} (\boldsymbol\mu_2 - \boldsymbol\mu_1)) + \operatorname{tr}((\mathbf L_2^{-1} \mathbf L_1)^\top (\mathbf L_2^{-1} \mathbf L_1)) - 2\log\frac{\det\mathbf L_1}{\det\mathbf L_2} - d\right)\,.\\
+\end{aligned}\]
+
+&lt;p&gt;We have used the following facts:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;the &lt;a href=&quot;https://en.wikipedia.org/wiki/Trace_(linear_algebra)#Cyclic_property&quot;&gt;cyclic property of trace&lt;/a&gt;;&lt;/li&gt;
+  &lt;li&gt;$\det \mathbf A = \det \mathbf A^\top$;&lt;/li&gt;
+  &lt;li&gt;$\log\det (\mathbf A \mathbf B) = \log\det(\mathbf A) + \log\det(\mathbf B)$.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;It follows that:&lt;/p&gt;
+
+\[D_\mathrm{KL}(p \parallel q) = \frac{1}{2}\big(\boldsymbol y^\top \boldsymbol y + \|\mathbf M\|_F^2 - 2 (\operatorname{tr}(\log \mathbf L_1) - \operatorname{tr}(\log \mathbf L_2)) - d\big)\,,\]
+
+&lt;p&gt;where $\mathbf L_2 \boldsymbol y = \boldsymbol\mu_2 - \boldsymbol\mu_1$, and $\mathbf L_2 \mathbf M = \mathbf L_1$.&lt;/p&gt;
+
+&lt;p&gt;We have denoted:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;$\|\cdot\|_F$ as the Frobenius norm of a matrix;&lt;/li&gt;
+  &lt;li&gt;$\log \mathbf A$ as the elementwise logarithm of $\mathbf A$.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;We have used the following facts:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;$\operatorname{tr}(\mathbf A^\top \mathbf A) = \|\mathbf A\|_F^2$;&lt;/li&gt;
+  &lt;li&gt;$\log\det \mathbf L = \operatorname{tr}(\log \mathbf L)$ when $\mathbf L$ is a lower triangular matrix.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;code&quot;&gt;Code&lt;/h3&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;torch&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;torch&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;distributions&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;form_cholesky_tril_from_elements&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale_tril_elems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;&quot;&quot;
+    Form the Cholesky lower triangular matrix from its elements.
+
+    Args:
+        d (int): The number of rows/columns in the square matrix.
+        scale_tril_elems (torch.Tensor): The Cholesky lower triangular
+            elements, of shape (batch_size, (1 + d) * d // 2).
+
+    Returns:
+        torch.Tensor: A tensor of shape (batch_size, d, d).
+    &quot;&quot;&quot;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;batch_size&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale_tril_elems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;device&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale_tril_elems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;device&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;torch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tril_indices&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;l_mat&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;torch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;zeros&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;batch_size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;l_mat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[:,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale_tril_elems&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;l_mat_diag&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;l_mat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;diagonal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dim1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dim2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;l_mat_diag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;copy_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;l_mat_diag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;l_mat&lt;/span&gt;
+
+
+&lt;span class=&quot;n&quot;&gt;d&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;batch_size&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;groundtruth&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mean1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale_tril1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mean2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale_tril2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MultivariateNormal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;loc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mean1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale_tril&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scale_tril1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;q&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MultivariateNormal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;loc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mean2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale_tril&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scale_tril2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kl_divergence&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;q&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;ours&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mean1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale_tril1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mean2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale_tril2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;torch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;linalg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;solve_triangular&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;scale_tril2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mean2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mean1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;unsqueeze&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;upper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;squeeze&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;y2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;square&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;M&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;torch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;linalg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;solve_triangular&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scale_tril2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale_tril1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;upper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;M2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;M&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;square&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;flatten&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;M2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;scale_tril1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;diagonal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dim1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dim2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale_tril2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;diagonal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dim1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dim2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&quot;c1&quot;&gt;# Randomize p and q&apos;s parameterization.
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mean1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;torch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;randn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;batch_size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;mean2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;torch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;randn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;batch_size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;scale_tril1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;form_cholesky_tril_from_elements&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;torch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;randn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;batch_size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;//&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;scale_tril2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;form_cholesky_tril_from_elements&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;torch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;randn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;batch_size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;//&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# Assert the correctness.
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;assert&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;torch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;allclose&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;groundtruth&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mean1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale_tril1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mean2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale_tril2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+                      &lt;span class=&quot;n&quot;&gt;ours&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mean1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale_tril1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mean2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale_tril2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Profile our implementation:&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;%timeit groundtruth(mean1, scale_tril1, mean2, scale_tril2)&lt;/code&gt; (baseline):&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;164 μs ± 178 ns per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;%timeit ours(mean1, scale_tril1, mean2, scale_tril2)&lt;/code&gt; (our implementation):&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;46.2 μs ± 71.6 ns per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><category term="math--prob" /><category term="dev--pytorch" /><summary type="html">Abstract</summary></entry><entry><title type="html">vim/nvim 中文分词插件 jieba.vim</title><link href="https://kkew3.github.io/2024/11/10/jieba-vim.html" rel="alternate" type="text/html" title="vim/nvim 中文分词插件 jieba.vim" /><published>2024-11-10T06:53:06+00:00</published><updated>2024-11-10T06:53:06+00:00</updated><id>https://kkew3.github.io/2024/11/10/jieba-vim</id><content type="html" xml:base="https://kkew3.github.io/2024/11/10/jieba-vim.html">&lt;blockquote&gt;
+  &lt;p&gt;jieba.vim，做最好的 Vim 中文分词插件。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;jieba.vim 正处于积极开发中，欢迎关注、Star ⭐️、下载试用&lt;a href=&quot;https://github.com/kkew3/jieba.vim&quot;&gt;最新进展&lt;/a&gt;，欢迎在 &lt;a href=&quot;https://github.com/kkew3/jieba.vim/issues&quot;&gt;issue&lt;/a&gt; 讨论并提意见建议。&lt;/p&gt;
+
+&lt;h2 id=&quot;vimnvim-中文编辑现状&quot;&gt;Vim/Nvim 中文编辑现状&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.vim.org/&quot;&gt;Vim&lt;/a&gt;/&lt;a href=&quot;https://neovim.io/&quot;&gt;Nvim&lt;/a&gt; 的中文文本编辑体验不足是广为人知的问题。由于中文不用空格分隔词语，Vim 的原生 &lt;a href=&quot;https://vimhelp.org/motion.txt.html#word-motions&quot;&gt;word motion&lt;/a&gt; 功能无法有效发挥作用，因此用户只能依赖基本的 h/l 键位逐字移动光标。作为一名常用 Vim 写作的人，我对这方面的不便深有体会，经过调研确定没有已存在的完善项目后，我于一年多前开始在业余时间开发 jieba.vim，旨在解决这个问题。&lt;/p&gt;
+
+&lt;h2 id=&quot;jiebavim-简介&quot;&gt;jieba.vim 简介&lt;/h2&gt;
+
+&lt;p&gt;jieba.vim 是一个基于 &lt;a href=&quot;https://github.com/fxsjy/jieba&quot;&gt;jieba&lt;/a&gt; 的 Vim/Nvim 中文分词插件，通过增强 w/W/e/E/b/B/ge/gE 键位，使 Vim 能够按中文词语移动光标。jieba.vim 的&lt;a href=&quot;https://github.com/kkew3/jieba.vim/tree/main&quot;&gt;初版原型&lt;/a&gt;使用 python3 开发，初步解决了按词移动光标的问题。虽然（可能）由于其过于缓慢的词典加载速度并没有获得什么关注，但是基于该原型的 lua 移植版 &lt;a href=&quot;https://github.com/neo451/jieba.nvim&quot;&gt;neo451/jieba.nvim&lt;/a&gt; 在 Vim 中文编辑圈的小为人知还是证明了 jieba.vim 解决方案的有效性，给了我继续改进的动力。随后，我发布了 jieba.vim 的&lt;a href=&quot;https://github.com/kkew3/jieba.vim/commit/7d03b0cc83dd21f32b0fcba027b191a7c93cd714&quot;&gt;改进版&lt;/a&gt;，解决了其速度问题，并于近一个月开始重写 jieba.vim 的核心逻辑，更严谨地确立其发展方向。&lt;/p&gt;
+
+&lt;h2 id=&quot;jiebavim-对自身的定位及路线图&quot;&gt;jieba.vim 对自身的定位及路线图&lt;/h2&gt;
+
+&lt;p&gt;Features 依重要性降序排序：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;jieba.vim 应保持其与 Vim 的兼容性。经过增强的 w/W/e/E/b/B/ge/gE 键位在无中文 ASCII 文本上应与 Vim 原生行为&lt;em&gt;完全一致&lt;/em&gt;，其中包括各种特殊情况（例如 &lt;a href=&quot;https://vimhelp.org/change.txt.html#cw&quot;&gt;cw&lt;/a&gt;）。这需要通过大量测试，以及对单元测试的正确性验证（见 &lt;a href=&quot;https://github.com/junegunn/vader.vim&quot;&gt;junegunn/vader.vim&lt;/a&gt;）予以保证。&lt;/li&gt;
+  &lt;li&gt;jieba.vim 应具有较快的速度（包括词典加载速度、键位反应速度、词典懒加载），以确保良好的用户体验。&lt;/li&gt;
+  &lt;li&gt;jieba.vim 应易于安装。通过发布预编译链接库，目前 jieba.vim 的&lt;a href=&quot;https://github.com/kkew3/jieba.vim/releases/tag/v1.0.5&quot;&gt;最新稳定版&lt;/a&gt;已无需本地安装 Rust 并进行编译。&lt;/li&gt;
+  &lt;li&gt;jieba.vim 应具有较广的功能覆盖，例如对自定义 Vim 选项 &lt;a href=&quot;https://vimhelp.org/options.txt.html#%27iskeyword%27&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&apos;iskeyword&apos;&lt;/code&gt;&lt;/a&gt;、&lt;a href=&quot;https://vimhelp.org/options.txt.html#%27virtualedit%27&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&apos;virtualedit&apos;&lt;/code&gt;&lt;/a&gt;、&lt;a href=&quot;https://vimhelp.org/options.txt.html#%27encoding%27&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&apos;encoding&apos;&lt;/code&gt;&lt;/a&gt; 的支持。&lt;/li&gt;
+  &lt;li&gt;jieba.vim 应易于从 neovim 使用，针对 neovim 将尝试直接从 lua 链接 Rust 核心 crate，从而免除 lua 调用 python、python 再调用 Rust 的额外调用关系。&lt;/li&gt;
+  &lt;li&gt;此外，对 word &lt;a href=&quot;https://vimhelp.org/motion.txt.html#text-objects&quot;&gt;text object&lt;/a&gt; iw/iW/aw/aW 的支持也处于计划内。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;jiebavim-分支一览&quot;&gt;jieba.vim 分支一览&lt;/h2&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;分支&lt;/th&gt;
+      &lt;th&gt;简介&lt;/th&gt;
+      &lt;th&gt;开发语言&lt;/th&gt;
+      &lt;th&gt;许可&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;[初版原型](https://github.com/kkew3/jieba.vim/tree/main) (main)&lt;/td&gt;
+      &lt;td&gt;normal 模式下按词移动光标完善，其余模式下有 bug。&lt;/td&gt;
+      &lt;td&gt;python3&lt;/td&gt;
+      &lt;td&gt;MIT&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;[改进版](https://github.com/kkew3/jieba.vim/commit/7d03b0cc83dd21f32b0fcba027b191a7c93cd714) (7d03b0cc)&lt;/td&gt;
+      &lt;td&gt;normal 模式下按词移动光标完善，其余模式下有 bug，词典加载速度快 60%。&lt;/td&gt;
+      &lt;td&gt;Rust + python3&lt;/td&gt;
+      &lt;td&gt;MIT&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;[最新稳定版](https://github.com/kkew3/jieba.vim/releases/tag/v1.0.5) (v1.0.5)&lt;/td&gt;
+      &lt;td&gt;目前已完成 normal/visual/operator-pending 模式下的 {count}w/W/e/E/b/B/ge/gE/. 键位，支持 [&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&apos;iskeyword&apos;&lt;/code&gt;](https://vimhelp.org/options.txt.html#%27iskeyword%27)，欢迎下载试用。&lt;/td&gt;
+      &lt;td&gt;Rust + python3&lt;/td&gt;
+      &lt;td&gt;Apache v2.0&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;[最新进展](https://github.com/kkew3/jieba.vim) (rust)&lt;/td&gt;
+      &lt;td&gt;将尝试支持 lua。&lt;/td&gt;
+      &lt;td&gt;Rust + python3&lt;/td&gt;
+      &lt;td&gt;Apache v2.0&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</content><author><name></name></author><category term="editor--vim" /><summary type="html">jieba.vim，做最好的 Vim 中文分词插件。</summary></entry><entry><title type="html">Conditioning of the variational posterior in CVAE (Sohn, 2015)</title><link href="https://kkew3.github.io/2024/08/27/conditioning-of-cvae-variational-posterior.html" rel="alternate" type="text/html" title="Conditioning of the variational posterior in CVAE (Sohn, 2015)" /><published>2024-08-27T11:03:07+00:00</published><updated>2024-08-27T11:03:07+00:00</updated><id>https://kkew3.github.io/2024/08/27/conditioning-of-cvae-variational-posterior</id><content type="html" xml:base="https://kkew3.github.io/2024/08/27/conditioning-of-cvae-variational-posterior.html">&lt;h2 id=&quot;abstract&quot;&gt;Abstract&lt;/h2&gt;
+
+&lt;p&gt;This post explores alternative conditioning of the variational posterior $q$ in CVAE (&lt;a href=&quot;https://papers.nips.cc/paper_files/paper/2015/hash/8d55a249e6baa5c06772297520da2051-Abstract.html&quot;&gt;Sohn et al. 2015&lt;/a&gt;), and concludes that the conditioning of $q$ on $y$ is important to predictive inference.&lt;/p&gt;
+
+&lt;h2 id=&quot;introduction&quot;&gt;Introduction&lt;/h2&gt;
+
+&lt;p&gt;CVAE models the likelihood $p(y \mid x)$ as a continuous mixture of latent $z$:&lt;/p&gt;
+
+&lt;div id=&quot;eq-def&quot;&gt;&lt;/div&gt;
+
+\[p(y \mid x) = \int p_\theta(z \mid x) p_\theta(y \mid x,z)\,\mathrm dz\,. \tag{1}\]
+
+&lt;p&gt;Since (&lt;a href=&quot;#eq-def&quot;&gt;1&lt;/a&gt;) is intractable, Sohn et al. instead optimize its evidence lower bound (ELBO):&lt;/p&gt;
+
+\[\mathcal L_{\text{CVAE}}(x,y;\theta,\phi) = \mathbb E_q[\log p_\theta(y \mid x,z) - \log q_\phi(z \mid x,y)]\,. \tag{2}\]
+
+&lt;p&gt;Here, the variational posterior $q$ conditions on $x$ and $y$.
+At test time, the authors propose to use importance sampling leveraging the trained variational posterior:&lt;/p&gt;
+
+&lt;div id=&quot;eq-is&quot;&gt;&lt;/div&gt;
+
+\[p(y \mid x) \approx \frac{1}{S} \sum_{s=1}^S \frac{p_\theta(y \mid x,z_s) p_\theta(z_s \mid x)}{q_\phi(z_s \mid x,y)}\,, \tag{3}\]
+
+&lt;p&gt;where $z_s \sim q_\phi(z \mid x,y)$.&lt;/p&gt;
+
+&lt;p&gt;What if $q$ conditions on $x$ only?
+This post explores this possibility, and reaches the conclusion that without conditioning on $y$, $q$ at optimum won’t ever attain the true posterior $p(z \mid x,y)$, and should not be otherwise better in terms of reducing the variance in importance sampling.&lt;/p&gt;
+
+&lt;h2 id=&quot;warm-up-proving-the-effecacy-of-importance-sampling&quot;&gt;Warm up: proving the effecacy of importance sampling&lt;/h2&gt;
+
+&lt;p&gt;We assume that infinite data is available for learning, and $q$ is from a flexible enough probability family.
+The data are drawn from the joint data distribution $p_D(x,y)$, where we have stressed with a subscript $D$.
+We assume that $x$ is continuous and $y$ is discrete.
+The goal is to maximize the expected ELBO in terms of $p_D(x,y)$.
+However, we assume that $p_\theta(y \mid x,z)$ won’t approaches to $p_D(y \mid x)$ whatever value $\theta$ picks.
+We will drop $\theta$ and $\phi$ below for brevity.&lt;/p&gt;
+
+&lt;p&gt;We may easily pose this setup as a constrained maximization problem:
+$\max \mathbb E[\log p(y,z \mid x) - \log q(z \mid x,y)]$ subject to $q$ being a probability, where the expectation is taken with respect to $p_D(x,y) q(z \mid x,y)$.&lt;/p&gt;
+
+&lt;p&gt;The Lagrangian is:&lt;/p&gt;
+
+&lt;div id=&quot;eq-lagrangian-q-xy&quot;&gt;&lt;/div&gt;
+
+\[\int \sum_y p_D(x,y) \int q(z \mid x,y) \log \frac{p(y,z \mid x)}{q(z \mid x,y)}\,\mathrm dz\,\mathrm dx + \int \sum_y \mu(x,y) \left(\int q(z \mid x,y)\,\mathrm dz - 1\right)\,\mathrm dx\,, \tag{4}\]
+
+&lt;p&gt;where $\mu(x,y)$ is the Lagrange multiplier.
+Now find the &lt;a href=&quot;https://www.youtube.com/watch?v=6VvmMkAx5Jc&amp;amp;t=982s&quot;&gt;Gateaux derivative&lt;/a&gt; and let it equal zero:&lt;/p&gt;
+
+\[0 = p_D(x,y) (\log p(y,z \mid x) - (1 + \log q(z \mid x,y)) + \mu(x,y))\,.\]
+
+&lt;p&gt;Absorbing $p_D(x,y) &amp;gt; 0$ and the constant 1 into $\mu(x,y)$ yields:&lt;/p&gt;
+
+\[\log q(z \mid x,y) = \mu(x,y) + \log p(y,z \mid x)\,,\]
+
+&lt;p&gt;where $\mu(x,y) = -\log \int p(y,z \mid x)\,\mathrm dz = -\log p_D(y \mid x)$.
+It thus follows that, at optimum, $q(z \mid x,y) = p(z \mid x,y)$.
+Hence, when evaluating Equation (&lt;a href=&quot;#eq-is&quot;&gt;3&lt;/a&gt;), at optimum, the right hand side equals the left hand side with zero variance.&lt;/p&gt;
+
+&lt;h2 id=&quot;conditioning-only-on-x-gives-worse-approximation&quot;&gt;Conditioning only on x gives worse approximation&lt;/h2&gt;
+
+&lt;p&gt;Following the same setup as the previous section, we start from the Lagrangian (&lt;a href=&quot;#eq-lagrangian-q-xy&quot;&gt;4&lt;/a&gt;).
+Note that now we assume $q \triangleq q(z \mid x)$, and that the Lagrange multiplier is $\mu(x)$ instead of $\mu(x,y)$.
+Rearranging the terms:&lt;/p&gt;
+
+\[\begin{multline}
+    \int p_D(x) \int q(z \mid x) \left(\sum_y p_D(y \mid x) \log p(y,z \mid x) - \log q(z \mid x)\right)\,\mathrm dz\,\mathrm dz \\
+    + \int \mu(x) \left(\int q(z \mid x)\,\mathrm dz - 1\right)\,\mathrm dx\,.
+\end{multline}\]
+
+&lt;p&gt;Let its Gateaux derivative with respect to $q$ equal zero:&lt;/p&gt;
+
+\[0 = p_D(x) \left(\sum_y p_D(y \mid x) \log p(y,z \mid x) - (1 + \log q(z \mid x))\right) + \mu(x)\,.\]
+
+&lt;p&gt;Absorbing $p_D(x) &amp;gt; 0$ and the constant 1 into $\mu(x)$ yields:&lt;/p&gt;
+
+\[\log q(z \mid x) = \mu(x) + \sum_y p_D(y \mid x) \log p(z \mid x,y) - \mathbb H(p_D(y \mid x))\,,\]
+
+&lt;p&gt;where $\mathbb H(p_D(y \mid x)) = -\sum_y p_D(y \mid x) \log p_D(y \mid x)$ is the entropy.
+We see immediately that:&lt;/p&gt;
+
+&lt;div id=&quot;eq-main-result&quot;&gt;&lt;/div&gt;
+
+\[q(z \mid x) \propto \exp(\mathbb E_{p_D(y \mid x)}[\log p(z \mid x,y)])\,. \tag{5}\]
+
+&lt;p&gt;This means that when not conditioning on $y$, $q(z \mid x)$ can never achieve the true posterior $p(z \mid x,y)$, unless $\mathbb H(p_D(y \mid x)) = 0$, which is unlikely to occur.&lt;/p&gt;</content><author><name></name></author><category term="math--prob" /><category term="ml--bayes" /><summary type="html">Abstract</summary></entry><entry><title type="html">Effect of gamma in BN-VAE</title><link href="https://kkew3.github.io/2024/08/09/gamma-in-bn-vae.html" rel="alternate" type="text/html" title="Effect of gamma in BN-VAE" /><published>2024-08-09T11:00:44+00:00</published><updated>2024-08-09T11:00:44+00:00</updated><id>https://kkew3.github.io/2024/08/09/gamma-in-bn-vae</id><content type="html" xml:base="https://kkew3.github.io/2024/08/09/gamma-in-bn-vae.html">&lt;h2 id=&quot;abstract&quot;&gt;Abstract&lt;/h2&gt;
+
+&lt;p&gt;This post discusses the effect of $\gamma$ in BN-VAE (&lt;a href=&quot;https://arxiv.org/abs/2004.12585&quot;&gt;Zhu et al., 2020&lt;/a&gt;).&lt;/p&gt;
+
+&lt;h2 id=&quot;introduction&quot;&gt;Introduction&lt;/h2&gt;
+
+&lt;p&gt;BN-VAE (see more about it &lt;a href=&quot;https://kexue.fm/archives/7381&quot;&gt;here&lt;/a&gt; (in Chinese)) attempts to solve KL vanishing problem (a.k.a. posterior collapse) in Gaussian-VAE by batch-normalizing the variational posterior mean, which casts a positive lower bound on the &lt;a href=&quot;https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence&quot;&gt;Kullback-Leibler divergence&lt;/a&gt; term (over the dataset) in &lt;a href=&quot;https://en.wikipedia.org/wiki/Evidence_lower_bound&quot;&gt;ELBO&lt;/a&gt;, thus avoiding KL vanishing problem.
+The batch normalization procedure includes a fixed hyperparameter $\gamma \ge 0$, which controls the lower bound of the KL; the larger $\gamma$, the larger the lower bound.
+When $\gamma=0$, KL vanishing occurs.&lt;/p&gt;
+
+&lt;p&gt;Zhu et al. (2020) visualizes the distribution of the variational posterior mean when $\gamma$ equals 0.3 and 1.
+What will happen if $\gamma &amp;gt; 1$?
+How does $\gamma &amp;gt; 0$ solves the KL vanishing problem?
+We’ll explore these questions below.&lt;/p&gt;
+
+&lt;h2 id=&quot;gamma1-introduces-posterior-hole-problem&quot;&gt;$\gamma&amp;gt;1$ introduces posterior hole problem&lt;/h2&gt;
+
+&lt;p&gt;Posterior hole problem happens when the aggregate variational posterior (a.k.a. average encoder distribution (&lt;a href=&quot;https://approximateinference.org/2016/accepted/HoffmanJohnson2016.pdf&quot;&gt;Hoffman &amp;amp; Johnson, 2016&lt;/a&gt;)) does not match the prior.
+When measured in KL divergence, this means:&lt;/p&gt;
+
+\[D_{KL}(q_\phi(z) \parallel p(z)) &amp;gt; 0\]
+
+&lt;p&gt;Here, $q_\phi(z) = \sum_{i=1}^N \frac{1}{N} q_\phi(z \mid x_i)$ where $N$ is the dataset size, is the aggregate variational posterior.&lt;/p&gt;
+
+&lt;p&gt;In Gaussian-VAE, the variational posterior $q_\phi(z \mid x_i) = \mathcal N(z \mid \mu_i, \sigma_i^2)$, where $(\mu_i,\sigma_i^2)$ are typically computed by a neural network called the inference network (&lt;a href=&quot;https://arxiv.org/pdf/1312.6114&quot;&gt;Kingma &amp;amp; Welling, 2013&lt;/a&gt;) parameterized by $\phi$ given $x_i$; and $q_\phi(z \mid x_i)$ can usually be factorized into each dimension $j$ as $q_\phi(z \mid x_i) = \prod_{j=1}^d q_\phi(z_j \mid x_i)$, where each $q_\phi(z_j \mid x_i)$ is an univariate Gaussian parameterized by $(\mu_{ij}, \sigma_{ij}^2)$.
+Thus, the aggregate variational posterior is an $N$-mixture of Gaussians whose mean, at each dimension $j$, is $\bar\mu_j = \frac{1}{N}\sum_{i=1}^N \mu_{ij}$ and variance is $\bar\sigma_j^2 = \frac{1}{N}\sum_{i=1}^N \sigma_{ij}^2$.&lt;/p&gt;
+
+&lt;p&gt;If $q_\phi$ is transformed according to BN-VAE, then $\bar\mu_j = \beta$ where $\beta$ is a learnable parameter.
+Furthermore, we have variance $\mathbb E_{q_\phi(z_j)}[z_j^2] - \mathbb E_{q_\phi(z_j)}[z_j]^2 = \gamma^2 + \bar\sigma^2$.
+If we follow Zhu et al. (2020) to use a standard Gaussian $\mathcal N(z \mid \mathbf 0, \mathbf I)$ as prior $p$, then according to &lt;a href=&quot;https://kkew3.github.io/2024/08/09/lower-bound-of-kl-divergence-between-any-density-and-gaussian.html&quot;&gt;this post&lt;/a&gt;, $D_{KL}(q_\phi(z) \parallel p(z)$, at each dimension $j$, will be lower bounded by $D_{KL}(q_0(z_j) \parallel p(z_j))$ where $q_0(z_j) = \mathcal N(z_j \mid \beta, \gamma^2 + \bar\sigma^2)$, which is consistently greater than zero when $\gamma &amp;gt; 1$ (&lt;a href=&quot;https://arxiv.org/pdf/1901.03416&quot;&gt;Razavi et al., 2019&lt;/a&gt;).
+It follows immediately (&lt;a href=&quot;https://statproofbook.github.io/P/kl-add&quot;&gt;Soch, Joram, et al., 2024&lt;/a&gt;), that $D_{KL}(q_\phi(z) \parallel p(z)) \ge \sum_{j=1}^d D_{KL}(q_0(z_i) \parallel p(z_i)) &amp;gt; 0$.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;TO BE CONTINUED&lt;/em&gt;&lt;/p&gt;</content><author><name></name></author><category term="ml--bayes" /><summary type="html">Abstract</summary></entry><entry><title type="html">Lower bound of KL divergence between any density and Gaussian</title><link href="https://kkew3.github.io/2024/08/09/lower-bound-of-kl-divergence-between-any-density-and-gaussian.html" rel="alternate" type="text/html" title="Lower bound of KL divergence between any density and Gaussian" /><published>2024-08-09T09:03:39+00:00</published><updated>2024-08-09T09:03:39+00:00</updated><id>https://kkew3.github.io/2024/08/09/lower-bound-of-kl-divergence-between-any-density-and-gaussian</id><content type="html" xml:base="https://kkew3.github.io/2024/08/09/lower-bound-of-kl-divergence-between-any-density-and-gaussian.html">&lt;h2 id=&quot;abstract&quot;&gt;Abstract&lt;/h2&gt;
+
+&lt;p&gt;In this post, I explain how to derive a lower bound of the &lt;a href=&quot;https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence&quot;&gt;Kullback-Leibler divergence&lt;/a&gt; between any density $q$, e.g. a Gaussian mixture, and a Gaussian $p$.&lt;/p&gt;
+
+&lt;h2 id=&quot;framework&quot;&gt;Framework&lt;/h2&gt;
+
+&lt;p&gt;We may cast the problem finding the lower bound to a constrained minimization problem:&lt;/p&gt;
+
+&lt;div id=&quot;eq-1&quot;&gt;&lt;/div&gt;
+
+\[\begin{aligned}
+    \min_{q&apos;}\ &amp;amp;D_{KL}(q&apos; \parallel p)\\
+    \text{s.t. } &amp;amp;\int_{\mathcal X} q&apos;(x)\,\mathrm dx = 1\\
+                 &amp;amp;\ldots \ \text{other constraints}
+\end{aligned}\tag{1}\]
+
+&lt;p&gt;where $\mathcal X$ is the support of $q’$, and we’ll fill in “other constraints” with what we know about the density $q$, like its mean and variance.
+The solution of Equation (&lt;a href=&quot;#eq-1&quot;&gt;1&lt;/a&gt;) will be the lower bound we’re seeking for.&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://en.wikipedia.org/wiki/Lagrange_multiplier&quot;&gt;Lagrangian&lt;/a&gt; would be:&lt;/p&gt;
+
+\[L = \int_{\mathcal X} q&apos;(x)\log \frac{q&apos;(x)}{p(x)}\,\mathrm dx + \lambda_0 (\int_{\mathcal X} q&apos;(x)\,\mathrm dx - 1) + \ldots \tag{2}\]
+
+&lt;p&gt;Taking the functional derivative of $L$ with respect to $q’$ and letting it equal zero yields:&lt;/p&gt;
+
+\[\begin{aligned}
+    0 &amp;amp;= 1 + \log q&apos;(x) - \log p(x) + \lambda_0 + \ldots\\
+    \log q&apos;(x) &amp;amp;= -\lambda_0 - 1 + \log p(x) + \ldots\\
+    q&apos;(x) &amp;amp;= \exp(-\lambda_0 -1 + \log p(x) + \ldots)
+\end{aligned}\]
+
+&lt;p&gt;Finally, plugging $q’(x)$ back into the constraints and solve for the Lagrange multipliers $\lambda_0$, etc.&lt;/p&gt;
+
+&lt;h2 id=&quot;example&quot;&gt;Example&lt;/h2&gt;
+
+&lt;p&gt;In this simple example, we assume that $p(x) = \mathcal N(x \mid 0, 1)$ be a standard univariate Gaussian, and assume that $q$ and $p$ have the same support.
+Suppose also that we know the mean and variance of $q$ to be: $\mathbb E_q[x] = 0$, $\mathbb E_q[x^2] - \mathbb E_q[x]^2 = \mathbb E_q[x^2] = \sigma^2$.&lt;/p&gt;
+
+&lt;p&gt;The Lagrangian is:&lt;/p&gt;
+
+&lt;div id=&quot;eq-3&quot;&gt;&lt;/div&gt;
+
+\[\require{enclose}
+L = \int_{-\infty}^\infty q&apos;(x) \log \frac{q&apos;(x)}{p(x)}\,\mathrm dx + \lambda_0 (\underbrace{\int_{-\infty}^\infty q&apos;(x)\,\mathrm dx - 1}_{\substack{\enclose{circle}{1}}}) + \lambda_1 (\underbrace{\int_{-\infty}^\infty x^2 q&apos;(x)\,\mathrm dx - \sigma^2}_{\substack{\enclose{circle}{2}}})\tag{3}\]
+
+&lt;p&gt;where we have encoded the mean and variance constraints into one term (see why &lt;a href=&quot;https://michael-franke.github.io/intro-data-analysis/the-maximum-entropy-principle.html#example-2-derivation-of-maximum-entropy-pdf-with-given-mean-mu-and-variance-sigma2&quot;&gt;here&lt;/a&gt;).
+Taking the derivative and letting it equal zero yields:&lt;/p&gt;
+
+&lt;div id=&quot;eq-4&quot;&gt;&lt;/div&gt;
+
+\[\begin{align}
+    0 &amp;amp;= 1 + \log q&apos;(x) - \log p(x) + \lambda_0 + \lambda_1 x^2\\
+    \log q&apos;(x) &amp;amp;\stackrel{1}{=} -\lambda_0 - 1 - (\frac{1}{2} + \lambda_1) x^2\\
+    q&apos;(x) &amp;amp;= \exp(-\lambda_0 - 1 - (\frac{1}{2} + \lambda_1) x^2)\tag{4}\\
+\end{align}\]
+
+&lt;p&gt;where equal sign ‘$1$’ is because $\log p(x) = -\frac{1}{2}x^2 + C$, and the constant $C$ has been absorbed into $\lambda_0$.&lt;/p&gt;
+
+&lt;p&gt;Plugging Equation (&lt;a href=&quot;#eq-4&quot;&gt;4&lt;/a&gt;) back to &lt;a href=&quot;#eq-3&quot;&gt;⓵&lt;/a&gt; and solving the integral yields:&lt;/p&gt;
+
+&lt;div id=&quot;eq-5.1&quot;&gt;&lt;/div&gt;
+
+\[\frac{\sqrt{\pi}\exp(-\lambda_0 - 1)}{\sqrt{\frac{1}{2} + \lambda_1}} = 1\tag{5.1}\]
+
+&lt;p&gt;Likewise, plugging (&lt;a href=&quot;#eq-4&quot;&gt;4&lt;/a&gt;) back to &lt;a href=&quot;#eq-3&quot;&gt;⓶&lt;/a&gt; and solving the integral yields:&lt;/p&gt;
+
+&lt;div id=&quot;eq-5.2&quot;&gt;&lt;/div&gt;
+
+\[\frac{\sqrt{\pi} \exp(-\lambda_0 - 1)}{2\sqrt{(\frac{1}{2} + \lambda_1)^3}} = \sigma^2\tag{5.2}\]
+
+&lt;p&gt;Solving Equations (&lt;a href=&quot;#eq-5.1&quot;&gt;5.1&lt;/a&gt;, &lt;a href=&quot;#eq-5.2&quot;&gt;5.2&lt;/a&gt;) gives:&lt;/p&gt;
+
+&lt;div id=&quot;eq-6&quot;&gt;&lt;/div&gt;
+
+\[\begin{cases}
+    \lambda_0 = -1 + \frac{1}{2} \log 2\pi\sigma^2\\
+    \lambda_1 = -\frac{1}{2} + \frac{1}{2\sigma^2}\\
+\end{cases}\tag{6}\]
+
+&lt;p&gt;Plugging Equation (&lt;a href=&quot;#eq-6&quot;&gt;6&lt;/a&gt;) to Equation (&lt;a href=&quot;#eq-4&quot;&gt;4&lt;/a&gt;), it’s immediate that&lt;/p&gt;
+
+\[q&apos;(x) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp(-\frac{x^2}{2\sigma^2})\]
+
+&lt;p&gt;i.e., a Gaussian $\mathcal N(x \mid 0, \sigma^2)$.
+Therefore, according to &lt;a href=&quot;https://statproofbook.github.io/P/norm-kl&quot;&gt;Soch, Joram, et al. (2024)&lt;/a&gt;,&lt;/p&gt;
+
+\[D_{KL}(q \parallel p) \ge \frac{1}{2}(\sigma^2 - \log\sigma^2 - 1)\]</content><author><name></name></author><category term="math--prob" /><summary type="html">Abstract</summary></entry><entry><title type="html">Compute accuracy from F1 score</title><link href="https://kkew3.github.io/2024/07/06/compute-accuracy-from-f1-score.html" rel="alternate" type="text/html" title="Compute accuracy from F1 score" /><published>2024-07-06T01:51:59+00:00</published><updated>2024-07-06T01:51:59+00:00</updated><id>https://kkew3.github.io/2024/07/06/compute-accuracy-from-f1-score</id><content type="html" xml:base="https://kkew3.github.io/2024/07/06/compute-accuracy-from-f1-score.html">&lt;p&gt;I encountered a similar problem today as the one in &lt;a href=&quot;https://stackoverflow.com/questions/42041078/calculating-accuracy-from-precision-recall-f1-score-scikit-learn&quot;&gt;this&lt;/a&gt; post, where I wish to find the accuracy given F1 score only.
+F1 score is &lt;a href=&quot;https://datascience.stackexchange.com/a/65342/153995&quot;&gt;well suited&lt;/a&gt; to my imbalanced classification problem, so I compute it during training; but I then find it difficult to interprete.
+There’s a surprising lack of relevant information when I searched the web.
+Luckily, it’s not a difficult task either.&lt;/p&gt;
+
+&lt;p&gt;Since each F1 score corresponds to a range of accuracies, we may regard finding the accuracy given F1 score an optimization problem.
+The process consists of two steps: 1) find the minimum accuracy; 2) find the maximum accuracy. To find the maximum, we may reduce it to finding the &lt;em&gt;negative&lt;/em&gt; of the minimum of the &lt;em&gt;negative&lt;/em&gt; accuracy.
+Thus we will only handle step 1 below.&lt;/p&gt;
+
+&lt;p&gt;Known constants:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;$s_F$: the F1 score.&lt;/li&gt;
+  &lt;li&gt;$r_P$ and $r_N$: the positive and negative class ratio.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Variables:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;$r_{TP}$, $r_{TN}$, $r_{FP}$, $r_{FN}$: the true positive, true negative, false positive and false negative ratio (i.e. divided by the total sample count).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Objective:
+$s_A = r_{TP} + r_{TN}$.&lt;/p&gt;
+
+&lt;p&gt;Constraints:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;$r_{TP} \ge 0$, $r_{TN} \ge 0$, $r_{FP} \ge 0$, $r_{FN} \ge 0$.&lt;/li&gt;
+  &lt;li&gt;$r_{TP} + r_{FN} = r_P$, $r_{TN} + r_{FP} = r_N$.&lt;/li&gt;
+  &lt;li&gt;$\frac{2 \cdot r_{TP} / (r_{TP} + r_{FP}) \cdot r_{TP} / (r_{TP} + r_{FN})}{r_{TP} / (r_{TP} + r_{FP}) + r_{TP} / (r_{TP} + r_{FN})} = s_F$. The left hand side is just the F1 score formula.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Python implementation:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# jax is not necessary, just that I don&apos;t want to spend time on finding
+# partial derivative of the F1 score with respect to true positive,
+# etc.
+&lt;/span&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;jax&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;numpy&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scipy.special&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;softmax&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scipy.optimize&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;minimize&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# Used to avoid divid-by-zero error.
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;EPS&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;1e-8&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;f1_score_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f1_score&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;&quot;&quot;
+    :param x: the array (tp, fp, tn, fn)
+    :param f1_score: the known F1 score
+    &quot;&quot;&quot;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;tp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;precision&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;recall&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;precision&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;recall&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;precision&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;recall&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f1_score&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;positive_sum_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n_positive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;&quot;&quot;
+    :param x: the array (tp, fp, tn, fn)
+    :param n_positive: the known positive class ratio
+    &quot;&quot;&quot;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;tp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n_positive&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;negative_sum_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n_negative&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;&quot;&quot;
+    :param x: the array (tp, fp, tn, fn)
+    :param n_negative: the known negative class ratio
+    &quot;&quot;&quot;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;tn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n_negative&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;accuracy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;&quot;&quot;
+    :param x: the array (tp, fp, tn, fn)
+    &quot;&quot;&quot;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;tp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tn&lt;/span&gt;
+
+
+&lt;span class=&quot;c1&quot;&gt;# Ideally this should give a feasible solution. But in practice, I
+# find it works fine even if it&apos;s not feasible.
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;rand_init&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;softmax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;randn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;find_min_accuracy_from_f1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f1_score&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n_positive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n_negative&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;&quot;&quot;
+    :param f1_score: the known F1 socre
+    :param n_positive: the known positive class ratio
+    :param n_negative: the known negative class ratio
+    &quot;&quot;&quot;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;res&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;minimize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;accuracy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;rand_init&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&apos;SLSQP&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;jac&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;jax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;grad&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;accuracy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;bounds&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;EPS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;EPS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;EPS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;EPS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)],&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;constraints&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&apos;type&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&apos;eq&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&apos;fun&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f1_score_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&apos;jax&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;grad&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f1_score_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&apos;args&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f1_score&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,),&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&apos;type&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&apos;eq&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&apos;fun&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;positive_sum_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&apos;jac&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;grad&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;positive_sum_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&apos;args&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n_positive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,),&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&apos;type&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&apos;eq&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&apos;fun&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;negative_sum_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&apos;jac&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;grad&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;negative_sum_constraint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&apos;args&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n_negative&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,),&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;options&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&apos;maxiter&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fun&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Calling the function &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;find_min_accuracy_from_f1&lt;/code&gt; with data, we get the minimum possible accuracy given F1 score:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; find_min_accuracy_from_f1(0.457, 0.044, 0.9559)
+0.8953
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><category term="ml" /><summary type="html">I encountered a similar problem today as the one in this post, where I wish to find the accuracy given F1 score only. F1 score is well suited to my imbalanced classification problem, so I compute it during training; but I then find it difficult to interprete. There’s a surprising lack of relevant information when I searched the web. Luckily, it’s not a difficult task either.</summary></entry><entry><title type="html">Leverage Ollama in iTerm2 AI integration</title><link href="https://kkew3.github.io/2024/06/13/leverage-ollama-in-iterm2-ai-integration.html" rel="alternate" type="text/html" title="Leverage Ollama in iTerm2 AI integration" /><published>2024-06-13T14:46:53+00:00</published><updated>2024-06-13T14:46:53+00:00</updated><id>https://kkew3.github.io/2024/06/13/leverage-ollama-in-iterm2-ai-integration</id><content type="html" xml:base="https://kkew3.github.io/2024/06/13/leverage-ollama-in-iterm2-ai-integration.html">&lt;h2 id=&quot;introduction&quot;&gt;Introduction&lt;/h2&gt;
+
+&lt;p&gt;Recently, &lt;a href=&quot;https://iterm2.com/&quot;&gt;iTerm2&lt;/a&gt; released version &lt;a href=&quot;https://iterm2.com/downloads/stable/iTerm2-3_5_0.changelog&quot;&gt;3.5.0&lt;/a&gt;, which includes generative AI integration in OpenAI API.
+&lt;a href=&quot;https://ollama.com/&quot;&gt;Ollama&lt;/a&gt; is an open platform for large language models (LLM).
+Starting from February 2024, Ollama has built-in &lt;a href=&quot;https://ollama.com/blog/openai-compatibility&quot;&gt;support&lt;/a&gt; of OpenAI chat completions API.
+Putting them together, we can &lt;a href=&quot;https://gitlab.com/gnachman/iterm2/-/issues/11455&quot;&gt;now&lt;/a&gt; ask AI to compose commands for us seamlessly in iTerm2 interface, using Ollama bot locally.&lt;/p&gt;
+
+&lt;h2 id=&quot;configuration&quot;&gt;Configuration&lt;/h2&gt;
+
+&lt;p&gt;Here are the steps to start using the AI integration in iTerm2:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Install the AI plugin from &lt;a href=&quot;https://iterm2.com/ai-plugin.html&quot;&gt;iTerm2 site&lt;/a&gt;.&lt;/li&gt;
+  &lt;li&gt;In iTerm2 preferences, under &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;General&lt;/code&gt; section and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AI&lt;/code&gt; tab, enter “OpenAI API key” with anything non-empty, fill in the &lt;a href=&quot;https://gitlab.com/gnachman/iterm2/-/wikis/AI-Prompt&quot;&gt;AI prompt&lt;/a&gt;, specify the model and the custom URL.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;For example, mine is like below:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;OpenAI API key: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;abc&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;AI prompt: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Return commands suitable for copy/pasting into \(shell) on \(uname). Do NOT include commentary NOR Markdown triple-backtick code blocks as your whole response will be copied into my terminal automatically. If not otherwise specified, you should always give at most one line of command. The command should do this: \(ai.prompt)&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Model: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;codegemma:instruct&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Token limit: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;16384&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Custom URL: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://localhost/v1/chat/completions&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Use legacy “completions” API: false.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Remarks:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;If your Ollama runs on a server in WLAN, e.g. at IP address &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;192.168.0.107&lt;/code&gt;, just replace the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;localhost&lt;/code&gt; in custom URL with that IP address.&lt;/li&gt;
+  &lt;li&gt;Don’t forget to start Ollama by &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ollama serve&lt;/code&gt; before using iTerm2’s AI integration.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;workflow&quot;&gt;Workflow&lt;/h2&gt;
+
+&lt;p&gt;My favorite iTerm2 workflow after the configuration above:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Press &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;command + shift + .&lt;/code&gt; to activate the composer.&lt;/li&gt;
+  &lt;li&gt;Specify my need in plain English, and press &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;command + y&lt;/code&gt; to send the input text to Ollama.&lt;/li&gt;
+  &lt;li&gt;After a few seconds, the text should be replaced by Ollama’s response.&lt;/li&gt;
+  &lt;li&gt;Press &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;shift + enter&lt;/code&gt; to send the response to the terminal.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;A demo:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/posts_imgs/2024-06-13/iterm2-ai-demo.gif&quot; alt=&quot;demo&quot; /&gt;&lt;/p&gt;</content><author><name></name></author><category term="os--macos" /><summary type="html">Introduction</summary></entry><entry><title type="html">Learn Bayesian Logistic regression from imbalanced data</title><link href="https://kkew3.github.io/2024/05/17/learn-bayesian-lr-from-imbalanced-data.html" rel="alternate" type="text/html" title="Learn Bayesian Logistic regression from imbalanced data" /><published>2024-05-17T03:21:31+00:00</published><updated>2024-05-17T03:21:31+00:00</updated><id>https://kkew3.github.io/2024/05/17/learn-bayesian-lr-from-imbalanced-data</id><content type="html" xml:base="https://kkew3.github.io/2024/05/17/learn-bayesian-lr-from-imbalanced-data.html">&lt;h2 id=&quot;dataset&quot;&gt;Dataset&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/posts_imgs/2024-05-17/dataset.png&quot; alt=&quot;toy 2d dataset&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Obviously, this is an imbalanced dataset.
+A dumb classifier may assign “yellow” to all points and yield apparently satisfactory accuracy.&lt;/p&gt;
+
+&lt;h2 id=&quot;bayesian-logistic-regression&quot;&gt;Bayesian Logistic regression&lt;/h2&gt;
+
+&lt;p&gt;Denote the $k$-th component of the softmax of $\boldsymbol z$ as:&lt;/p&gt;
+
+\[\mathcal S_k(\boldsymbol z) \triangleq \frac{\exp(z_k)}{\sum_{k&apos;}\exp(z_{k&apos;})}\,.\]
+
+&lt;p&gt;The likelihood is:&lt;/p&gt;
+
+\[p(y=k \mid \boldsymbol x, \mathbf W, \boldsymbol b) = \mathcal S_k(\mathbf W \boldsymbol x + \boldsymbol b)\,,\]
+
+&lt;p&gt;where matrix $\mathbf W$ consists of $K$ weight vector $\boldsymbol w_k \in \mathbb R^d$, $\boldsymbol x \in \mathbb R^d$, and $\boldsymbol b \in \mathbb R^K$.&lt;/p&gt;
+
+&lt;p&gt;For now, assign an uninformative Gaussian prior:&lt;/p&gt;
+
+\[\forall k,\ \boldsymbol w_k \sim \mathcal N(0, \mathbf I)\,,\quad b_k \sim \mathcal N(0, 1)\,.
+\tag{1}\]
+
+&lt;p&gt;The posterior (given the dataset $\mathcal D$) is:&lt;/p&gt;
+
+\[p(\mathbf W, \boldsymbol b \mid \mathcal D) \propto \prod_{k=1}^K p(\boldsymbol w_k) p(b_k) \prod_{j=1}^m p(y_j \mid \boldsymbol x_j, \mathbf W, \boldsymbol b)\,.
+\tag{2.1}\]
+
+&lt;p&gt;The predictive posterior is:&lt;/p&gt;
+
+\[p(y \mid \boldsymbol x, \mathcal D) = \int p(y \mid \boldsymbol x, \mathbf W, \boldsymbol b) p(\mathbf W, \boldsymbol b \mid \mathcal D)\,\mathrm d \mathbf W \mathrm d \boldsymbol b\,.
+\tag{2.2}\]
+
+&lt;p&gt;Although both (2.1) and (2.2) are intractable, we may find $q(\mathbf W, \boldsymbol b) \approx p(\mathbf W, \boldsymbol b \mid \mathcal D)$ by variational inference, and estimate the predictive posterior by Monte Carlo after plugging in $q$.
+Since such procedure is out of scope, we won’t include details about it.&lt;/p&gt;
+
+&lt;p&gt;Let’s see the decision boundary and the uncertainty (measured by entropy) of the Bayesian LR:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/posts_imgs/2024-05-17/uninformative-db.png&quot; alt=&quot;uninformative decision boundary&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/posts_imgs/2024-05-17/uninformative-unc.png&quot; alt=&quot;uninformative uncertainty&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The model learns to be a dumb classifier!&lt;/p&gt;
+
+&lt;p&gt;We may apply rescaling (a.k.a. threshold shifting) to the learned classifier, by dividing the predictive posterior by the class prior (i.e. the proportion of samples of class $k$ in all samples), and use it to make prediction.
+The rescaled decision boundary and uncertainty are:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/posts_imgs/2024-05-17/uninformative-rescaled-db.png&quot; alt=&quot;uninformative rescaled decision boundary&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/posts_imgs/2024-05-17/uninformative-rescaled-unc.png&quot; alt=&quot;uninformative rescaled uncertainty&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;This benefits the minority class, but deteriorates the overall accuracy &lt;em&gt;a lot&lt;/em&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;strengthen-the-prior&quot;&gt;Strengthen the prior&lt;/h2&gt;
+
+&lt;p&gt;It turns out that if we strengthen the prior (by increasing its precision, or equivalently, decreasing its variance) of the intercepts in (1), things become much better.
+The new prior is:&lt;/p&gt;
+
+\[\forall k,\ b_k \sim \mathcal N(0, 10^{-6})\,.
+\tag{3}\]
+
+&lt;p&gt;What we just encode into the prior reads:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;I’m pretty sure that the two class weigh the same, despite the “purple” class appears inferior.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The result plots are:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/posts_imgs/2024-05-17/precise-uninformative-db.png&quot; alt=&quot;precise uninformative decision boundary&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/posts_imgs/2024-05-17/precise-uninformative-unc.png&quot; alt=&quot;precise uninformative uncertainty&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;bias-the-prior&quot;&gt;Bias the prior&lt;/h2&gt;
+
+&lt;p&gt;What if we go further by biasing the classifier a little towards the minority class ($k=0$, “purple”)?
+The new prior is:&lt;/p&gt;
+
+\[b_0 \sim \mathcal N(2, 10^{-6})\,,\quad b_1 \sim \mathcal N(0, 10^{-6})\,.
+\tag{4}\]
+
+&lt;p&gt;This prior reads:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;I’m pretty sure there’re even a bit more “purple” class than “yellow” class a priori, despite they’re not sampled as much in the dataset.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The plots are now:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/posts_imgs/2024-05-17/precise-biased-db.png&quot; alt=&quot;precise biased decision boundary&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/posts_imgs/2024-05-17/precise-biased-unc.png&quot; alt=&quot;precise biased uncertainty&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Pefect!&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;In this post, we see that under Bayesian framework, Bayesian LR is able to naturally combat imbalanced dataset by adjusting its prior belief.&lt;/p&gt;
+
+&lt;p&gt;This &lt;a href=&quot;https://github.com/kkew3/bayeslr-imbalanced&quot;&gt;codebase&lt;/a&gt; generates all the figures in the post.&lt;/p&gt;
+
+&lt;h2 id=&quot;appendix&quot;&gt;Appendix&lt;/h2&gt;
+
+&lt;p&gt;Features and labels of the toy dataset.&lt;/p&gt;
+
+&lt;p&gt;The features:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;array([[-0.46601866,  1.18801609],
+       [ 0.53858625,  0.60716392],
+       [-0.97431137,  0.69753311],
+       [-1.09220402,  0.87799492],
+       [-2.03843356,  0.28665154],
+       [-0.34062009,  0.79352777],
+       [-1.16225216,  0.79350459],
+       [ 0.19419328,  1.60986703],
+       [ 0.41018415,  1.54828838],
+       [-0.61113336,  0.99020048],
+       [ 0.08837677,  0.95373644],
+       [-1.77183232, -0.12717568],
+       [-0.54560628,  1.07613052],
+       [-1.69901425,  0.55489764],
+       [-0.7449788 ,  0.7519103 ],
+       [-1.84473763,  0.55248995],
+       [-0.50824943,  1.08964891],
+       [-1.35655196,  0.7102918 ],
+       [-0.71295569,  0.38030989],
+       [ 0.0582823 ,  1.35158484],
+       [-2.74743505, -0.18849513],
+       [-2.36125827, -0.22542297],
+       [ 0.28512568,  1.52124326],
+       [-0.67059538,  0.61188467],
+       [-1.08310962,  0.57068698],
+       [-1.59421684,  0.32055693],
+       [-0.58608561,  0.98441983],
+       [ 0.91449962,  1.74231742],
+       [-1.78271812,  0.25676529],
+       [-0.30880495,  0.98633121],
+       [-0.80196522,  0.56542478],
+       [-1.64551419,  0.2527351 ],
+       [ 0.88404065,  1.80009243],
+       [ 0.07752252,  1.19103008],
+       [ 0.01499115,  1.35642701],
+       [-1.37772455,  0.58176578],
+       [-0.9893581 ,  0.6000557 ],
+       [-0.20708577,  0.97773425],
+       [-0.97487675,  0.67788572],
+       [-0.84898247,  0.76214066],
+       [-2.87107864,  0.01823837],
+       [-1.52762479,  0.15224236],
+       [-1.19066619,  0.61716677],
+       [-0.78719074,  1.22733157],
+       [ 0.37887222,  1.38907542],
+       [-0.29892079,  1.20534091],
+       [-1.21904812,  0.45126808],
+       [-0.01954643,  1.00443244],
+       [-2.7534539 , -0.41174779],
+       [ 0.00290918,  1.19376387],
+       [-0.3465645 ,  0.97372693],
+       [-0.38706669,  0.98612011],
+       [-0.3909804 ,  1.1737113 ],
+       [ 0.67985963,  1.57038317],
+       [-1.5574845 ,  0.38938231],
+       [-0.70276487,  0.84873314],
+       [-0.77152456,  1.24328845],
+       [-0.78685252,  0.71866813],
+       [-1.58251503,  0.47314274],
+       [-0.86990291,  1.01246542],
+       [-0.76296641,  1.03057172],
+       [-1.46908977,  0.50048994],
+       [ 0.41590518,  1.35808005],
+       [-0.23171796,  0.97466644],
+       [-0.35599838,  1.05651836],
+       [-1.86300113,  0.31105633],
+       [-1.06979785,  0.89343042],
+       [ 0.89051152,  1.36968058],
+       [-1.64250124,  0.5395521 ],
+       [ 0.19072792,  1.39594182],
+       [-0.68980859,  1.51412568],
+       [-0.66216014,  0.94064958],
+       [-1.98324693,  0.36500688],
+       [-1.77543305,  0.48759471],
+       [ 0.99143992,  1.53242166],
+       [-2.03402523,  0.27661546],
+       [-0.98138839,  0.86047666],
+       [ 0.86594322,  1.60352598],
+       [-1.25510995,  0.40788484],
+       [-1.28207069,  0.55164356],
+       [-0.50983219,  1.05505834],
+       [ 0.98003606,  0.56171673],
+       [-1.86097117,  0.44004685],
+       [-1.09945843,  0.63380337],
+       [-1.44294885,  0.18391039],
+       [-1.60512757,  0.25456073],
+       [ 0.5505329 ,  1.63447114],
+       [-1.13622159,  0.87658095],
+       [-0.18029101,  0.98458234],
+       [-1.48031015,  0.3667454 ],
+       [ 0.94295697,  1.51965296],
+       [-1.94413955,  0.257857  ],
+       [-1.92812486, -0.15406208],
+       [-0.28437139,  0.8520255 ],
+       [-0.95551392,  0.28517945],
+       [-1.44252631,  0.5455637 ],
+       [-0.22064889,  1.33439538],
+       [-1.52749019,  0.50443876],
+       [ 0.757785  ,  0.42124458],
+       [-0.49536512,  0.9627005 ]])
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The labels:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;array([1,
+       0,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       0,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       0,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       0,
+       1,
+       1,
+       1,
+       1,
+       0,
+       1,
+       1,
+       0,
+       1])
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><category term="ml--bayes" /><summary type="html">Dataset</summary></entry></feed>
