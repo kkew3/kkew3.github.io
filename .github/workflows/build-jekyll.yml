@@ -13,6 +13,8 @@ on:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+    env:
+      PROVIDER: github
     steps:
       - uses: actions/checkout@v4
 
@@ -24,10 +26,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gems-
 
+      - name: Overwrite deployment PROVIDER for PR
+        shell: bash
+        if: ${{ github.event_name == 'pull_request' }}
+        run: echo "PROVIDER=test" >> $GITHUB_ENV
+
       # Use GitHub Deploy Action to build and deploy to Github
       - uses: kkew3/jekyll-deploy-action@issue/ruby-3.1.3-break-on-archlinux
         with:
-          provider: 'github'
+          provider: ${{ env.PROVIDER }}
           token: ${{ secrets.GITHUB_TOKEN }} # It's your Personal Access Token(PAT)
           repository: ''             # Default is current repository
           branch: 'gh-pages'         # Default is gh-pages for github provider
