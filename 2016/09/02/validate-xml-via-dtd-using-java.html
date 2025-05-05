@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>使用Java API通过DTD方式验证XML | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="使用Java API通过DTD方式验证XML">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="摘要">
+<meta property="og:description" content="摘要">
+<link rel="canonical" href="https://kkew3.github.io/2016/09/02/validate-xml-via-dtd-using-java.html">
+<meta property="og:url" content="https://kkew3.github.io/2016/09/02/validate-xml-via-dtd-using-java.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2016-09-02T16:26:30+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="使用Java API通过DTD方式验证XML">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2016-09-02T16:26:30+00:00","datePublished":"2016-09-02T16:26:30+00:00","description":"摘要","headline":"使用Java API通过DTD方式验证XML","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2016/09/02/validate-xml-via-dtd-using-java.html"},"url":"https://kkew3.github.io/2016/09/02/validate-xml-via-dtd-using-java.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">使用Java API通过DTD方式验证XML</h1>
+    <span><a href="https://kkew3.github.io/tags/dev--java"><code class="highlighter-rouge"><nobr>dev/java</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2016-09-02T16:26:30+00:00" itemprop="datePublished">Sep 2, 2016 at 16:26:30
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="摘要">摘要</h2>
+
+<p>本文记述了如何使用<code class="language-plaintext highlighter-rouge">Java 8</code>API 解析但不验证、按照XML文件头的<code class="language-plaintext highlighter-rouge">DOCTYPE</code>声明验证、使用本地文件验证XML的方法。本文不涉及如何读取、修改XML节点，以及创建XML文档的内容。</p>
+
+<h2 id="解析但不验证">解析但不验证</h2>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">java.io.FileInputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.InputStream</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.xml.parsers.DocumentBuilder</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.xml.parsers.DocumentBuilderFactory</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.xml.parsers.ParserConfigurationException</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.w3c.dom.Document</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.xml.sax.SAXException</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">XMLParser</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">String</span> <span class="n">xmlToParse</span> <span class="o">=</span> <span class="s">"myDocument.xml"</span><span class="o">;</span>
+			<span class="nc">DocumentBuilderFactory</span> <span class="n">dbf</span> <span class="o">=</span> 
+					<span class="nc">DocumentBuilderFactory</span><span class="o">.</span><span class="na">newInstance</span><span class="o">();</span>
+			<span class="c1">// 默认DocumentBuilderFactory不创建</span>
+			<span class="c1">// 启用验证功能的DocumentBuilder</span>
+			<span class="nc">DocumentBuilder</span> <span class="n">db</span> <span class="o">=</span> <span class="n">dbf</span><span class="o">.</span><span class="na">newDocumentBuilder</span><span class="o">();</span>
+			<span class="nc">Document</span> <span class="n">myDoc</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="n">xmlToParse</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">ParseConfigurationException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">SAXException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="使用xml文件头部声明的doctype验证">使用XML文件头部声明的DOCTYPE验证</h2>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">java.io.FileInputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.InputStream</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.xml.parsers.DocumentBuilder</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.xml.parsers.DocumentBuilderFactory</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.xml.parsers.ParserConfigurationException</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.w3c.dom.Document</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.xml.sax.SAXException</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">XMLParser</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">String</span> <span class="n">xmlToParse</span> <span class="o">=</span> <span class="s">"myDocument.xml"</span><span class="o">;</span>
+			<span class="nc">DocumentBuilderFactory</span> <span class="n">dbf</span> <span class="o">=</span> 
+					<span class="nc">DocumentBuilderFactory</span><span class="o">.</span><span class="na">newInstance</span><span class="o">();</span>
+			<span class="n">dbf</span><span class="o">.</span><span class="na">setValidating</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>  <span class="c1">// 注意这里不同</span>
+			<span class="nc">DocumentBuilder</span> <span class="n">db</span> <span class="o">=</span> <span class="n">dbf</span><span class="o">.</span><span class="na">newDocumentBuilder</span><span class="o">();</span>
+			<span class="nc">Document</span> <span class="n">myDoc</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="n">xmlToParse</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">ParseConfigurationException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">SAXException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+</code></pre></div></div>
+
+<p>这时可能抛出<code class="language-plaintext highlighter-rouge">IOException</code>，原因通常是没有找到XML所声明的DTD文件</p>
+
+<ul>
+  <li>如果XML声明的DTD在本地，可能会报<code class="language-plaintext highlighter-rouge">FileNotFoundException</code>。此时需要检查本地DTD的路径是否填写正确</li>
+  <li>否则可能报<code class="language-plaintext highlighter-rouge">SocketException</code>。此时需要检查网络是否畅通</li>
+</ul>
+
+<p><strong>然而此时即使XML不符合所声明DTD的定义，<code class="language-plaintext highlighter-rouge">SAXException</code>也可能不会被抛出</strong>，而仅仅是报错信息通过<code class="language-plaintext highlighter-rouge">System.err</code>打印出来，同时会打印运行警告：“警告: 已启用验证, 但未设置 org.xml.sax.ErrorHandler, 这可能不是预期结果。解析器将使用默认 ErrorHandler 来输出前 0 个错误。请调用 ‘setErrorHandler’ 方法以解决此问题。”</p>
+
+<p>这是因为没有设置<code class="language-plaintext highlighter-rouge">ErrorHandler</code>。如果希望<code class="language-plaintext highlighter-rouge">SAXException</code>在发生验证错误时被抛出，需要通过<code class="language-plaintext highlighter-rouge">DocumentBuilder.setErrorHandler(ErrorHandler eh)</code>方法进行设置。</p>
+
+<p>重写上述代码如下：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">java.io.FileInputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.InputStream</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.xml.parsers.DocumentBuilder</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.xml.parsers.DocumentBuilderFactory</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.xml.parsers.ParserConfigurationException</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.w3c.dom.Document</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.xml.sax.ErrorHandler</span><span class="o">;</span>  <span class="c1">// 注意这里不同</span>
+<span class="kn">import</span> <span class="nn">org.xml.sax.SAXException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.xml.sax.SAXParseException</span><span class="o">;</span>  <span class="c1">// 注意这里不同</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">XMLParser</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">String</span> <span class="n">xmlToParse</span> <span class="o">=</span> <span class="s">"myDocument.xml"</span><span class="o">;</span>
+			<span class="nc">DocumentBuilderFactory</span> <span class="n">dbf</span> <span class="o">=</span> 
+					<span class="nc">DocumentBuilderFactory</span><span class="o">.</span><span class="na">newInstance</span><span class="o">();</span>
+			<span class="n">dbf</span><span class="o">.</span><span class="na">setValidating</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+			<span class="nc">DocumentBuilder</span> <span class="n">db</span> <span class="o">=</span> <span class="n">dbf</span><span class="o">.</span><span class="na">newDocumentBuilder</span><span class="o">();</span>
+			<span class="n">db</span><span class="o">.</span><span class="na">setErrorHandler</span><span class="o">(</span><span class="k">new</span> <span class="nc">ErrorHandler</span><span class="o">()</span> <span class="o">{</span>
+				<span class="cm">/*
+				 * 定义了一个只要出一点解析错误就抛出异常的ErrorHandler。
+				 * 读者可以以此为依据编写更精细化管理的ErrorHandler。
+				 */</span>
+				
+				<span class="nd">@Override</span>
+				<span class="kd">public</span> <span class="kt">void</span> <span class="nf">error</span><span class="o">(</span><span class="nc">SAXParseException</span> <span class="n">exception</span><span class="o">)</span>
+						<span class="kd">throws</span> <span class="nc">SAXException</span> <span class="o">{</span>
+					<span class="k">throw</span> <span class="n">exception</span><span class="o">;</span>
+				<span class="o">}</span>
+				<span class="nd">@Override</span>
+				<span class="kd">public</span> <span class="kt">void</span> <span class="nf">fatalError</span><span class="o">(</span><span class="nc">SAXParseException</span> <span class="n">exception</span><span class="o">)</span>
+						<span class="kd">throws</span> <span class="nc">SAXException</span> <span class="o">{</span>
+					<span class="k">throw</span> <span class="n">exception</span><span class="o">;</span>
+				<span class="o">}</span>
+				<span class="nd">@Override</span>
+				<span class="kd">public</span> <span class="kt">void</span> <span class="nf">warning</span><span class="o">(</span><span class="nc">SAXParseException</span> <span class="n">exception</span><span class="o">)</span>
+						<span class="kd">throws</span> <span class="nc">SAXException</span> <span class="o">{</span>
+					<span class="k">throw</span> <span class="n">exception</span><span class="o">;</span>
+				<span class="o">}</span>
+			<span class="o">});</span>  <span class="c1">// 注意这里不同</span>
+			<span class="nc">Document</span> <span class="n">myDoc</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="n">xmlToParse</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">ParseConfigurationException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">SAXException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="使用本地dtd文件验证">使用本地DTD文件验证</h2>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">java.io.FileInputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.InputStream</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.xml.parsers.DocumentBuilder</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.xml.parsers.DocumentBuilderFactory</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.xml.parsers.ParserConfigurationException</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.w3c.dom.Document</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.xml.sax.ErrorHandler</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.xml.sax.EntityHandler</span><span class="o">;</span>  <span class="c1">// 注意这里不同</span>
+<span class="kn">import</span> <span class="nn">org.xml.sax.InputSource</span><span class="o">;</span>  <span class="c1">// 注意这里不同</span>
+<span class="kn">import</span> <span class="nn">org.xml.sax.SAXException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.xml.sax.SAXParseException</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">XMLParser</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">String</span> <span class="n">xmlToParse</span> <span class="o">=</span> <span class="s">"myDocument.xml"</span><span class="o">;</span>
+			<span class="nc">DocumentBuilderFactory</span> <span class="n">dbf</span> <span class="o">=</span> 
+					<span class="nc">DocumentBuilderFactory</span><span class="o">.</span><span class="na">newInstance</span><span class="o">();</span>
+			<span class="n">dbf</span><span class="o">.</span><span class="na">setValidating</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+			<span class="nc">DocumentBuilder</span> <span class="n">db</span> <span class="o">=</span> <span class="n">dbf</span><span class="o">.</span><span class="na">newDocumentBuilder</span><span class="o">();</span>
+			<span class="n">db</span><span class="o">.</span><span class="na">setErrorHandler</span><span class="o">(</span><span class="k">new</span> <span class="nc">ErrorHandler</span><span class="o">()</span> <span class="o">{</span>
+				<span class="nd">@Override</span>
+				<span class="kd">public</span> <span class="kt">void</span> <span class="nf">error</span><span class="o">(</span><span class="nc">SAXParseException</span> <span class="n">exception</span><span class="o">)</span>
+						<span class="kd">throws</span> <span class="nc">SAXException</span> <span class="o">{</span>
+					<span class="k">throw</span> <span class="n">exception</span><span class="o">;</span>
+				<span class="o">}</span>
+				<span class="nd">@Override</span>
+				<span class="kd">public</span> <span class="kt">void</span> <span class="nf">fatalError</span><span class="o">(</span><span class="nc">SAXParseException</span> <span class="n">exception</span><span class="o">)</span>
+						<span class="kd">throws</span> <span class="nc">SAXException</span> <span class="o">{</span>
+					<span class="k">throw</span> <span class="n">exception</span><span class="o">;</span>
+				<span class="o">}</span>
+				<span class="nd">@Override</span>
+				<span class="kd">public</span> <span class="kt">void</span> <span class="nf">warning</span><span class="o">(</span><span class="nc">SAXParseException</span> <span class="n">exception</span><span class="o">)</span>
+						<span class="kd">throws</span> <span class="nc">SAXException</span> <span class="o">{</span>
+					<span class="k">throw</span> <span class="n">exception</span><span class="o">;</span>
+				<span class="o">}</span>
+			<span class="o">});</span>
+			<span class="n">db</span><span class="o">.</span><span class="na">setEntityResolver</span><span class="o">(</span><span class="k">new</span> <span class="nc">EntityResolver</span><span class="o">()</span> <span class="o">{</span>
+				<span class="cm">/*
+				 * 编写了根据PUBLIC域使用相应的本地dtd的EntityResolver；
+				 * 读者也可以据此编写根据SYSTEM域使用相应dtd的EntityResolver；
+				 * 或不管xml中声明成什么DOCTYPE，都使用同一份dtd进行验证，
+				 * 此时resolveEntity方法体中仅包含
+				 *     return new InputSource("a-fixed-dtd-path");
+				 */</span>
+				
+				<span class="nd">@Override</span>
+				<span class="kd">public</span> <span class="nc">InputSource</span> <span class="nf">resolveEntity</span><span class="o">(</span><span class="nc">String</span> <span class="n">publicId</span><span class="o">,</span>
+						<span class="nc">String</span> <span class="n">systemId</span><span class="o">)</span> <span class="o">{</span>
+					<span class="k">switch</span> <span class="o">(</span><span class="n">publicId</span><span class="o">)</span> <span class="o">{</span>  <span class="c1">// 此处仅为示意</span>
+					<span class="k">case</span> <span class="s">"URL-sample-1"</span><span class="o">:</span>
+						<span class="k">return</span> <span class="k">new</span> <span class="nf">InputSource</span><span class="o">(</span>
+								<span class="s">"local-dtd-path-for-url-sample-1"</span><span class="o">);</span>
+					<span class="k">case</span> <span class="s">"URL-sample-2"</span><span class="o">:</span>
+						<span class="k">return</span> <span class="k">new</span> <span class="nf">InputSource</span><span class="o">(</span>
+								<span class="s">"local-dtd-path-for-url-sample-2"</span><span class="o">);</span>
+					<span class="k">default</span><span class="o">:</span>
+						<span class="c1">// 仍然按照DOCTYPE去解析，此时可能抛出IOException</span>
+						<span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+				<span class="o">}</span>
+			<span class="o">});</span>  <span class="c1">// 注意这里不同</span>
+			<span class="nc">Document</span> <span class="n">myDoc</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="n">xmlToParse</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">ParseConfigurationException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">SAXException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+</code></pre></div></div>
+
+  </div>
+<a class="u-url" href="/2016/09/02/validate-xml-via-dtd-using-java.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
