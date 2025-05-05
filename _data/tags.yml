@@ -46,3 +46,5 @@ llm:
   name: llm
 rss:
   name: rss
+git:
+  name: git
