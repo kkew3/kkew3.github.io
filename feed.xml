@@ -1,0 +1,708 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="https://kkew3.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://kkew3.github.io/" rel="alternate" type="text/html" /><updated>2025-07-15T10:14:19+00:00</updated><id>https://kkew3.github.io/feed.xml</id><title type="html">Kaiwen’s personal website</title><subtitle>My blogs and research reports.</subtitle><entry><title type="html">Poor man’s parallel gzip</title><link href="https://kkew3.github.io/2025/07/15/poor-mans-parallel-gzip.html" rel="alternate" type="text/html" title="Poor man’s parallel gzip" /><published>2025-07-15T09:52:27+00:00</published><updated>2025-07-15T09:52:27+00:00</updated><id>https://kkew3.github.io/2025/07/15/poor-mans-parallel-gzip</id><content type="html" xml:base="https://kkew3.github.io/2025/07/15/poor-mans-parallel-gzip.html"><![CDATA[<p>There have been several tools aiming to incorporate multiple CPU cores to accelerate large file compression.
+To name a few: <a href="https://zlib.net/pigz/"><code class="language-plaintext highlighter-rouge">pigz</code></a>, <a href="https://facebook.github.io/zstd/"><code class="language-plaintext highlighter-rouge">zstd</code></a>, <a href="https://tukaani.org/xz/"><code class="language-plaintext highlighter-rouge">xz</code></a>.
+Here I suggest a minimalist approach to parallel compression.
+The core idea:</p>
+
+<ol>
+  <li>Split a file into chunks.</li>
+  <li>Compress the chunks in parallel.</li>
+  <li>Bundle the results in a tarball.</li>
+</ol>
+
+<p>This approach is remarkably easy to implement and surprisingly effective for many use-cases—especially when you just want “good enough” speed without extra software.</p>
+
+<p>Here’re the hackable shell functions that implement compression and decompression:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Write the tarball containing gzipped chunks to stdout.</span>
+<span class="c"># Usage: cat FILE | pgzip &gt; OUTPUT.tar</span>
+pgzip<span class="o">()</span> <span class="o">{</span>
+    <span class="nb">local </span><span class="nv">workdir</span><span class="o">=</span><span class="s2">"</span><span class="si">$(</span><span class="nb">mktemp</span> <span class="nt">-d</span> <span class="s2">"</span><span class="k">${</span><span class="nv">TMPDIR</span><span class="k">:-</span><span class="p">/tmp</span><span class="k">}</span><span class="s2">/tmpXXXXXX"</span><span class="si">)</span><span class="s2">"</span>
+    <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> <span class="nt">-ne</span> 0 <span class="o">]</span><span class="p">;</span> <span class="k">then
+        </span><span class="nb">echo</span> <span class="s2">"Failed to mktemp -d"</span> <span class="o">&gt;</span>&amp;2
+        <span class="k">return </span>1
+    <span class="k">fi</span>
+
+    <span class="c"># Some fancy strategies to decide the number of chunks to split.</span>
+    <span class="nb">local </span><span class="nv">ncpu</span><span class="o">=</span><span class="s2">"</span><span class="si">$(</span><span class="nb">nproc</span><span class="si">)</span><span class="s2">"</span>  <span class="c"># Get the number of processors.</span>
+    <span class="nv">ncpu</span><span class="o">=</span><span class="k">$((</span> <span class="nv">$ncpu</span> <span class="o">*</span> <span class="m">8</span> <span class="o">/</span> <span class="m">10</span> <span class="k">))</span>  <span class="c"># Use 80% of all processors.</span>
+    <span class="nv">ncpu</span><span class="o">=</span><span class="k">$((</span> <span class="nv">$ncpu</span> &lt; <span class="m">10</span> ? <span class="nv">$ncpu</span> : <span class="m">10</span> <span class="k">))</span>  <span class="c"># Use at most 10 processors.</span>
+
+    <span class="c"># Step 1: split stdin into chunks.</span>
+    <span class="nb">split</span> <span class="nt">-d</span> <span class="nt">-a</span> 1 <span class="nt">-n</span> <span class="nv">$ncpu</span> - <span class="s2">"</span><span class="nv">$workdir</span><span class="s2">/chunk_"</span>
+    <span class="c"># Step 2: parallel gzip.</span>
+    find <span class="s2">"</span><span class="nv">$workdir</span><span class="s2">"</span> <span class="nt">-name</span> <span class="s1">'chunk_*'</span> | xargs <span class="nt">-n1</span> <span class="nt">-P</span> <span class="nv">$ncpu</span> <span class="nb">gzip</span>
+    <span class="c"># Step 3: bundle into tarball, which goes to stdout.</span>
+    <span class="o">{</span> <span class="nb">echo</span> <span class="s2">"-C </span><span class="nv">$workdir</span><span class="s2">"</span><span class="p">;</span> find <span class="s2">"</span><span class="nv">$workdir</span><span class="s2">"</span> <span class="nt">-name</span> <span class="s1">'chunk_*'</span> | xargs <span class="nb">basename</span> | <span class="nb">sort</span><span class="p">;</span> <span class="o">}</span> | <span class="nb">tar </span>cf - <span class="nt">-T</span> -
+    <span class="nb">rm</span> <span class="nt">-rf</span> <span class="s2">"</span><span class="nv">$workdir</span><span class="s2">"</span>
+<span class="o">}</span>
+
+<span class="c"># Decompress the output tarball to stdout.</span>
+<span class="c"># Usage: pgunzip OUTPUT.tar &gt; FILE</span>
+pgunzip<span class="o">()</span> <span class="o">{</span>
+    <span class="nb">local </span><span class="nv">INPUT</span><span class="o">=</span><span class="s2">"</span><span class="nv">$1</span><span class="s2">"</span>
+    <span class="k">if</span> <span class="o">[</span> <span class="nt">-z</span> <span class="s2">"</span><span class="nv">$INPUT</span><span class="s2">"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then
+        </span><span class="nb">echo</span> <span class="s2">"Missing input file"</span> <span class="o">&gt;</span>&amp;2
+        <span class="k">return </span>1
+    <span class="k">fi
+    </span><span class="nb">tar </span>xOf <span class="s2">"</span><span class="nv">$INPUT</span><span class="s2">"</span> | <span class="nb">gzip</span> <span class="nt">-cd</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>That’s it. No compilation, no installation, just shell and standard tools.</p>
+
+<p>What’s more, the result tarball can be easily handled by python, with builtin modules only (i.e. <code class="language-plaintext highlighter-rouge">tarfile</code> and <code class="language-plaintext highlighter-rouge">gzip</code>).</p>
+
+<p>The limitation is obvious:</p>
+
+<ul>
+  <li>Not robust against failures mid-process.</li>
+</ul>]]></content><author><name></name></author><category term="dev--sh" /><summary type="html"><![CDATA[There have been several tools aiming to incorporate multiple CPU cores to accelerate large file compression. To name a few: pigz, zstd, xz. Here I suggest a minimalist approach to parallel compression. The core idea:]]></summary></entry><entry><title type="html">Synchronize files using git over ssh</title><link href="https://kkew3.github.io/2025/05/05/sync-files-with-git-ssh.html" rel="alternate" type="text/html" title="Synchronize files using git over ssh" /><published>2025-05-05T03:48:55+00:00</published><updated>2025-05-05T03:48:55+00:00</updated><id>https://kkew3.github.io/2025/05/05/sync-files-with-git-ssh</id><content type="html" xml:base="https://kkew3.github.io/2025/05/05/sync-files-with-git-ssh.html"><![CDATA[<p>I typically write model code on a consumer-grade laptop, and <code class="language-plaintext highlighter-rouge">rsync</code> the code to a remote server, where the model is trained.
+The price is that for every project, I have to write a script doing this job.
+Furthermore, <code class="language-plaintext highlighter-rouge">rsync</code> is not very smart in managing deleted files—it either deletes all extraneous files or keep all those files.
+While it’s probably not impossible to overcome the limitation by carefully reading the <a href="https://linux.die.net/man/1/rsync">manual</a>, delving into it would take tons of time as the manual contains over 19k words.</p>
+
+<p>Recently, I find that <code class="language-plaintext highlighter-rouge">git</code> over ssh can be used to resolve the isssue.
+The procedure is simple.
+Let us denote the remote server by <code class="language-plaintext highlighter-rouge">remote.server</code>, i.e. with an entry in <code class="language-plaintext highlighter-rouge">~/.ssh/config</code> similar to:</p>
+
+<pre><code class="language-sshconfig">Host remote.server
+  User ubuntu
+  HostName XXX.XXX.XXX.XXX
+  IdentityFile ~/.ssh/id_rsa
+</code></pre>
+
+<p>On the local laptop:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> /path/to/my_project
+<span class="c"># We store the bare repo under ~/git/my_project.git.</span>
+ssh remote.server <span class="s1">'git init --bare ~/git/my_project.git'</span>
+<span class="c"># Setup remote over ssh.</span>
+git remote add origin remote.server:~/git/my_project.git
+git push <span class="nt">-u</span> origin master
+</code></pre></div></div>
+
+<p>On the remote server (if we are setting up from scratch):</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> /path/to/projects/dir
+<span class="c"># Git clone local repo.</span>
+git clone ~/git/my_project.git
+</code></pre></div></div>
+
+<p>On the remote server (if we already have an existing remote directory):</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> /path/to/my_project
+<span class="nv">tmp</span><span class="o">=</span><span class="si">$(</span><span class="nb">mktemp</span> <span class="nt">-d</span> tmpXXXXXX<span class="si">)</span>
+<span class="c"># Git clone local repo.</span>
+git clone ~/git/my_project.git <span class="nv">$tmp</span>
+<span class="c"># See https://stackoverflow.com/a/13852329/7881370.</span>
+<span class="nb">mv</span> <span class="nv">$tmp</span>/.git .git
+<span class="nb">rm</span> <span class="nt">-rf</span> <span class="nv">$tmp</span>
+<span class="c"># Then resolve conflicts by referring to git status.</span>
+<span class="c">#git status</span>
+</code></pre></div></div>
+
+<p>After this setup, for some further local updates, we just <code class="language-plaintext highlighter-rouge">git push</code> locally and <code class="language-plaintext highlighter-rouge">git pull</code> remotely.</p>]]></content><author><name></name></author><category term="git" /><summary type="html"><![CDATA[I typically write model code on a consumer-grade laptop, and rsync the code to a remote server, where the model is trained. The price is that for every project, I have to write a script doing this job. Furthermore, rsync is not very smart in managing deleted files—it either deletes all extraneous files or keep all those files. While it’s probably not impossible to overcome the limitation by carefully reading the manual, delving into it would take tons of time as the manual contains over 19k words.]]></summary></entry><entry><title type="html">在 macOS 上折腾 RSS 阅读器</title><link href="https://kkew3.github.io/2024/12/31/miniflux-on-mac.html" rel="alternate" type="text/html" title="在 macOS 上折腾 RSS 阅读器" /><published>2024-12-31T08:39:31+00:00</published><updated>2024-12-31T08:39:31+00:00</updated><id>https://kkew3.github.io/2024/12/31/miniflux-on-mac</id><content type="html" xml:base="https://kkew3.github.io/2024/12/31/miniflux-on-mac.html"><![CDATA[<h2 id="背景">背景</h2>
+
+<p>本来之前一直用 <a href="https://netnewswire.com/"><code class="language-plaintext highlighter-rouge">NetNewsWire</code></a> 阅读 RSS，直到我自己 host 的 RSS 源的 IP 地址变了，而貌似 NetNewsWire 无法修改已订阅的 RSS 源的 IP 地址（以前的版本是<a href="https://apple.stackexchange.com/a/20282">可以</a>修改的）。不得已切换到了 <a href="https://vivaldi.com/zh-hans/"><code class="language-plaintext highlighter-rouge">Vivaldi</code></a>，这是一个浏览器，但它有一个附加的阅读 RSS 的小功能。随着 RSS 积累得越来越多，最近逐渐开始变卡，明明 <code class="language-plaintext highlighter-rouge">NetNewsWire</code> 用了那么久都很流畅的说。在<a href="https://lukesingham.com/rss-feed-reader/">这篇博客</a>的指点下我找到了 <a href="https://miniflux.app/"><code class="language-plaintext highlighter-rouge">Miniflux</code></a>，于是开始了一天的折腾。</p>
+
+<h2 id="docker-安装-miniflux">Docker 安装 Miniflux</h2>
+
+<p>首先尝试最简单的 <a href="https://miniflux.app/docs/docker.html">Docker 安装</a>，就按照官网文档的样子写好 <code class="language-plaintext highlighter-rouge">docker-compose.yaml</code>，然后</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose up <span class="nt">-d</span>
+</code></pre></div></div>
+
+<p>就行了，不用安装 postgres 环境。但是服务起来后发现连不上自己 host 的 RSS，原来是因为那个 RSS 源也是在 Docker 容器里跑的，而且它的 network scope 为 <code class="language-plaintext highlighter-rouge">Local</code>，意思是除非其它 Docker container 和它在一个 host 上，否则就无法连接。因为我在自己 Mac 上安装的 Miniflux 容器，而 RSS 源没有 host 在本地，那显然这条路是走不通的。</p>
+
+<h2 id="本地安装-miniflux">本地安装 Miniflux</h2>
+
+<p>首先安装 postgres，就用最简单的 <a href="https://postgresapp.com/"><code class="language-plaintext highlighter-rouge">Postgres.app</code></a>，按照网站流程一路安装即可，但是不用修改 <code class="language-plaintext highlighter-rouge">$PATH</code> 环境变量，见下文。</p>
+
+<p>然后按照 Miniflux 的 <a href="https://miniflux.app/docs/database.html">Database Configuration</a> 页面配置 postgres，在<em>交互式</em> bash 下：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 暂时把 Postgres.app 附带的命令行工具引入 PATH</span>
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"/Applications/Postgres.app/Contents/Versions/latest/bin:</span><span class="nv">$PATH</span><span class="s2">"</span>
+
+<span class="c"># 新建 postgres 用户，名为 miniflux。`-P` 是用来输入密码的。</span>
+createuser <span class="nt">-P</span> miniflux
+<span class="c"># 这里输入密码，然后再输一次。我输的是 secret。之后要用。</span>
+
+<span class="c"># 在用户 miniflux 下新建名为 miniflux 的数据库。</span>
+createdb <span class="nt">-O</span> miniflux miniflux
+
+<span class="c"># 启用 hstore 扩展</span>
+psql miniflux <span class="nt">-c</span> <span class="s1">'create extension hstore'</span>
+</code></pre></div></div>
+
+<p>第三步新建配置文件。这里也可以用环境变量的方式，但我倾向于用配置文件。文档见<a href="https://miniflux.app/docs/configuration.html">这里</a>。我把配置文件搁在 <code class="language-plaintext highlighter-rouge">~/.config/miniflux/</code> 下。名字叫 <code class="language-plaintext highlighter-rouge">config</code>。配置文件路径其实是随意的。我是这么写的：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 格式为 postgres://{用户}:{密码}@localhost/{数据库名}?sslmode=disable。</span>
+<span class="nv">DATABASE_URL</span><span class="o">=</span>postgres://miniflux:secret@localhost/miniflux?sslmode<span class="o">=</span>disable
+
+<span class="c"># 创建第一个用户，要不然 Miniflux 运行起来后无法登录。省去运行 `miniflux -create-admin`</span>
+<span class="c"># 的麻烦。</span>
+<span class="nv">CREATE_ADMIN</span><span class="o">=</span>1
+<span class="nv">ADMIN_USERNAME</span><span class="o">=</span>admin
+<span class="c"># 密码必须是六个字母及以上。</span>
+<span class="nv">ADMIN_PASSWORD</span><span class="o">=</span>admin123
+
+<span class="c"># 省去运行 `miniflux -migrate` 的麻烦。</span>
+<span class="nv">RUN_MIGRATIONS</span><span class="o">=</span>1
+
+<span class="c"># 我喜欢 8050 这个端口号。</span>
+<span class="nv">LISTEN_ADDR</span><span class="o">=</span>127.0.0.1:8050
+</code></pre></div></div>
+
+<p>第四步，从 Miniflux 的 <a href="https://github.com/miniflux/v2/releases">Release</a> 页面下载可执行程序。我是因特尔芯片的 Mac，所以下载 <code class="language-plaintext highlighter-rouge">miniflux-darwin-amd64</code>。把它放到方便的路径下，然后 bash 中运行：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 赋予可执行权限。</span>
+<span class="nb">chmod </span>u+x miniflux-darwin-amd64
+
+<span class="c"># 重命名一下以后敲起来方便。</span>
+<span class="nb">mv </span>miniflux-darwin-amd64 miniflux
+
+<span class="c"># 运行 Miniflux。</span>
+./miniflux <span class="nt">-c</span> ~/.config/miniflux/config
+
+<span class="c"># 也可以用 tmux 后台运行：</span>
+<span class="c">#tmux new -ds miniflux ./miniflux -c ~/.config/miniflux/config</span>
+
+<span class="c"># 如果 RSS 源里有 youtube，不要忘记在运行 miniflux 前 export HTTP_PROXY 和</span>
+<span class="c"># HTTPS_PROXY。这两个变量设置在配置文件里是没用的。</span>
+</code></pre></div></div>
+
+<p>最后，浏览器访问 <code class="language-plaintext highlighter-rouge">127.0.0.1:8050</code>，用户名填 <code class="language-plaintext highlighter-rouge">admin</code>, 密码填 <code class="language-plaintext highlighter-rouge">admin123</code>（即配置文件里填的那些），就可以使用了。</p>]]></content><author><name></name></author><category term="rss" /><category term="os--macos" /><summary type="html"><![CDATA[背景]]></summary></entry><entry><title type="html">Share my unicode finder bot</title><link href="https://kkew3.github.io/2024/12/26/unicode-finder.html" rel="alternate" type="text/html" title="Share my unicode finder bot" /><published>2024-12-26T08:38:48+00:00</published><updated>2024-12-26T08:38:48+00:00</updated><id>https://kkew3.github.io/2024/12/26/unicode-finder</id><content type="html" xml:base="https://kkew3.github.io/2024/12/26/unicode-finder.html"><![CDATA[<p><img src="/assets/posts_imgs/2024-12-26/unicode-finder-bot-chat.png" alt="" /></p>
+
+<p>I’d like to share my new bot <a href="https://poe.com/unicode-finder">unicode-finder</a> on <a href="https://poe.com/">Poe</a>.
+It echos unicode(s) given plain English description of it, so that you won’t need to search all over the Internet for such a seemingly simple task.
+The prompt is:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Your are a helpful assistant. Your task is to find unicode(s) given user's
+description. Your answer should be concise, including only the unicode itself
+and the unicode code point, so that the user may copy and paste from your
+answer with ease.  Note that the answer may involve multiple unicodes. For
+example, given description "a", you should answer "a U+0061"; given description
+"underlined c", you should answer "c̲ U+0063 U+0332".
+</code></pre></div></div>]]></content><author><name></name></author><category term="llm" /><summary type="html"><![CDATA[]]></summary></entry><entry><title type="html">KL divergence between two full-rank Gaussians in PyTorch</title><link href="https://kkew3.github.io/2024/12/09/gaussian-kl-div-torch.html" rel="alternate" type="text/html" title="KL divergence between two full-rank Gaussians in PyTorch" /><published>2024-12-09T08:03:00+00:00</published><updated>2024-12-09T08:03:00+00:00</updated><id>https://kkew3.github.io/2024/12/09/gaussian-kl-div-torch</id><content type="html" xml:base="https://kkew3.github.io/2024/12/09/gaussian-kl-div-torch.html"><![CDATA[<h2 id="abstract">Abstract</h2>
+
+<p>In this post, we will go through the <a href="https://pytorch.org/">PyTorch</a> code to compute the Kullback-Leibler divergence between two full-rank Gaussians.
+The code might be useful if one considers using full-rank Gaussian as variational posterior while training a <a href="https://arxiv.org/abs/1312.6114">variational autoencoder</a>.</p>
+
+<h2 id="kl-divergence-between-two-full-rank-gaussians">KL divergence between two full-rank Gaussians</h2>
+
+<p>It’s common practice to parameterize the covariance matrix $\boldsymbol\Sigma$ of a $d$-dimensional full-rank Gaussian using a $D$-dimensional vector of nonzero elements of $\mathbf L$, where $D = d(1+d)/2$ and $\boldsymbol\Sigma = \mathbf L \mathbf L^\top$ is the Cholesky decomposition.
+So we will assume it here.
+Note that the diagonal of $\mathbf L$ must be positive so that $\boldsymbol\Sigma$ is positive definite.
+We will enforce this by taking the exponential on the diagonal elements (e.g. the first $d$ elements of our parameterization).</p>
+
+<p>Let the two Gaussians be $p(\boldsymbol x) = \mathcal N(\boldsymbol x \mid \boldsymbol\mu_1, \boldsymbol\Sigma_1)$ and $q(\boldsymbol x) = \mathcal N(\boldsymbol x \mid \boldsymbol\mu_2, \boldsymbol\Sigma_2)$.
+Per <a href="https://statproofbook.github.io/P/mvn-kl">The Book of Statistical Proofs</a>, the KL divergence between them is:</p>
+
+\[D_\mathrm{KL}(p \parallel q) = \frac{1}{2}\left((\boldsymbol\mu_2 - \boldsymbol\mu_1)^\top \boldsymbol\Sigma_2^{-1} (\boldsymbol\mu_2 - \boldsymbol\mu_1) + \operatorname{tr}(\boldsymbol\Sigma_2^{-1} \boldsymbol\Sigma_1) - \log \frac{\det \boldsymbol\Sigma_1}{\det \boldsymbol\Sigma_2} - d\right)\,.\]
+
+<p>Plugging in our parameterization of the covariance matrices:</p>
+
+\[\begin{aligned}
+    D_\mathrm{KL}(p \parallel q)
+    &amp;= \frac{1}{2}\left((\boldsymbol\mu_2 - \boldsymbol\mu_1)^\top \mathbf L_2^{-\top} \mathbf L_2^{-1} (\boldsymbol\mu_2 - \boldsymbol\mu_1) + \operatorname{tr}((\mathbf L_2 \mathbf L_2^\top)^{-1} (\mathbf L_1 \mathbf L_1^\top)) - \log \frac{\det(\mathbf L_1 \mathbf L_1^\top)}{\det(\mathbf L_2 \mathbf L_2^\top)} - d\right)\\
+    &amp;= \frac{1}{2}\left((\mathbf L_2^{-1} (\boldsymbol\mu_2 - \boldsymbol\mu_1))^\top (\mathbf L_2^{-1} (\boldsymbol\mu_2 - \boldsymbol\mu_1)) + \operatorname{tr}((\mathbf L_2^{-1} \mathbf L_1)^\top (\mathbf L_2^{-1} \mathbf L_1)) - 2\log\frac{\det\mathbf L_1}{\det\mathbf L_2} - d\right)\,.\\
+\end{aligned}\]
+
+<p>We have used the following facts:</p>
+
+<ul>
+  <li>the <a href="https://en.wikipedia.org/wiki/Trace_(linear_algebra)#Cyclic_property">cyclic property of trace</a>;</li>
+  <li>$\det \mathbf A = \det \mathbf A^\top$;</li>
+  <li>$\log\det (\mathbf A \mathbf B) = \log\det(\mathbf A) + \log\det(\mathbf B)$.</li>
+</ul>
+
+<p>It follows that:</p>
+
+\[D_\mathrm{KL}(p \parallel q) = \frac{1}{2}\big(\boldsymbol y^\top \boldsymbol y + \|\mathbf M\|_F^2 - 2 (\operatorname{tr}(\log \mathbf L_1) - \operatorname{tr}(\log \mathbf L_2)) - d\big)\,,\]
+
+<p>where $\mathbf L_2 \boldsymbol y = \boldsymbol\mu_2 - \boldsymbol\mu_1$, and $\mathbf L_2 \mathbf M = \mathbf L_1$.</p>
+
+<p>We have denoted:</p>
+
+<ul>
+  <li>$\|\cdot\|_F$ as the Frobenius norm of a matrix;</li>
+  <li>$\log \mathbf A$ as the elementwise logarithm of $\mathbf A$.</li>
+</ul>
+
+<p>We have used the following facts:</p>
+
+<ul>
+  <li>$\operatorname{tr}(\mathbf A^\top \mathbf A) = \|\mathbf A\|_F^2$;</li>
+  <li>$\log\det \mathbf L = \operatorname{tr}(\log \mathbf L)$ when $\mathbf L$ is a lower triangular matrix.</li>
+</ul>
+
+<h3 id="code">Code</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">distributions</span> <span class="k">as</span> <span class="n">D</span>
+
+
+<span class="k">def</span> <span class="nf">form_cholesky_tril_from_elements</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">scale_tril_elems</span><span class="p">):</span>
+    <span class="s">"""
+    Form the Cholesky lower triangular matrix from its elements.
+
+    Args:
+        d (int): The number of rows/columns in the square matrix.
+        scale_tril_elems (torch.Tensor): The Cholesky lower triangular
+            elements, of shape (batch_size, (1 + d) * d // 2).
+
+    Returns:
+        torch.Tensor: A tensor of shape (batch_size, d, d).
+    """</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">scale_tril_elems</span><span class="p">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">scale_tril_elems</span><span class="p">.</span><span class="n">device</span>
+    <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">tril_indices</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">l_mat</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">l_mat</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">scale_tril_elems</span>
+    <span class="n">l_mat_diag</span> <span class="o">=</span> <span class="n">l_mat</span><span class="p">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">dim1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">l_mat_diag</span><span class="p">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">l_mat_diag</span><span class="p">.</span><span class="n">exp</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">l_mat</span>
+
+
+<span class="n">d</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">5</span>
+
+
+<span class="k">def</span> <span class="nf">groundtruth</span><span class="p">(</span><span class="n">mean1</span><span class="p">,</span> <span class="n">scale_tril1</span><span class="p">,</span> <span class="n">mean2</span><span class="p">,</span> <span class="n">scale_tril2</span><span class="p">):</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">D</span><span class="p">.</span><span class="n">MultivariateNormal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">mean1</span><span class="p">,</span> <span class="n">scale_tril</span><span class="o">=</span><span class="n">scale_tril1</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">D</span><span class="p">.</span><span class="n">MultivariateNormal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">mean2</span><span class="p">,</span> <span class="n">scale_tril</span><span class="o">=</span><span class="n">scale_tril2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">D</span><span class="p">.</span><span class="n">kl_divergence</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">ours</span><span class="p">(</span><span class="n">mean1</span><span class="p">,</span> <span class="n">scale_tril1</span><span class="p">,</span> <span class="n">mean2</span><span class="p">,</span> <span class="n">scale_tril2</span><span class="p">):</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="n">solve_triangular</span><span class="p">(</span>
+        <span class="n">scale_tril2</span><span class="p">,</span> <span class="p">(</span><span class="n">mean2</span> <span class="o">-</span> <span class="n">mean1</span><span class="p">).</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">upper</span><span class="o">=</span><span class="bp">False</span><span class="p">).</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">y2</span> <span class="o">=</span> <span class="n">y</span><span class="p">.</span><span class="n">square</span><span class="p">().</span><span class="nb">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="n">scale_tril2</span><span class="p">,</span> <span class="n">scale_tril1</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">M2</span> <span class="o">=</span> <span class="n">M</span><span class="p">.</span><span class="n">square</span><span class="p">().</span><span class="n">flatten</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">).</span><span class="nb">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">y2</span> <span class="o">+</span> <span class="n">M2</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="n">scale_tril1</span><span class="p">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">dim1</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=-</span><span class="mi">1</span><span class="p">).</span><span class="n">log</span><span class="p">().</span><span class="nb">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">scale_tril2</span><span class="p">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">dim1</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=-</span><span class="mi">1</span><span class="p">).</span><span class="n">log</span><span class="p">().</span><span class="nb">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="n">d</span><span class="p">)</span>
+
+
+<span class="c1"># Randomize p and q's parameterization.
+</span><span class="n">mean1</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+<span class="n">mean2</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+<span class="n">scale_tril1</span> <span class="o">=</span> <span class="n">form_cholesky_tril_from_elements</span><span class="p">(</span>
+    <span class="n">d</span><span class="p">,</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">d</span><span class="p">)</span> <span class="o">*</span> <span class="n">d</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">scale_tril2</span> <span class="o">=</span> <span class="n">form_cholesky_tril_from_elements</span><span class="p">(</span>
+    <span class="n">d</span><span class="p">,</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">d</span><span class="p">)</span> <span class="o">*</span> <span class="n">d</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="c1"># Assert the correctness.
+</span><span class="k">assert</span> <span class="n">torch</span><span class="p">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">groundtruth</span><span class="p">(</span><span class="n">mean1</span><span class="p">,</span> <span class="n">scale_tril1</span><span class="p">,</span> <span class="n">mean2</span><span class="p">,</span> <span class="n">scale_tril2</span><span class="p">),</span>
+                      <span class="n">ours</span><span class="p">(</span><span class="n">mean1</span><span class="p">,</span> <span class="n">scale_tril1</span><span class="p">,</span> <span class="n">mean2</span><span class="p">,</span> <span class="n">scale_tril2</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>Profile our implementation:</p>
+
+<p><code class="language-plaintext highlighter-rouge">%timeit groundtruth(mean1, scale_tril1, mean2, scale_tril2)</code> (baseline):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>164 μs ± 178 ns per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">%timeit ours(mean1, scale_tril1, mean2, scale_tril2)</code> (our implementation):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>46.2 μs ± 71.6 ns per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
+</code></pre></div></div>]]></content><author><name></name></author><category term="math--prob" /><category term="dev--pytorch" /><summary type="html"><![CDATA[Abstract]]></summary></entry><entry><title type="html">vim/nvim 中文分词插件 jieba.vim</title><link href="https://kkew3.github.io/2024/11/10/jieba-vim.html" rel="alternate" type="text/html" title="vim/nvim 中文分词插件 jieba.vim" /><published>2024-11-10T06:53:06+00:00</published><updated>2024-11-10T06:53:06+00:00</updated><id>https://kkew3.github.io/2024/11/10/jieba-vim</id><content type="html" xml:base="https://kkew3.github.io/2024/11/10/jieba-vim.html"><![CDATA[<blockquote>
+  <p>jieba.vim，做最好的 Vim 中文分词插件。</p>
+</blockquote>
+
+<p>jieba.vim 正处于积极开发中，欢迎关注、Star ⭐️、下载试用<a href="https://github.com/kkew3/jieba.vim">最新进展</a>，欢迎在 <a href="https://github.com/kkew3/jieba.vim/issues">issue</a> 讨论并提意见建议。</p>
+
+<h2 id="vimnvim-中文编辑现状">Vim/Nvim 中文编辑现状</h2>
+
+<p><a href="https://www.vim.org/">Vim</a>/<a href="https://neovim.io/">Nvim</a> 的中文文本编辑体验不足是广为人知的问题。由于中文不用空格分隔词语，Vim 的原生 <a href="https://vimhelp.org/motion.txt.html#word-motions">word motion</a> 功能无法有效发挥作用，因此用户只能依赖基本的 h/l 键位逐字移动光标。作为一名常用 Vim 写作的人，我对这方面的不便深有体会，经过调研确定没有已存在的完善项目后，我于一年多前开始在业余时间开发 jieba.vim，旨在解决这个问题。</p>
+
+<h2 id="jiebavim-简介">jieba.vim 简介</h2>
+
+<p>jieba.vim 是一个基于 <a href="https://github.com/fxsjy/jieba">jieba</a> 的 Vim/Nvim 中文分词插件，通过增强 w/W/e/E/b/B/ge/gE 键位，使 Vim 能够按中文词语移动光标。jieba.vim 的<a href="https://github.com/kkew3/jieba.vim/tree/main">初版原型</a>使用 python3 开发，初步解决了按词移动光标的问题。虽然（可能）由于其过于缓慢的词典加载速度并没有获得什么关注，但是基于该原型的 lua 移植版 <a href="https://github.com/neo451/jieba.nvim">neo451/jieba.nvim</a> 在 Vim 中文编辑圈的小为人知还是证明了 jieba.vim 解决方案的有效性，给了我继续改进的动力。随后，我发布了 jieba.vim 的<a href="https://github.com/kkew3/jieba.vim/commit/7d03b0cc83dd21f32b0fcba027b191a7c93cd714">改进版</a>，解决了其速度问题，并于近一个月开始重写 jieba.vim 的核心逻辑，更严谨地确立其发展方向。</p>
+
+<h2 id="jiebavim-对自身的定位及路线图">jieba.vim 对自身的定位及路线图</h2>
+
+<p>Features 依重要性降序排序：</p>
+
+<ol>
+  <li>jieba.vim 应保持其与 Vim 的兼容性。经过增强的 w/W/e/E/b/B/ge/gE 键位在无中文 ASCII 文本上应与 Vim 原生行为<em>完全一致</em>，其中包括各种特殊情况（例如 <a href="https://vimhelp.org/change.txt.html#cw">cw</a>）。这需要通过大量测试，以及对单元测试的正确性验证（见 <a href="https://github.com/junegunn/vader.vim">junegunn/vader.vim</a>）予以保证。</li>
+  <li>jieba.vim 应具有较快的速度（包括词典加载速度、键位反应速度、词典懒加载），以确保良好的用户体验。</li>
+  <li>jieba.vim 应易于安装。通过发布预编译链接库，目前 jieba.vim 的<a href="https://github.com/kkew3/jieba.vim/releases/tag/v1.0.5">最新稳定版</a>已无需本地安装 Rust 并进行编译。</li>
+  <li>jieba.vim 应具有较广的功能覆盖，例如对自定义 Vim 选项 <a href="https://vimhelp.org/options.txt.html#%27iskeyword%27"><code class="language-plaintext highlighter-rouge">'iskeyword'</code></a>、<a href="https://vimhelp.org/options.txt.html#%27virtualedit%27"><code class="language-plaintext highlighter-rouge">'virtualedit'</code></a>、<a href="https://vimhelp.org/options.txt.html#%27encoding%27"><code class="language-plaintext highlighter-rouge">'encoding'</code></a> 的支持。</li>
+  <li>jieba.vim 应易于从 neovim 使用，针对 neovim 将尝试直接从 lua 链接 Rust 核心 crate，从而免除 lua 调用 python、python 再调用 Rust 的额外调用关系。</li>
+  <li>此外，对 word <a href="https://vimhelp.org/motion.txt.html#text-objects">text object</a> iw/iW/aw/aW 的支持也处于计划内。</li>
+</ol>
+
+<h2 id="jiebavim-分支一览">jieba.vim 分支一览</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>分支</th>
+      <th>简介</th>
+      <th>开发语言</th>
+      <th>许可</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>[初版原型](https://github.com/kkew3/jieba.vim/tree/main) (main)</td>
+      <td>normal 模式下按词移动光标完善，其余模式下有 bug。</td>
+      <td>python3</td>
+      <td>MIT</td>
+    </tr>
+    <tr>
+      <td>[改进版](https://github.com/kkew3/jieba.vim/commit/7d03b0cc83dd21f32b0fcba027b191a7c93cd714) (7d03b0cc)</td>
+      <td>normal 模式下按词移动光标完善，其余模式下有 bug，词典加载速度快 60%。</td>
+      <td>Rust + python3</td>
+      <td>MIT</td>
+    </tr>
+    <tr>
+      <td>[最新稳定版](https://github.com/kkew3/jieba.vim/releases/tag/v1.0.5) (v1.0.5)</td>
+      <td>目前已完成 normal/visual/operator-pending 模式下的 {count}w/W/e/E/b/B/ge/gE/. 键位，支持 [<code class="language-plaintext highlighter-rouge">'iskeyword'</code>](https://vimhelp.org/options.txt.html#%27iskeyword%27)，欢迎下载试用。</td>
+      <td>Rust + python3</td>
+      <td>Apache v2.0</td>
+    </tr>
+    <tr>
+      <td>[最新进展](https://github.com/kkew3/jieba.vim) (rust)</td>
+      <td>将尝试支持 lua。</td>
+      <td>Rust + python3</td>
+      <td>Apache v2.0</td>
+    </tr>
+  </tbody>
+</table>]]></content><author><name></name></author><category term="editor--vim" /><summary type="html"><![CDATA[jieba.vim，做最好的 Vim 中文分词插件。]]></summary></entry><entry><title type="html">Conditioning of the variational posterior in CVAE (Sohn, 2015)</title><link href="https://kkew3.github.io/2024/08/27/conditioning-of-cvae-variational-posterior.html" rel="alternate" type="text/html" title="Conditioning of the variational posterior in CVAE (Sohn, 2015)" /><published>2024-08-27T11:03:07+00:00</published><updated>2024-08-27T11:03:07+00:00</updated><id>https://kkew3.github.io/2024/08/27/conditioning-of-cvae-variational-posterior</id><content type="html" xml:base="https://kkew3.github.io/2024/08/27/conditioning-of-cvae-variational-posterior.html"><![CDATA[<h2 id="abstract">Abstract</h2>
+
+<p>This post explores alternative conditioning of the variational posterior $q$ in CVAE (<a href="https://papers.nips.cc/paper_files/paper/2015/hash/8d55a249e6baa5c06772297520da2051-Abstract.html">Sohn et al. 2015</a>), and concludes that the conditioning of $q$ on $y$ is important to predictive inference.</p>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>CVAE models the likelihood $p(y \mid x)$ as a continuous mixture of latent $z$:</p>
+
+<div id="eq-def"></div>
+
+\[p(y \mid x) = \int p_\theta(z \mid x) p_\theta(y \mid x,z)\,\mathrm dz\,. \tag{1}\]
+
+<p>Since (<a href="#eq-def">1</a>) is intractable, Sohn et al. instead optimize its evidence lower bound (ELBO):</p>
+
+\[\mathcal L_{\text{CVAE}}(x,y;\theta,\phi) = \mathbb E_q[\log p_\theta(y \mid x,z) - \log q_\phi(z \mid x,y)]\,. \tag{2}\]
+
+<p>Here, the variational posterior $q$ conditions on $x$ and $y$.
+At test time, the authors propose to use importance sampling leveraging the trained variational posterior:</p>
+
+<div id="eq-is"></div>
+
+\[p(y \mid x) \approx \frac{1}{S} \sum_{s=1}^S \frac{p_\theta(y \mid x,z_s) p_\theta(z_s \mid x)}{q_\phi(z_s \mid x,y)}\,, \tag{3}\]
+
+<p>where $z_s \sim q_\phi(z \mid x,y)$.</p>
+
+<p>What if $q$ conditions on $x$ only?
+This post explores this possibility, and reaches the conclusion that without conditioning on $y$, $q$ at optimum won’t ever attain the true posterior $p(z \mid x,y)$, and should not be otherwise better in terms of reducing the variance in importance sampling.</p>
+
+<h2 id="warm-up-proving-the-effecacy-of-importance-sampling">Warm up: proving the effecacy of importance sampling</h2>
+
+<p>We assume that infinite data is available for learning, and $q$ is from a flexible enough probability family.
+The data are drawn from the joint data distribution $p_D(x,y)$, where we have stressed with a subscript $D$.
+We assume that $x$ is continuous and $y$ is discrete.
+The goal is to maximize the expected ELBO in terms of $p_D(x,y)$.
+However, we assume that $p_\theta(y \mid x,z)$ won’t approaches to $p_D(y \mid x)$ whatever value $\theta$ picks.
+We will drop $\theta$ and $\phi$ below for brevity.</p>
+
+<p>We may easily pose this setup as a constrained maximization problem:
+$\max \mathbb E[\log p(y,z \mid x) - \log q(z \mid x,y)]$ subject to $q$ being a probability, where the expectation is taken with respect to $p_D(x,y) q(z \mid x,y)$.</p>
+
+<p>The Lagrangian is:</p>
+
+<div id="eq-lagrangian-q-xy"></div>
+
+\[\int \sum_y p_D(x,y) \int q(z \mid x,y) \log \frac{p(y,z \mid x)}{q(z \mid x,y)}\,\mathrm dz\,\mathrm dx + \int \sum_y \mu(x,y) \left(\int q(z \mid x,y)\,\mathrm dz - 1\right)\,\mathrm dx\,, \tag{4}\]
+
+<p>where $\mu(x,y)$ is the Lagrange multiplier.
+Now find the <a href="https://www.youtube.com/watch?v=6VvmMkAx5Jc&amp;t=982s">Gateaux derivative</a> and let it equal zero:</p>
+
+\[0 = p_D(x,y) (\log p(y,z \mid x) - (1 + \log q(z \mid x,y)) + \mu(x,y))\,.\]
+
+<p>Absorbing $p_D(x,y) &gt; 0$ and the constant 1 into $\mu(x,y)$ yields:</p>
+
+\[\log q(z \mid x,y) = \mu(x,y) + \log p(y,z \mid x)\,,\]
+
+<p>where $\mu(x,y) = -\log \int p(y,z \mid x)\,\mathrm dz = -\log p_D(y \mid x)$.
+It thus follows that, at optimum, $q(z \mid x,y) = p(z \mid x,y)$.
+Hence, when evaluating Equation (<a href="#eq-is">3</a>), at optimum, the right hand side equals the left hand side with zero variance.</p>
+
+<h2 id="conditioning-only-on-x-gives-worse-approximation">Conditioning only on x gives worse approximation</h2>
+
+<p>Following the same setup as the previous section, we start from the Lagrangian (<a href="#eq-lagrangian-q-xy">4</a>).
+Note that now we assume $q \triangleq q(z \mid x)$, and that the Lagrange multiplier is $\mu(x)$ instead of $\mu(x,y)$.
+Rearranging the terms:</p>
+
+\[\begin{multline}
+    \int p_D(x) \int q(z \mid x) \left(\sum_y p_D(y \mid x) \log p(y,z \mid x) - \log q(z \mid x)\right)\,\mathrm dz\,\mathrm dz \\
+    + \int \mu(x) \left(\int q(z \mid x)\,\mathrm dz - 1\right)\,\mathrm dx\,.
+\end{multline}\]
+
+<p>Let its Gateaux derivative with respect to $q$ equal zero:</p>
+
+\[0 = p_D(x) \left(\sum_y p_D(y \mid x) \log p(y,z \mid x) - (1 + \log q(z \mid x))\right) + \mu(x)\,.\]
+
+<p>Absorbing $p_D(x) &gt; 0$ and the constant 1 into $\mu(x)$ yields:</p>
+
+\[\log q(z \mid x) = \mu(x) + \sum_y p_D(y \mid x) \log p(z \mid x,y) - \mathbb H(p_D(y \mid x))\,,\]
+
+<p>where $\mathbb H(p_D(y \mid x)) = -\sum_y p_D(y \mid x) \log p_D(y \mid x)$ is the entropy.
+We see immediately that:</p>
+
+<div id="eq-main-result"></div>
+
+\[q(z \mid x) \propto \exp(\mathbb E_{p_D(y \mid x)}[\log p(z \mid x,y)])\,. \tag{5}\]
+
+<p>This means that when not conditioning on $y$, $q(z \mid x)$ can never achieve the true posterior $p(z \mid x,y)$, unless $\mathbb H(p_D(y \mid x)) = 0$, which is unlikely to occur.</p>]]></content><author><name></name></author><category term="math--prob" /><category term="ml--bayes" /><summary type="html"><![CDATA[Abstract]]></summary></entry><entry><title type="html">Effect of gamma in BN-VAE</title><link href="https://kkew3.github.io/2024/08/09/gamma-in-bn-vae.html" rel="alternate" type="text/html" title="Effect of gamma in BN-VAE" /><published>2024-08-09T11:00:44+00:00</published><updated>2024-08-09T11:00:44+00:00</updated><id>https://kkew3.github.io/2024/08/09/gamma-in-bn-vae</id><content type="html" xml:base="https://kkew3.github.io/2024/08/09/gamma-in-bn-vae.html"><![CDATA[<h2 id="abstract">Abstract</h2>
+
+<p>This post discusses the effect of $\gamma$ in BN-VAE (<a href="https://arxiv.org/abs/2004.12585">Zhu et al., 2020</a>).</p>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>BN-VAE (see more about it <a href="https://kexue.fm/archives/7381">here</a> (in Chinese)) attempts to solve KL vanishing problem (a.k.a. posterior collapse) in Gaussian-VAE by batch-normalizing the variational posterior mean, which casts a positive lower bound on the <a href="https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence">Kullback-Leibler divergence</a> term (over the dataset) in <a href="https://en.wikipedia.org/wiki/Evidence_lower_bound">ELBO</a>, thus avoiding KL vanishing problem.
+The batch normalization procedure includes a fixed hyperparameter $\gamma \ge 0$, which controls the lower bound of the KL; the larger $\gamma$, the larger the lower bound.
+When $\gamma=0$, KL vanishing occurs.</p>
+
+<p>Zhu et al. (2020) visualizes the distribution of the variational posterior mean when $\gamma$ equals 0.3 and 1.
+What will happen if $\gamma &gt; 1$?
+How does $\gamma &gt; 0$ solves the KL vanishing problem?
+We’ll explore these questions below.</p>
+
+<h2 id="gamma1-introduces-posterior-hole-problem">$\gamma&gt;1$ introduces posterior hole problem</h2>
+
+<p>Posterior hole problem happens when the aggregate variational posterior (a.k.a. average encoder distribution (<a href="https://approximateinference.org/2016/accepted/HoffmanJohnson2016.pdf">Hoffman &amp; Johnson, 2016</a>)) does not match the prior.
+When measured in KL divergence, this means:</p>
+
+\[D_{KL}(q_\phi(z) \parallel p(z)) &gt; 0\]
+
+<p>Here, $q_\phi(z) = \sum_{i=1}^N \frac{1}{N} q_\phi(z \mid x_i)$ where $N$ is the dataset size, is the aggregate variational posterior.</p>
+
+<p>In Gaussian-VAE, the variational posterior $q_\phi(z \mid x_i) = \mathcal N(z \mid \mu_i, \sigma_i^2)$, where $(\mu_i,\sigma_i^2)$ are typically computed by a neural network called the inference network (<a href="https://arxiv.org/pdf/1312.6114">Kingma &amp; Welling, 2013</a>) parameterized by $\phi$ given $x_i$; and $q_\phi(z \mid x_i)$ can usually be factorized into each dimension $j$ as $q_\phi(z \mid x_i) = \prod_{j=1}^d q_\phi(z_j \mid x_i)$, where each $q_\phi(z_j \mid x_i)$ is an univariate Gaussian parameterized by $(\mu_{ij}, \sigma_{ij}^2)$.
+Thus, the aggregate variational posterior is an $N$-mixture of Gaussians whose mean, at each dimension $j$, is $\bar\mu_j = \frac{1}{N}\sum_{i=1}^N \mu_{ij}$ and variance is $\bar\sigma_j^2 = \frac{1}{N}\sum_{i=1}^N \sigma_{ij}^2$.</p>
+
+<p>If $q_\phi$ is transformed according to BN-VAE, then $\bar\mu_j = \beta$ where $\beta$ is a learnable parameter.
+Furthermore, we have variance $\mathbb E_{q_\phi(z_j)}[z_j^2] - \mathbb E_{q_\phi(z_j)}[z_j]^2 = \gamma^2 + \bar\sigma^2$.
+If we follow Zhu et al. (2020) to use a standard Gaussian $\mathcal N(z \mid \mathbf 0, \mathbf I)$ as prior $p$, then according to <a href="https://kkew3.github.io/2024/08/09/lower-bound-of-kl-divergence-between-any-density-and-gaussian.html">this post</a>, $D_{KL}(q_\phi(z) \parallel p(z)$, at each dimension $j$, will be lower bounded by $D_{KL}(q_0(z_j) \parallel p(z_j))$ where $q_0(z_j) = \mathcal N(z_j \mid \beta, \gamma^2 + \bar\sigma^2)$, which is consistently greater than zero when $\gamma &gt; 1$ (<a href="https://arxiv.org/pdf/1901.03416">Razavi et al., 2019</a>).
+It follows immediately (<a href="https://statproofbook.github.io/P/kl-add">Soch, Joram, et al., 2024</a>), that $D_{KL}(q_\phi(z) \parallel p(z)) \ge \sum_{j=1}^d D_{KL}(q_0(z_i) \parallel p(z_i)) &gt; 0$.</p>
+
+<p><em>TO BE CONTINUED</em></p>]]></content><author><name></name></author><category term="ml--bayes" /><summary type="html"><![CDATA[Abstract]]></summary></entry><entry><title type="html">Lower bound of KL divergence between any density and Gaussian</title><link href="https://kkew3.github.io/2024/08/09/lower-bound-of-kl-divergence-between-any-density-and-gaussian.html" rel="alternate" type="text/html" title="Lower bound of KL divergence between any density and Gaussian" /><published>2024-08-09T09:03:39+00:00</published><updated>2024-08-09T09:03:39+00:00</updated><id>https://kkew3.github.io/2024/08/09/lower-bound-of-kl-divergence-between-any-density-and-gaussian</id><content type="html" xml:base="https://kkew3.github.io/2024/08/09/lower-bound-of-kl-divergence-between-any-density-and-gaussian.html"><![CDATA[<h2 id="abstract">Abstract</h2>
+
+<p>In this post, I explain how to derive a lower bound of the <a href="https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence">Kullback-Leibler divergence</a> between any density $q$, e.g. a Gaussian mixture, and a Gaussian $p$.</p>
+
+<h2 id="framework">Framework</h2>
+
+<p>We may cast the problem finding the lower bound to a constrained minimization problem:</p>
+
+<div id="eq-1"></div>
+
+\[\begin{aligned}
+    \min_{q'}\ &amp;D_{KL}(q' \parallel p)\\
+    \text{s.t. } &amp;\int_{\mathcal X} q'(x)\,\mathrm dx = 1\\
+                 &amp;\ldots \ \text{other constraints}
+\end{aligned}\tag{1}\]
+
+<p>where $\mathcal X$ is the support of $q’$, and we’ll fill in “other constraints” with what we know about the density $q$, like its mean and variance.
+The solution of Equation (<a href="#eq-1">1</a>) will be the lower bound we’re seeking for.</p>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Lagrange_multiplier">Lagrangian</a> would be:</p>
+
+\[L = \int_{\mathcal X} q'(x)\log \frac{q'(x)}{p(x)}\,\mathrm dx + \lambda_0 (\int_{\mathcal X} q'(x)\,\mathrm dx - 1) + \ldots \tag{2}\]
+
+<p>Taking the functional derivative of $L$ with respect to $q’$ and letting it equal zero yields:</p>
+
+\[\begin{aligned}
+    0 &amp;= 1 + \log q'(x) - \log p(x) + \lambda_0 + \ldots\\
+    \log q'(x) &amp;= -\lambda_0 - 1 + \log p(x) + \ldots\\
+    q'(x) &amp;= \exp(-\lambda_0 -1 + \log p(x) + \ldots)
+\end{aligned}\]
+
+<p>Finally, plugging $q’(x)$ back into the constraints and solve for the Lagrange multipliers $\lambda_0$, etc.</p>
+
+<h2 id="example">Example</h2>
+
+<p>In this simple example, we assume that $p(x) = \mathcal N(x \mid 0, 1)$ be a standard univariate Gaussian, and assume that $q$ and $p$ have the same support.
+Suppose also that we know the mean and variance of $q$ to be: $\mathbb E_q[x] = 0$, $\mathbb E_q[x^2] - \mathbb E_q[x]^2 = \mathbb E_q[x^2] = \sigma^2$.</p>
+
+<p>The Lagrangian is:</p>
+
+<div id="eq-3"></div>
+
+\[\require{enclose}
+L = \int_{-\infty}^\infty q'(x) \log \frac{q'(x)}{p(x)}\,\mathrm dx + \lambda_0 (\underbrace{\int_{-\infty}^\infty q'(x)\,\mathrm dx - 1}_{\substack{\enclose{circle}{1}}}) + \lambda_1 (\underbrace{\int_{-\infty}^\infty x^2 q'(x)\,\mathrm dx - \sigma^2}_{\substack{\enclose{circle}{2}}})\tag{3}\]
+
+<p>where we have encoded the mean and variance constraints into one term (see why <a href="https://michael-franke.github.io/intro-data-analysis/the-maximum-entropy-principle.html#example-2-derivation-of-maximum-entropy-pdf-with-given-mean-mu-and-variance-sigma2">here</a>).
+Taking the derivative and letting it equal zero yields:</p>
+
+<div id="eq-4"></div>
+
+\[\begin{align}
+    0 &amp;= 1 + \log q'(x) - \log p(x) + \lambda_0 + \lambda_1 x^2\\
+    \log q'(x) &amp;\stackrel{1}{=} -\lambda_0 - 1 - (\frac{1}{2} + \lambda_1) x^2\\
+    q'(x) &amp;= \exp(-\lambda_0 - 1 - (\frac{1}{2} + \lambda_1) x^2)\tag{4}\\
+\end{align}\]
+
+<p>where equal sign ‘$1$’ is because $\log p(x) = -\frac{1}{2}x^2 + C$, and the constant $C$ has been absorbed into $\lambda_0$.</p>
+
+<p>Plugging Equation (<a href="#eq-4">4</a>) back to <a href="#eq-3">⓵</a> and solving the integral yields:</p>
+
+<div id="eq-5.1"></div>
+
+\[\frac{\sqrt{\pi}\exp(-\lambda_0 - 1)}{\sqrt{\frac{1}{2} + \lambda_1}} = 1\tag{5.1}\]
+
+<p>Likewise, plugging (<a href="#eq-4">4</a>) back to <a href="#eq-3">⓶</a> and solving the integral yields:</p>
+
+<div id="eq-5.2"></div>
+
+\[\frac{\sqrt{\pi} \exp(-\lambda_0 - 1)}{2\sqrt{(\frac{1}{2} + \lambda_1)^3}} = \sigma^2\tag{5.2}\]
+
+<p>Solving Equations (<a href="#eq-5.1">5.1</a>, <a href="#eq-5.2">5.2</a>) gives:</p>
+
+<div id="eq-6"></div>
+
+\[\begin{cases}
+    \lambda_0 = -1 + \frac{1}{2} \log 2\pi\sigma^2\\
+    \lambda_1 = -\frac{1}{2} + \frac{1}{2\sigma^2}\\
+\end{cases}\tag{6}\]
+
+<p>Plugging Equation (<a href="#eq-6">6</a>) to Equation (<a href="#eq-4">4</a>), it’s immediate that</p>
+
+\[q'(x) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp(-\frac{x^2}{2\sigma^2})\]
+
+<p>i.e., a Gaussian $\mathcal N(x \mid 0, \sigma^2)$.
+Therefore, according to <a href="https://statproofbook.github.io/P/norm-kl">Soch, Joram, et al. (2024)</a>,</p>
+
+\[D_{KL}(q \parallel p) \ge \frac{1}{2}(\sigma^2 - \log\sigma^2 - 1)\]]]></content><author><name></name></author><category term="math--prob" /><summary type="html"><![CDATA[Abstract]]></summary></entry><entry><title type="html">Compute accuracy from F1 score</title><link href="https://kkew3.github.io/2024/07/06/compute-accuracy-from-f1-score.html" rel="alternate" type="text/html" title="Compute accuracy from F1 score" /><published>2024-07-06T01:51:59+00:00</published><updated>2024-07-06T01:51:59+00:00</updated><id>https://kkew3.github.io/2024/07/06/compute-accuracy-from-f1-score</id><content type="html" xml:base="https://kkew3.github.io/2024/07/06/compute-accuracy-from-f1-score.html"><![CDATA[<p>I encountered a similar problem today as the one in <a href="https://stackoverflow.com/questions/42041078/calculating-accuracy-from-precision-recall-f1-score-scikit-learn">this</a> post, where I wish to find the accuracy given F1 score only.
+F1 score is <a href="https://datascience.stackexchange.com/a/65342/153995">well suited</a> to my imbalanced classification problem, so I compute it during training; but I then find it difficult to interprete.
+There’s a surprising lack of relevant information when I searched the web.
+Luckily, it’s not a difficult task either.</p>
+
+<p>Since each F1 score corresponds to a range of accuracies, we may regard finding the accuracy given F1 score an optimization problem.
+The process consists of two steps: 1) find the minimum accuracy; 2) find the maximum accuracy. To find the maximum, we may reduce it to finding the <em>negative</em> of the minimum of the <em>negative</em> accuracy.
+Thus we will only handle step 1 below.</p>
+
+<p>Known constants:</p>
+
+<ul>
+  <li>$s_F$: the F1 score.</li>
+  <li>$r_P$ and $r_N$: the positive and negative class ratio.</li>
+</ul>
+
+<p>Variables:</p>
+
+<ul>
+  <li>$r_{TP}$, $r_{TN}$, $r_{FP}$, $r_{FN}$: the true positive, true negative, false positive and false negative ratio (i.e. divided by the total sample count).</li>
+</ul>
+
+<p>Objective:
+$s_A = r_{TP} + r_{TN}$.</p>
+
+<p>Constraints:</p>
+
+<ul>
+  <li>$r_{TP} \ge 0$, $r_{TN} \ge 0$, $r_{FP} \ge 0$, $r_{FN} \ge 0$.</li>
+  <li>$r_{TP} + r_{FN} = r_P$, $r_{TN} + r_{FP} = r_N$.</li>
+  <li>$\frac{2 \cdot r_{TP} / (r_{TP} + r_{FP}) \cdot r_{TP} / (r_{TP} + r_{FN})}{r_{TP} / (r_{TP} + r_{FP}) + r_{TP} / (r_{TP} + r_{FN})} = s_F$. The left hand side is just the F1 score formula.</li>
+</ul>
+
+<p>Python implementation:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># jax is not necessary, just that I don't want to spend time on finding
+# partial derivative of the F1 score with respect to true positive,
+# etc.
+</span><span class="kn">import</span> <span class="nn">jax</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">softmax</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span>
+
+<span class="c1"># Used to avoid divid-by-zero error.
+</span><span class="n">EPS</span> <span class="o">=</span> <span class="mf">1e-8</span>
+
+<span class="k">def</span> <span class="nf">f1_score_constraint</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f1_score</span><span class="p">):</span>
+    <span class="s">"""
+    :param x: the array (tp, fp, tn, fn)
+    :param f1_score: the known F1 score
+    """</span>
+    <span class="n">tp</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="n">fn</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">tp</span> <span class="o">/</span> <span class="p">(</span><span class="n">tp</span> <span class="o">+</span> <span class="n">fp</span><span class="p">)</span>
+    <span class="n">recall</span> <span class="o">=</span> <span class="n">tp</span> <span class="o">/</span> <span class="p">(</span><span class="n">tp</span> <span class="o">+</span> <span class="n">fn</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">precision</span> <span class="o">*</span> <span class="n">recall</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">precision</span> <span class="o">+</span> <span class="n">recall</span><span class="p">)</span> <span class="o">-</span> <span class="n">f1_score</span>
+
+
+<span class="k">def</span> <span class="nf">positive_sum_constraint</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n_positive</span><span class="p">):</span>
+    <span class="s">"""
+    :param x: the array (tp, fp, tn, fn)
+    :param n_positive: the known positive class ratio
+    """</span>
+    <span class="n">tp</span><span class="p">,</span> <span class="n">fn</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">tp</span> <span class="o">+</span> <span class="n">fn</span> <span class="o">-</span> <span class="n">n_positive</span>
+
+
+<span class="k">def</span> <span class="nf">negative_sum_constraint</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n_negative</span><span class="p">):</span>
+    <span class="s">"""
+    :param x: the array (tp, fp, tn, fn)
+    :param n_negative: the known negative class ratio
+    """</span>
+    <span class="n">tn</span><span class="p">,</span> <span class="n">fp</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">tn</span> <span class="o">+</span> <span class="n">fp</span> <span class="o">-</span> <span class="n">n_negative</span>
+
+
+<span class="k">def</span> <span class="nf">accuracy</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="s">"""
+    :param x: the array (tp, fp, tn, fn)
+    """</span>
+    <span class="n">tp</span><span class="p">,</span> <span class="n">tn</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">tp</span> <span class="o">+</span> <span class="n">tn</span>
+
+
+<span class="c1"># Ideally this should give a feasible solution. But in practice, I
+# find it works fine even if it's not feasible.
+</span><span class="k">def</span> <span class="nf">rand_init</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">softmax</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">find_min_accuracy_from_f1</span><span class="p">(</span><span class="n">f1_score</span><span class="p">,</span> <span class="n">n_positive</span><span class="p">,</span> <span class="n">n_negative</span><span class="p">):</span>
+    <span class="s">"""
+    :param f1_score: the known F1 socre
+    :param n_positive: the known positive class ratio
+    :param n_negative: the known negative class ratio
+    """</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
+        <span class="n">accuracy</span><span class="p">,</span>
+        <span class="n">rand_init</span><span class="p">(),</span>
+        <span class="n">method</span><span class="o">=</span><span class="s">'SLSQP'</span><span class="p">,</span>
+        <span class="n">jac</span><span class="o">=</span><span class="n">jax</span><span class="p">.</span><span class="n">grad</span><span class="p">(</span><span class="n">accuracy</span><span class="p">),</span>
+        <span class="n">bounds</span><span class="o">=</span><span class="p">[(</span><span class="n">EPS</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="n">EPS</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="n">EPS</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="n">EPS</span><span class="p">,</span> <span class="bp">None</span><span class="p">)],</span>
+        <span class="n">constraints</span><span class="o">=</span><span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s">'type'</span><span class="p">:</span> <span class="s">'eq'</span><span class="p">,</span>
+                <span class="s">'fun'</span><span class="p">:</span> <span class="n">f1_score_constraint</span><span class="p">,</span>
+                <span class="s">'jax'</span><span class="p">:</span> <span class="n">jax</span><span class="p">.</span><span class="n">grad</span><span class="p">(</span><span class="n">f1_score_constraint</span><span class="p">),</span>
+                <span class="s">'args'</span><span class="p">:</span> <span class="p">(</span><span class="n">f1_score</span><span class="p">,),</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s">'type'</span><span class="p">:</span> <span class="s">'eq'</span><span class="p">,</span>
+                <span class="s">'fun'</span><span class="p">:</span> <span class="n">positive_sum_constraint</span><span class="p">,</span>
+                <span class="s">'jac'</span><span class="p">:</span> <span class="n">jax</span><span class="p">.</span><span class="n">grad</span><span class="p">(</span><span class="n">positive_sum_constraint</span><span class="p">),</span>
+                <span class="s">'args'</span><span class="p">:</span> <span class="p">(</span><span class="n">n_positive</span><span class="p">,),</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s">'type'</span><span class="p">:</span> <span class="s">'eq'</span><span class="p">,</span>
+                <span class="s">'fun'</span><span class="p">:</span> <span class="n">negative_sum_constraint</span><span class="p">,</span>
+                <span class="s">'jac'</span><span class="p">:</span> <span class="n">jax</span><span class="p">.</span><span class="n">grad</span><span class="p">(</span><span class="n">negative_sum_constraint</span><span class="p">),</span>
+                <span class="s">'args'</span><span class="p">:</span> <span class="p">(</span><span class="n">n_negative</span><span class="p">,),</span>
+            <span class="p">},</span>
+        <span class="p">],</span>
+        <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s">'maxiter'</span><span class="p">:</span> <span class="mi">1000</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span><span class="p">.</span><span class="n">fun</span>
+</code></pre></div></div>
+
+<p>Calling the function <code class="language-plaintext highlighter-rouge">find_min_accuracy_from_f1</code> with data, we get the minimum possible accuracy given F1 score:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt;&gt;&gt; find_min_accuracy_from_f1(0.457, 0.044, 0.9559)
+0.8953
+</code></pre></div></div>]]></content><author><name></name></author><category term="ml" /><summary type="html"><![CDATA[I encountered a similar problem today as the one in this post, where I wish to find the accuracy given F1 score only. F1 score is well suited to my imbalanced classification problem, so I compute it during training; but I then find it difficult to interprete. There’s a surprising lack of relevant information when I searched the web. Luckily, it’s not a difficult task either.]]></summary></entry></feed>
