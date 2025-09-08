@@ -54,6 +54,7 @@ https://www.databricks.com/company/newsroom/press-releases/databricks-raising-se
 curl -so NEWS.md "https://r.jina.ai/$(cat NEWS_URL)"
 ```
 
+{:start="2"}
 2. [docling][docling]:
 
 首先新建 `run_docling.py`：
@@ -76,6 +77,7 @@ curl -fsSL "$(cat NEWS_URL)" \
     > NEWS.md
 ```
 
+{:start="3"}
 3. [html2obsidian][html2obsidian]:
 
 在 bash 使用如下：
