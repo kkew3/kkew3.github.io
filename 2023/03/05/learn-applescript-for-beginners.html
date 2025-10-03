@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Learn Applescript for Beginners | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="Learn Applescript for Beginners">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="My blogs and research reports.">
+<meta property="og:description" content="My blogs and research reports.">
+<link rel="canonical" href="https://kkew3.github.io/2023/03/05/learn-applescript-for-beginners.html">
+<meta property="og:url" content="https://kkew3.github.io/2023/03/05/learn-applescript-for-beginners.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2023-03-05T07:54:00+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Learn Applescript for Beginners">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2023-03-05T07:54:00+00:00","datePublished":"2023-03-05T07:54:00+00:00","description":"My blogs and research reports.","headline":"Learn Applescript for Beginners","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2023/03/05/learn-applescript-for-beginners.html"},"url":"https://kkew3.github.io/2023/03/05/learn-applescript-for-beginners.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Learn Applescript for Beginners</h1>
+    <span><a href="https://kkew3.github.io/tags/dev--applescript"><code class="highlighter-rouge"><nobr>dev/applescript</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2023-03-05T07:54:00+00:00" itemprop="datePublished">Mar 5, 2023 at 07:54:00
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <!-- TODO: proofread -->
+
+<blockquote>
+  <p><a href="https://www.youtube.com/playlist?list=PL5iB9WEZe2j04doUAKVxqxaCv3JJ8TxQr">youtube link</a></p>
+</blockquote>
+
+<blockquote>
+  <p>Good referential text:</p>
+
+  <ul>
+    <li><a href="https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html">AppleScript Language Guide</a></li>
+    <li><a href="https://applescriptlibrary.files.wordpress.com/2013/11/applescriptlanguageguide-2013.pdf">AppleScript Language Guide (PDF)</a></li>
+  </ul>
+</blockquote>
+
+<h2 id="script-editor">Script editor</h2>
+
+<p><code class="language-plaintext highlighter-rouge">log "message"</code> can be used to log messages that will be shown in “Messages” accessory pane at the bottom.</p>
+
+<h2 id="file-formats">File formats</h2>
+
+<ul>
+  <li>Text: save as plain text</li>
+  <li>Script: save as compiled library</li>
+  <li>Application: used to create applet;
+  If in code <code class="language-plaintext highlighter-rouge">on open(droppedFiles) ... end open</code> is written, then it becomes a dropplet, which allows drag-n-drop action on the created applet.</li>
+</ul>
+
+<h2 id="dictionaries">Dictionaries</h2>
+
+<p>Words inside square bracket are optional arguments.
+Words on the right of right arrow is what will be returned.
+What will be returned can be caught by setting it to <code class="language-plaintext highlighter-rouge">set variable to</code>.
+For example,</p>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">set</span><span class="w"> </span><span class="nv">myDoc</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nb">make</span><span class="w"> </span><span class="nb">new</span><span class="w"> </span><span class="na">document</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="variables">Variables</h2>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">on</span> <span class="nb">run</span><span class="w">
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">theName</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="s2">"Jill"</span><span class="w">
+    </span><span class="nb">log</span><span class="w"> </span><span class="nv">theName</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nb">run</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="scope-of-variable">Scope of variable</h3>
+
+<p>By default within current handler, e.g. <code class="language-plaintext highlighter-rouge">on run</code> handler, <code class="language-plaintext highlighter-rouge">on sub_handler()</code> handler (subroutine).
+However, if claiming a variable as property at the top of script:</p>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">property</span><span class="w"> </span><span class="nv">theName</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">null</span><span class="w">
+</span></code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">theName</code> will become a global variable.</p>
+
+<h2 id="data-types">Data types</h2>
+
+<ul>
+  <li>number (integer or real) <code class="language-plaintext highlighter-rouge">set x to 23.25</code>
+</li>
+  <li>string: <code class="language-plaintext highlighter-rouge">set x to "23.25"</code>; but <code class="language-plaintext highlighter-rouge">set x to "23.25" as number</code> cast <code class="language-plaintext highlighter-rouge">x</code> again to a number</li>
+  <li>date: <code class="language-plaintext highlighter-rouge">set x to date "3/5/2023"</code> means set it to 2023-03-05</li>
+  <li>list: <code class="language-plaintext highlighter-rouge">set x to {"item1", "item2", "item3"}</code>. The list may comprise of heterogeneous types</li>
+  <li>record (dictionary): <code class="language-plaintext highlighter-rouge">set x to {keyA: "valueA", keyB: valueB}</code>
+</li>
+</ul>
+
+<p>Examples:</p>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">set</span><span class="w"> </span><span class="nv">var1</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="mf">22.5</span><span class="w">
+</span><span class="k">set</span><span class="w"> </span><span class="nv">var2</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="mi">2</span><span class="w">
+</span><span class="k">set</span><span class="w"> </span><span class="nv">theResult</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">var1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nv">var2</span><span class="w">  </span><span class="c1"># may be +, -, *, /, mod</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">set</span><span class="w"> </span><span class="nv">var1</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="s2">"hello"</span><span class="w">
+</span><span class="k">set</span><span class="w"> </span><span class="nv">var2</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="s2">"world"</span><span class="w">
+</span><span class="k">set</span><span class="w"> </span><span class="nv">theResult</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">var1</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nb">space</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nv">var2</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="s2">"!"</span><span class="w">  </span><span class="c1"># string concatenation</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">set</span><span class="w"> </span><span class="nv">var1</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">date</span><span class="w"> </span><span class="s2">"12/22/2021"</span><span class="w">
+</span><span class="k">set</span><span class="w"> </span><span class="nv">var2</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">date</span><span class="w"> </span><span class="s2">"12/24/2021"</span><span class="w">
+</span><span class="k">set</span><span class="w"> </span><span class="nv">theResult</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">var1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">days</span><span class="p">)</span><span class="w">  </span><span class="c1"># may be days, hours, etc</span><span class="w">
+</span><span class="k">set</span><span class="w"> </span><span class="nv">theResult</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nb">year</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">var1</span><span class="w">  </span><span class="c1"># may be year of, month of, day of, etc</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">set</span><span class="w"> </span><span class="nv">var1</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="p">{</span><span class="s2">"a"</span><span class="p">,</span><span class="w"> </span><span class="mf">23.9</span><span class="p">,</span><span class="w"> </span><span class="s2">"c"</span><span class="p">}</span><span class="w">
+</span><span class="k">set</span><span class="w"> </span><span class="nv">var2</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nb">item</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">var1</span><span class="w"> </span><span class="k">as </span><span class="nc">string</span><span class="w">  </span><span class="c1"># get "23.9", indexed from 1</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">set</span><span class="w"> </span><span class="nv">var1</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="p">{</span><span class="nv">FirstName</span><span class="p">:</span><span class="w"> </span><span class="s2">"Jon"</span><span class="p">,</span><span class="w"> </span><span class="nv">LastName</span><span class="p">:</span><span class="w"> </span><span class="s2">"Voight"</span><span class="p">}</span><span class="w">
+</span><span class="k">set</span><span class="w"> </span><span class="nv">theResult</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">FirstName</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">var1</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nb">space</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nv">LastName</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">var1</span><span class="w">
+
+</span><span class="c1"># First and Last are reserved words, to use them as keys, surround</span><span class="w">
+</span><span class="c1"># with pipes (`|`), e.g.:</span><span class="w">
+</span><span class="k">set</span><span class="w"> </span><span class="nv">var1</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="p">{</span><span class="err">|</span><span class="nv">First</span><span class="err">|</span><span class="p">:</span><span class="w"> </span><span class="s2">"Jon"</span><span class="p">,</span><span class="w"> </span><span class="err">|</span><span class="nv">Last</span><span class="err">|</span><span class="p">:</span><span class="w"> </span><span class="s2">"Voight"</span><span class="p">}</span><span class="w">
+</span><span class="k">set</span><span class="w"> </span><span class="nv">theResult</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="err">|</span><span class="nv">First</span><span class="err">|</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">var1</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nb">space</span><span class="w"> </span><span class="err">|</span><span class="nv">Last</span><span class="err">|</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">var2</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="first-script">First script</h2>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">on</span> <span class="nb">run</span><span class="w">  </span><span class="c1"># explicit on run handler, responding to double clicking</span><span class="w">
+    </span><span class="nb">delay</span><span class="w"> </span><span class="mi">2</span><span class="w">  </span><span class="c1"># delay for 2 seconds</span><span class="w">
+    </span><span class="nb">activate</span><span class="w">  </span><span class="c1"># activate the script</span><span class="w">
+    </span><span class="nb">display dialog</span><span class="w"> </span><span class="s2">"Hello World!"</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nb">run</span><span class="w">
+
+</span><span class="k">on</span> <span class="nb">open</span><span class="w"> </span><span class="p">(</span><span class="nv">theFiles</span><span class="p">)</span><span class="w">  </span><span class="c1"># on open handler, responding to drag-n-drop</span><span class="w">
+    </span><span class="k">repeat</span><span class="w"> </span><span class="nv">with</span><span class="w"> </span><span class="nv">aFile</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">theFiles</span><span class="w">
+        </span><span class="k">set</span><span class="w"> </span><span class="nv">myText</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span><span class="nv">file</span><span class="w"> </span><span class="nv">aFiles</span><span class="w">
+        </span><span class="nb">display dialog</span><span class="w"> </span><span class="nv">myText</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">repeat</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nb">open</span><span class="w">
+
+</span><span class="c1"># to use on idle handler, save it with "Stay open after run handler"</span><span class="w">
+</span><span class="k">on</span> <span class="nv">idle</span><span class="w">
+    </span><span class="nb">activate</span><span class="w">
+    </span><span class="nb">display dialog</span><span class="w"> </span><span class="s2">"Join us soon"</span><span class="w">
+    </span><span class="nb">return</span><span class="w"> </span><span class="mi">3</span><span class="w">  </span><span class="c1"># rerun this block 3 seconds later until manualy quit</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nv">idle</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="commenting">Commenting</h2>
+
+<p>Block comment:</p>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">(*</span><span class="w">
+    </span><span class="nv">Version</span><span class="w"> </span><span class="nv">History</span><span class="w">
+    </span><span class="nv">This</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="nb">the</span><span class="w"> </span><span class="nb">first</span><span class="w"> </span><span class="nv">build</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="k">my</span><span class="w"> </span><span class="nv">script</span><span class="w">
+</span><span class="o">*</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>in line comment: led by <code class="language-plaintext highlighter-rouge">--</code> or <code class="language-plaintext highlighter-rouge">#</code></p>
+
+<h2 id="repeat-loops">Repeat loops</h2>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">on</span> <span class="nb">run</span><span class="w">
+    </span><span class="k">repeat</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="k">times</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">repeat</span><span class="w">
+
+    </span><span class="k">repeat</span><span class="w"> </span><span class="nv">with</span><span class="w"> </span><span class="nv">i</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="mi">3</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">repeat</span><span class="w">
+
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">myList</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="p">{</span><span class="s2">"Jason"</span><span class="p">,</span><span class="w"> </span><span class="s2">"Joan"</span><span class="p">,</span><span class="w"> </span><span class="s2">"Jack"</span><span class="p">}</span><span class="w">
+    </span><span class="k">repeat</span><span class="w"> </span><span class="nv">with</span><span class="w"> </span><span class="nv">anItem</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">myList</span><span class="w">
+        </span><span class="nb">display dialog</span><span class="w"> </span><span class="s2">"Hello "</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nv">anItem</span><span class="w"> </span><span class="k">as </span><span class="nc">string</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">repeat</span><span class="w">
+
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">test</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nb">true</span><span class="w">
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">i</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="mi">1</span><span class="w">
+    </span><span class="k">repeat</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="nv">test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="w">
+        </span><span class="k">if</span><span class="w"> </span><span class="nv">i</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="k">then</span><span class="w">
+            </span><span class="k">set</span><span class="w"> </span><span class="nv">test</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nb">false</span><span class="w">
+        </span><span class="k">end</span><span class="w"> </span><span class="k">if</span><span class="w">
+        </span><span class="k">set</span><span class="w"> </span><span class="nv">i</span><span class="w"> </span><span class="nv">tto</span><span class="w"> </span><span class="nv">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">repeat</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nb">run</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Use <code class="language-plaintext highlighter-rouge">exit repeat</code> to break out of <code class="language-plaintext highlighter-rouge">repeat</code> earlier.</p>
+
+<h2 id="conditionals">Conditionals</h2>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">on</span> <span class="nb">run</span><span class="w">
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">x</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="mi">6</span><span class="w">
+    </span><span class="k">if</span><span class="w"> </span><span class="nv">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">6</span><span class="w"> </span><span class="k">then</span><span class="w">
+        </span><span class="nb">display dialog</span><span class="w"> </span><span class="s2">"x is 6"</span><span class="w">
+    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="k">then</span><span class="w">
+        </span><span class="nb">display dialog</span><span class="w"> </span><span class="s2">"x is 5"</span><span class="w">
+    </span><span class="k">else</span><span class="w">
+        </span><span class="nb">display dialog</span><span class="w"> </span><span class="s2">"x is neither 5 nor 6"</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">if</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nb">run</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="error-handling">Error handling</h2>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">on</span> <span class="nb">run</span><span class="w">
+    </span><span class="k">try</span><span class="w">  </span><span class="c1"># ignore quietly errors and break out of try block</span><span class="w">
+        </span><span class="k">set</span><span class="w"> </span><span class="nv">myDemo</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="s2">"Hello"</span><span class="w">
+        </span><span class="nb">display dialog</span><span class="w"> </span><span class="nv">myTest</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">try</span><span class="w">
+
+    </span><span class="k">try</span><span class="w">
+        </span><span class="nb">display dialog</span><span class="w"> </span><span class="nv">myTest</span><span class="w">
+    </span><span class="nb">on</span><span class="w"> </span><span class="k">error</span><span class="w"> </span><span class="nv">errName</span><span class="w">
+        </span><span class="nb">display dialog</span><span class="w"> </span><span class="nv">errName</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">try</span><span class="w">
+
+    </span><span class="k">try</span><span class="w">
+        </span><span class="k">if</span><span class="w"> </span><span class="nv">myDemo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Hello"</span><span class="w"> </span><span class="k">then</span><span class="w">
+            </span><span class="c1"># this will raise error "message" with errName assigned "message"</span><span class="w">
+            </span><span class="k">error</span><span class="w"> </span><span class="s2">"message"</span><span class="w">
+            </span><span class="c1"># or phrased as</span><span class="w">
+            </span><span class="c1"># error "message" number -1000</span><span class="w">
+        </span><span class="k">end</span><span class="w"> </span><span class="k">if</span><span class="w">
+    </span><span class="nb">on</span><span class="w"> </span><span class="k">error</span><span class="w"> </span><span class="nv">errName</span><span class="w"> </span><span class="nv">number</span><span class="w"> </span><span class="nv">n</span><span class="w">
+        </span><span class="nb">display dialog</span><span class="w"> </span><span class="nv">errName</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nb">return</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="s2">"with number "</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nv">n</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">try</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nb">run</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="aias-hfs-and-posix">Aias, HFS and POSIX</h2>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">on</span> <span class="nb">run</span><span class="w">
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">posixPath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="s2">"/Users/user/Desktop/name.jpg"</span><span class="w">
+
+    </span><span class="c1"># converts a POSIX path to an HFS file reference</span><span class="w">
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">hfsFilePathRef</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">posix</span><span class="w"> </span><span class="nv">file</span><span class="w"> </span><span class="nv">posixPath</span><span class="w">
+
+    </span><span class="c1"># converts a POSIX path to an HFS file path</span><span class="w">
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">hfsFilePath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">posix</span><span class="w"> </span><span class="nv">file</span><span class="w"> </span><span class="nv">posixPath</span><span class="w"> </span><span class="k">as </span><span class="nc">string</span><span class="w">
+
+    </span><span class="c1"># cannot convert POSIX path to alias directly</span><span class="w">
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">aliasExample</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">hfsPath</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nv">alias</span><span class="w">
+
+    </span><span class="c1"># convert an HFS path to a POSIX path</span><span class="w">
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">backToPosix</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">posix</span><span class="w"> </span><span class="na">path</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">hfsFilePath</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nb">run</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="handlers-aka-functions">Handlers (aka functions)</h2>
+
+<p>A handler is a collection of applescript statements that you give a descriptive name.</p>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">on</span> <span class="nb">run</span><span class="w">
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">theResult</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">doMath</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="s2">"+"</span><span class="p">)</span><span class="w">
+    </span><span class="nb">log</span><span class="w"> </span><span class="nv">theResult</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nb">run</span><span class="w">
+
+</span><span class="k">on</span> <span class="nv">doMath</span><span class="p">(</span><span class="nv">num1</span><span class="p">,</span><span class="w"> </span><span class="nv">num2</span><span class="p">,</span><span class="w"> </span><span class="nv">mathFunc</span><span class="p">)</span><span class="w">
+    </span><span class="k">try</span><span class="w">
+	    </span><span class="k">if</span><span class="w"> </span><span class="nv">mathFunc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"+"</span><span class="w"> </span><span class="k">then</span><span class="w">
+	        </span><span class="nb">return</span><span class="w"> </span><span class="nv">num1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nv">num2</span><span class="w">
+	    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">mathFunc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"-"</span><span class="w"> </span><span class="k">then</span><span class="w">
+	        </span><span class="nb">return</span><span class="w"> </span><span class="nv">num1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">num2</span><span class="w">
+	    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">mathFunc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"*"</span><span class="w"> </span><span class="k">then</span><span class="w">
+	        </span><span class="nb">return</span><span class="w"> </span><span class="nv">num1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nv">num2</span><span class="w">
+	    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">mathFunc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"/"</span><span class="w"> </span><span class="k">then</span><span class="w">
+	        </span><span class="nb">return</span><span class="w"> </span><span class="nv">num1</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nv">num2</span><span class="w">
+	    </span><span class="k">else</span><span class="w">
+	        </span><span class="k">error</span><span class="w"> </span><span class="s2">"You must supply a proper math function"</span><span class="w">
+	</span><span class="nb">on</span><span class="w"> </span><span class="k">error</span><span class="w"> </span><span class="nv">e</span><span class="w">
+	    </span><span class="nb">activate</span><span class="w">
+	    </span><span class="nb">display dialog</span><span class="w"> </span><span class="p">(</span><span class="nv">e</span><span class="w"> </span><span class="k">as </span><span class="nc">string</span><span class="p">)</span><span class="w"> </span><span class="nv">giving</span><span class="w"> </span><span class="nv">up</span><span class="w"> </span><span class="nb">after</span><span class="w"> </span><span class="mi">8</span><span class="w">
+	</span><span class="k">end</span><span class="w"> </span><span class="k">try</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nv">doMath</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Note that <code class="language-plaintext highlighter-rouge">giving up after N</code> means the dialog will disappear itself if not clicking the dialog button after N seconds.</p>
+
+<p>Within <code class="language-plaintext highlighter-rouge">tell application</code> block, be sure to call custom handler with <code class="language-plaintext highlighter-rouge">my</code> keyword.
+For example,</p>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">tell</span><span class="w"> </span><span class="nb">application</span><span class="w"> </span><span class="s2">"Numbers"</span><span class="w">
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">theResult</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="k">my</span><span class="w"> </span><span class="nv">doMath</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="s2">"-"</span><span class="p">)</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="k">tell</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="quit-handler">Quit handler</h2>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">on</span> <span class="nb">run</span><span class="w">
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">someCondition</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nb">false</span><span class="w">
+    </span><span class="k">if</span><span class="w"> </span><span class="nv">someCondition</span><span class="w"> </span><span class="k">then</span><span class="w">
+        </span><span class="c1"># tell the script to quit;</span><span class="w">
+		</span><span class="c1"># this will trigger the `on quit` handler if present</span><span class="w">
+        </span><span class="nb">quit</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">if</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nb">run</span><span class="w">
+
+</span><span class="k">on</span> <span class="nb">quit</span><span class="w">
+    </span><span class="c1"># write cleanup actions your script should run before quitting</span><span class="w">
+    </span><span class="nb">activate</span><span class="w">
+    </span><span class="nb">display dialog</span><span class="w"> </span><span class="s2">"I quit"</span><span class="w"> </span><span class="nv">giving</span><span class="w"> </span><span class="nv">up</span><span class="w"> </span><span class="nb">after</span><span class="w"> </span><span class="mi">4</span><span class="w">
+    </span><span class="c1"># this will quit current script immediately; without this statement</span><span class="w">
+	</span><span class="c1"># previous `quit` statement will be caught by `on quit` block and</span><span class="w">
+	</span><span class="c1"># quit won't be performed</span><span class="w">
+    </span><span class="k">continue</span><span class="w"> </span><span class="nb">quit</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nb">quit</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="case-study-most-recent-modified-file-from-a-folder">Case study: most recent modified file from a folder</h2>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">on</span> <span class="nb">run</span><span class="w">
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">thePath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="s2">"/Users/user/Desktop/folder"</span><span class="w">
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">newestFile</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">getNewestFile</span><span class="p">(</span><span class="nv">thePath</span><span class="p">)</span><span class="w">
+    </span><span class="nb">return</span><span class="w"> </span><span class="nv">newestFile</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nb">run</span><span class="w">
+
+</span><span class="k">on</span> <span class="nv">getNewestFile</span><span class="p">(</span><span class="nv">thePath</span><span class="p">)</span><span class="w">
+    </span><span class="k">try</span><span class="w">
+        </span><span class="k">set</span><span class="w"> </span><span class="nv">posixPath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="k">my</span><span class="w"> </span><span class="nv">convertPathTo</span><span class="p">(</span><span class="nv">thePath</span><span class="p">,</span><span class="w"> </span><span class="s2">"POSIX"</span><span class="p">)</span><span class="w">
+        </span><span class="k">set</span><span class="w"> </span><span class="nv">theFile</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nb">do shell script</span><span class="w"> </span><span class="s2">"ls -tp "</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nb">quoted form</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">posixPath</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="s2">" | grep -Ev '/' | head -n1"</span><span class="w">
+        </span><span class="k">if</span><span class="w"> </span><span class="nv">theFile</span><span class="w"> </span><span class="ow">is not</span><span class="w"> </span><span class="ow">equal to</span><span class="w"> </span><span class="s2">""</span><span class="w"> </span><span class="k">then</span><span class="w">
+            </span><span class="k">set</span><span class="w"> </span><span class="nv">theFile</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">posixPath</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="s2">"/"</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nv">theFile</span><span class="w">
+        </span><span class="k">end</span><span class="w"> </span><span class="k">if</span><span class="w">
+        </span><span class="nb">return</span><span class="w"> </span><span class="nv">theFile</span><span class="w">
+    </span><span class="nb">on</span><span class="w"> </span><span class="k">error</span><span class="w"> </span><span class="nv">e</span><span class="w">
+        </span><span class="nb">return</span><span class="w"> </span><span class="s2">""</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">try</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nv">getNewestFile</span><span class="w">
+
+</span><span class="k">on</span> <span class="nv">convertPathTo</span><span class="p">(</span><span class="nv">inputPath</span><span class="p">,</span><span class="w"> </span><span class="nv">requestedForm</span><span class="p">)</span><span class="w">
+    </span><span class="k">try</span><span class="w">
+        </span><span class="k">set</span><span class="w"> </span><span class="nv">standardPosixPath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">POSIX</span><span class="w"> </span><span class="na">path</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">inputPath</span><span class="w"> </span><span class="k">as </span><span class="nc">string</span><span class="w">
+        </span><span class="k">if</span><span class="w"> </span><span class="nv">requestedForm</span><span class="w"> </span><span class="ow">contains</span><span class="w"> </span><span class="s2">"posix"</span><span class="w"> </span><span class="k">then</span><span class="w">
+            </span><span class="k">set</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">POSIX</span><span class="w"> </span><span class="na">path</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">standardPosixPath</span><span class="w"> </span><span class="k">as </span><span class="nc">string</span><span class="w">
+            </span><span class="k">if</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="ow">ends with</span><span class="w"> </span><span class="s2">"/"</span><span class="w"> </span><span class="k">then</span><span class="w">
+                </span><span class="k">set</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nb">character</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="nb">thru</span><span class="w"> </span><span class="o">-</span><span class="mi">2</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="k">as </span><span class="nc">string</span><span class="w">
+            </span><span class="k">end</span><span class="w"> </span><span class="k">if</span><span class="w">
+        </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">requestedForm</span><span class="w"> </span><span class="ow">contains</span><span class="w"> </span><span class="s2">"alias"</span><span class="w"> </span><span class="k">then</span><span class="w">
+            </span><span class="k">set</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">POSIX</span><span class="w"> </span><span class="nv">file</span><span class="w"> </span><span class="p">(</span><span class="nv">standardPosixPath</span><span class="p">)</span><span class="w"> </span><span class="k">as </span><span class="nc">string</span><span class="w">
+            </span><span class="k">try</span><span class="w">
+                </span><span class="k">set</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nv">alias</span><span class="w">
+            </span><span class="nb">on</span><span class="w"> </span><span class="k">error</span><span class="w">
+                </span><span class="k">error</span><span class="w"> </span><span class="s2">"The file \""</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="s2">"\" doesn't exist and can't be returned as \"alias\""</span><span class="w">
+            </span><span class="k">end</span><span class="w"> </span><span class="k">try</span><span class="w">
+        </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">requestedForm</span><span class="w"> </span><span class="ow">contains</span><span class="w"> </span><span class="s2">"hfs"</span><span class="w"> </span><span class="k">then</span><span class="w">
+            </span><span class="k">set</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">POSIX</span><span class="w"> </span><span class="nv">file</span><span class="w"> </span><span class="p">(</span><span class="nv">standardPosixPath</span><span class="p">)</span><span class="w"> </span><span class="k">as </span><span class="nc">string</span><span class="w">
+        </span><span class="k">else</span><span class="w">
+            </span><span class="k">error</span><span class="w"> </span><span class="s2">"Requested path transformation type was an unexpected type"</span><span class="w">
+        </span><span class="k">end</span><span class="w"> </span><span class="k">if</span><span class="w">
+        </span><span class="nb">return</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w">
+    </span><span class="nb">on</span><span class="w"> </span><span class="k">error</span><span class="w"> </span><span class="nv">e</span><span class="w">
+        </span><span class="nb">return</span><span class="w"> </span><span class="nb">false</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">try</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nv">convertPathTo</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="case-study-automatically-scale-images">Case study: automatically scale images</h2>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">on</span> <span class="nb">run</span><span class="w">
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">filePath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="s2">"/Users/user/Desktop/test.png"</span><span class="w">
+    </span><span class="nv">resizeImageWidth</span><span class="p">(</span><span class="nv">fielPath</span><span class="p">,</span><span class="w"> </span><span class="mi">450</span><span class="p">)</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nb">run</span><span class="w">
+
+</span><span class="k">on</span> <span class="nv">resizeImageWidth</span><span class="p">(</span><span class="nv">filePath</span><span class="p">,</span><span class="w"> </span><span class="nv">pxls</span><span class="p">)</span><span class="w">
+    </span><span class="k">try</span><span class="w">
+        </span><span class="nb">do shell script</span><span class="w"> </span><span class="s2">"sips --resampleWidth "</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nv">pxls</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nb">space</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nb">quoted form</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">filePath</span><span class="w">
+        </span><span class="nb">return</span><span class="w"> </span><span class="nb">true</span><span class="w">
+    </span><span class="nb">on</span><span class="w"> </span><span class="k">error</span><span class="w"> </span><span class="nv">e</span><span class="w">
+        </span><span class="c1"># TODO do something with the error</span><span class="w">
+        </span><span class="nb">return</span><span class="w"> </span><span class="nb">false</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">try</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nv">resizeImageWidth</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="case-study-simple-hot-folder-creation">Case study: simple hot folder creation</h2>
+
+<p>A hot folder is a folder where a script monitor whatever is drag-n-dropped to that folder and perform actions on the object.</p>
+
+<div class="language-applescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">on</span> <span class="nb">run</span><span class="w">
+    </span><span class="c1"># any startup activities required to run this script can be done here</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nb">run</span><span class="w">
+
+</span><span class="k">on</span> <span class="nv">idle</span><span class="w">
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">input</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="s2">"/Users/user/Desktop/Hot Folder"</span><span class="w">
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">output</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="s2">"/Users/user/Desktop/Results"</span><span class="w">
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">errors</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="s2">"/Users/user/Desktop/Errors"</span><span class="w">
+
+    </span><span class="k">set</span><span class="w"> </span><span class="nv">filePaths</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">getFiles</span><span class="p">(</span><span class="nv">input</span><span class="p">)</span><span class="w">
+    </span><span class="k">if</span><span class="w"> </span><span class="nv">filePaths</span><span class="w"> </span><span class="ow">is not</span><span class="w"> </span><span class="ow">equal to</span><span class="w"> </span><span class="p">{}</span><span class="w"> </span><span class="k">then</span><span class="w">
+        </span><span class="k">repeat</span><span class="w"> </span><span class="nv">with</span><span class="w"> </span><span class="nv">filePath</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">filePaths</span><span class="w">
+            </span><span class="k">if</span><span class="w"> </span><span class="nv">resizeImageWidth</span><span class="p">(</span><span class="nv">filePath</span><span class="w"> </span><span class="k">as </span><span class="nc">string</span><span class="p">,</span><span class="w"> </span><span class="nv">output</span><span class="p">,</span><span class="w"> </span><span class="mi">450</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w">
+                </span><span class="nv">removeFile</span><span class="p">(</span><span class="nv">filePath</span><span class="w"> </span><span class="k">as </span><span class="nc">string</span><span class="p">)</span><span class="w">
+            </span><span class="k">else</span><span class="w">
+                </span><span class="nb">do shell script</span><span class="w"> </span><span class="s2">"mv -f "</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nb">quoted form</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">filePaht</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nb">space</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nb">quoted form</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">errors</span><span class="w">
+            </span><span class="k">end</span><span class="w"> </span><span class="k">if</span><span class="w">
+        </span><span class="k">end</span><span class="w"> </span><span class="k">repeat</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">if</span><span class="w">
+    </span><span class="nb">return</span><span class="w"> </span><span class="mi">5</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nv">idle</span><span class="w">
+
+</span><span class="k">on</span> <span class="nv">convertPathTo</span><span class="p">(</span><span class="nv">inputPath</span><span class="p">,</span><span class="w"> </span><span class="nv">requestedForm</span><span class="p">)</span><span class="w">
+    </span><span class="k">try</span><span class="w">
+        </span><span class="k">set</span><span class="w"> </span><span class="nv">standardPosixPath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">POSIX</span><span class="w"> </span><span class="na">path</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">inputPath</span><span class="w"> </span><span class="k">as </span><span class="nc">string</span><span class="w">
+        </span><span class="k">if</span><span class="w"> </span><span class="nv">requestedForm</span><span class="w"> </span><span class="ow">contains</span><span class="w"> </span><span class="s2">"posix"</span><span class="w"> </span><span class="k">then</span><span class="w">
+            </span><span class="k">set</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">POSIX</span><span class="w"> </span><span class="na">path</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">standardPosixPath</span><span class="w"> </span><span class="k">as </span><span class="nc">string</span><span class="w">
+            </span><span class="k">if</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="ow">ends with</span><span class="w"> </span><span class="s2">"/"</span><span class="w"> </span><span class="k">then</span><span class="w">
+                </span><span class="k">set</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nb">character</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="nb">thru</span><span class="w"> </span><span class="o">-</span><span class="mi">2</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="k">as </span><span class="nc">string</span><span class="w">
+            </span><span class="k">end</span><span class="w"> </span><span class="k">if</span><span class="w">
+        </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">requestedForm</span><span class="w"> </span><span class="ow">contains</span><span class="w"> </span><span class="s2">"alias"</span><span class="w"> </span><span class="k">then</span><span class="w">
+            </span><span class="k">set</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">POSIX</span><span class="w"> </span><span class="nv">file</span><span class="w"> </span><span class="p">(</span><span class="nv">standardPosixPath</span><span class="p">)</span><span class="w"> </span><span class="k">as </span><span class="nc">string</span><span class="w">
+            </span><span class="k">try</span><span class="w">
+                </span><span class="k">set</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nv">alias</span><span class="w">
+            </span><span class="nb">on</span><span class="w"> </span><span class="k">error</span><span class="w">
+                </span><span class="k">error</span><span class="w"> </span><span class="s2">"The file \""</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="s2">"\" doesn't exist and can't be returned as \"alias\""</span><span class="w">
+            </span><span class="k">end</span><span class="w"> </span><span class="k">try</span><span class="w">
+        </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">requestedForm</span><span class="w"> </span><span class="ow">contains</span><span class="w"> </span><span class="s2">"hfs"</span><span class="w"> </span><span class="k">then</span><span class="w">
+            </span><span class="k">set</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">POSIX</span><span class="w"> </span><span class="nv">file</span><span class="w"> </span><span class="p">(</span><span class="nv">standardPosixPath</span><span class="p">)</span><span class="w"> </span><span class="k">as </span><span class="nc">string</span><span class="w">
+        </span><span class="k">else</span><span class="w">
+            </span><span class="k">error</span><span class="w"> </span><span class="s2">"Requested path transformation type was an unexpected type"</span><span class="w">
+        </span><span class="k">end</span><span class="w"> </span><span class="k">if</span><span class="w">
+        </span><span class="nb">return</span><span class="w"> </span><span class="nv">transformedPath</span><span class="w">
+    </span><span class="nb">on</span><span class="w"> </span><span class="k">error</span><span class="w"> </span><span class="nv">e</span><span class="w">
+        </span><span class="nb">return</span><span class="w"> </span><span class="nb">false</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">try</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nv">convertPathTo</span><span class="w">
+
+</span><span class="k">on</span> <span class="nv">stringToList</span><span class="p">(</span><span class="nv">inputString</span><span class="p">,</span><span class="w"> </span><span class="nv">theDelimiter</span><span class="p">)</span><span class="w">
+    </span><span class="k">try</span><span class="w">
+        </span><span class="k">set</span><span class="w"> </span><span class="nv">tid</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nb">AppleScript</span>'s <span class="nb">text</span><span class="w"> </span><span class="nb">item</span><span class="w"> </span><span class="nv">delimters</span><span class="w">
+        </span><span class="k">set</span><span class="w"> </span><span class="nb">AppleScript</span>'s <span class="nb">text item delimiters</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">theDelimiter</span><span class="w">
+        </span><span class="k">set</span><span class="w"> </span><span class="nv">theList</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nb">text</span><span class="w"> </span><span class="nb">items</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="p">(</span><span class="nv">inputString</span><span class="w"> </span><span class="k">as </span><span class="nc">string</span><span class="p">)</span><span class="w">
+        </span><span class="k">set</span><span class="w"> </span><span class="nb">AppleScript</span>'s <span class="nb">text item delimiters</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">tid</span><span class="w">
+        </span><span class="nb">return</span><span class="w"> </span><span class="nv">theList</span><span class="w">
+    </span><span class="nb">on</span><span class="w"> </span><span class="k">error</span><span class="w"> </span><span class="nv">e</span><span class="w">
+        </span><span class="k">set</span><span class="w"> </span><span class="nb">AppleScript</span>'s <span class="nb">text item delimiters</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">tid</span><span class="w">
+        </span><span class="nb">return</span><span class="w"> </span><span class="p">{}</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">try</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nv">stringToList</span><span class="w">
+
+</span><span class="k">on</span> <span class="nv">resizeImageWidth</span><span class="p">(</span><span class="nv">filePath</span><span class="p">,</span><span class="w"> </span><span class="nv">output</span><span class="p">,</span><span class="w"> </span><span class="nv">pxls</span><span class="p">)</span><span class="w">
+    </span><span class="k">try</span><span class="w">
+        </span><span class="nb">do shell script</span><span class="w"> </span><span class="s2">"sips --resampleWidth "</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nv">pxls</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nb">space</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nb">quoted form</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">filePath</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="s2">" -o "</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nv">qutoed</span><span class="w"> </span><span class="nv">form</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">output</span><span class="w">
+        </span><span class="nb">return</span><span class="w"> </span><span class="nb">true</span><span class="w">
+    </span><span class="nb">on</span><span class="w"> </span><span class="k">error</span><span class="w"> </span><span class="nv">e</span><span class="w">
+        </span><span class="nb">return</span><span class="w"> </span><span class="nb">false</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">try</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nv">resizeImageWidth</span><span class="w">
+
+</span><span class="k">on</span> <span class="nv">getFiles</span><span class="p">(</span><span class="nv">thePath</span><span class="p">)</span><span class="w">
+    </span><span class="k">try</span><span class="w">
+        </span><span class="k">set</span><span class="w"> </span><span class="nv">posixPath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="k">my</span><span class="w"> </span><span class="nv">convertPathTo</span><span class="p">(</span><span class="nv">thePath</span><span class="p">,</span><span class="w"> </span><span class="s2">"posix"</span><span class="p">)</span><span class="w">
+        </span><span class="k">set</span><span class="w"> </span><span class="nv">theFiles</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nb">do shell script</span><span class="w"> </span><span class="s2">"find "</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nb">quoted form</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">posixPath</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="s2">" -type f ! -name \".*\""</span><span class="w">
+        </span><span class="k">if</span><span class="w"> </span><span class="nv">theFiles</span><span class="w"> </span><span class="ow">is not</span><span class="w"> </span><span class="ow">equal to</span><span class="w"> </span><span class="s2">""</span><span class="w"> </span><span class="k">then</span><span class="w">
+            </span><span class="k">set</span><span class="w"> </span><span class="nv">fileList</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">stringToList</span><span class="p">(</span><span class="nv">theFiles</span><span class="p">,</span><span class="w"> </span><span class="nb">return</span><span class="p">)</span><span class="w">
+        </span><span class="k">end</span><span class="w"> </span><span class="k">if</span><span class="w">
+        </span><span class="nb">return</span><span class="w"> </span><span class="nv">fileList</span><span class="w">
+    </span><span class="nb">on</span><span class="w"> </span><span class="k">error</span><span class="w"> </span><span class="nv">e</span><span class="w">
+        </span><span class="c1"># log the error here at some point</span><span class="w">
+        </span><span class="nb">return</span><span class="w"> </span><span class="p">{}</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">try</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nv">getFiles</span><span class="w">
+
+</span><span class="k">on</span> <span class="nv">removeFile</span><span class="p">(</span><span class="nv">theFile</span><span class="p">)</span><span class="w">
+    </span><span class="k">try</span><span class="w">
+        </span><span class="k">set</span><span class="w"> </span><span class="nv">posixPath</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">convertPathTo</span><span class="p">(</span><span class="nv">theFile</span><span class="p">,</span><span class="w"> </span><span class="s2">"posix"</span><span class="p">)</span><span class="w">
+        </span><span class="nb">do shell script</span><span class="w"> </span><span class="s2">"rm -f "</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nb">quoted form</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">posixPath</span><span class="w">
+	    </span><span class="nb">return</span><span class="w"> </span><span class="nb">true</span><span class="w">
+    </span><span class="nb">on</span><span class="w"> </span><span class="k">error</span><span class="w"> </span><span class="nv">e</span><span class="w">
+        </span><span class="nb">return</span><span class="w"> </span><span class="nb">false</span><span class="w">
+    </span><span class="k">end</span><span class="w"> </span><span class="k">try</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nv">removeFile</span><span class="w">
+</span></code></pre></div></div>
+
+  </div>
+<a class="u-url" href="/2023/03/05/learn-applescript-for-beginners.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

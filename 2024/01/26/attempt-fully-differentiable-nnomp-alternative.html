@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>An attempt to build fully differentiable alternative of (non-negative) matching pursuit algorithm for solving L0-sparsity dictionary learning | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="An attempt to build fully differentiable alternative of (non-negative) matching pursuit algorithm for solving L0-sparsity dictionary learning">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="Introduction">
+<meta property="og:description" content="Introduction">
+<link rel="canonical" href="https://kkew3.github.io/2024/01/26/attempt-fully-differentiable-nnomp-alternative.html">
+<meta property="og:url" content="https://kkew3.github.io/2024/01/26/attempt-fully-differentiable-nnomp-alternative.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2024-01-26T04:14:34+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="An attempt to build fully differentiable alternative of (non-negative) matching pursuit algorithm for solving L0-sparsity dictionary learning">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-01-26T04:14:34+00:00","datePublished":"2024-01-26T04:14:34+00:00","description":"Introduction","headline":"An attempt to build fully differentiable alternative of (non-negative) matching pursuit algorithm for solving L0-sparsity dictionary learning","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2024/01/26/attempt-fully-differentiable-nnomp-alternative.html"},"url":"https://kkew3.github.io/2024/01/26/attempt-fully-differentiable-nnomp-alternative.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+<script>MathJax={"tex":{"inlineMath":[["$","$"],["\\(","\\)"]],"displayMath":[["$$","$$"],["\\[","\\]"]]},"svg":{"fontCache":"global"}}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">An attempt to build fully differentiable alternative of (non-negative) matching pursuit algorithm for solving L0-sparsity dictionary learning</h1>
+    <span><a href="https://kkew3.github.io/tags/ml--dict"><code class="highlighter-rouge"><nobr>machine learning/dictionary learning</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2024-01-26T04:14:34+00:00" itemprop="datePublished">Jan 26, 2024 at 04:14:34
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="introduction">Introduction</h2>
+
+<p>In sparse dictionary learning, sparse coding and dictionary update are solved in an alternating manner (<a href="https://www.khoury.northeastern.edu/home/eelhami/courses/EE290A/K-SVD_Elad.pdf">Aharon et al., 2006</a>).
+In sparse coding stage, the following problem is solved given the dictionary $\mathbf D \in \mathbb R^{d \times n}$ and signals $y_j \in \mathbb R^d$:</p>
+
+\[\min_{x_j}\ \|y_j-\mathbf D x_j\|_2^2 \quad \text{s.t. } \|x\|_0 \le K\,,\tag{1}\]
+
+<p>where $K$ is the sparsity.
+Sometimes, there’s an additional constraint $x_j \succeq 0$ if non-negative sparse coding is required.
+Since $L_0$ constraint is intractable to optimize exactly, either approximate greedy algorithm like (non-negative) orthogonal matching pursuit (<a href="https://dspace.mit.edu/bitstream/handle/1721.1/72024/Wang_Orthogonal%20Matching.pdf">Cai &amp; Wang, 2011</a>; <a href="https://ieeexplore.ieee.org/abstract/document/7012095">Yaghoobi et al., 2015</a>; <a href="https://hal.science/hal-02049424/file/paper1_hal.pdf">Nguyen et al., 2019</a>), or relaxation of $L_0$ to $L_1$ sparsity as (non-negative) basis pursuit (<a href="http://redwood.psych.cornell.edu/discussion/papers/chen_donoho_BP_intro.pdf">Chen &amp; Donoho, 1994</a>; <a href="https://dl.acm.org/doi/abs/10.5555/3104322.3104374">Gregor &amp; LeCun, 2010</a>; <a href="https://mayhhu.github.io/ch/pdf/2018_L1-NNSO-Optim_ZHYW.pdf">Zhang et al., 2018</a>; <a href="https://arxiv.org/pdf/2106.00058">Tolooshams &amp; Ba, 2022</a>) are regarded as idiomatic solutions.</p>
+
+<h2 id="proposed-method">Proposed method</h2>
+
+<p>(<a href="https://arxiv.org/pdf/1712.01312.pdf">Louizos et al., 2018</a>) suggests a novel approach to handle the intractability of $L_0$ constraint.
+Instead of tackling the $L_0$ constraint directly, the authors address the expectation of the $L_0$ norms by introducing Bernoulli random variables.
+In the parlance of the sparse coding problem (1),</p>
+
+\[\min_{x_j,\pi_j}\ \mathbb E_{q(z_j \mid \pi_j)}\left[\|y_j - \mathbf D (x_j' \odot z_j)\|_2^2\right] \quad \text{s.t. } \mathbf 1^\top \pi_j \le K\,,\tag{2}\]
+
+<p>where $x_j$ has been reparameterized as $x_j’ \odot z_j$, and for each $i$, $z_{ji} \sim \mathrm{Bernoulli}(\pi_{ji})$, $x_{ji}’ \in \mathbb R$, the symbol $\odot$ denotes elementwise product.
+Note that Equation (2.1) can be trivially extend to non-negative sparse coding case by reparameterization $x_j := \exp(x_j’) \odot z_j$ or $x_j := \mathrm{softplus}(x_j’) \odot z_j$, where $\mathrm{softplus}(\cdot) = \log(1 + \exp(\cdot))$.
+(<a href="https://arxiv.org/pdf/1712.01312.pdf">Louizos et al., 2018</a>) further introduces a smoother on the discrete random variable $z_j$ to allow for reparameterization trick (<a href="https://arxiv.org/abs/1312.6114">Kingma &amp; Welling, 2014</a>; <a href="http://proceedings.mlr.press/v32/rezende14.pdf">Rezende et al., 2014</a>), and the expectation in Equation (2) can be estimated by Monte Carlo sampling.</p>
+
+<p>To solve the constrained minimization in Equation (2), it’s natural to proceed using Lagrangian multiplier and optimize under bound constraint only:</p>
+
+\[\min_{x_j,\pi_j}\max_{\lambda_j \ge 0}\ \mathbb E_{q(z_j \mid \pi_j)}\left[\|y_j - \mathbf D (x_j' \odot z_j)\|_2^2\right] + \lambda_j(\mathbf 1^\top \pi_j - K)\,.\tag{3}\]
+
+<p>On the one hand, one may optimize $x_j,\pi_j,\lambda_j$ jointly via gradient descent.
+However, it’s worthy noting that one must perform gradient <em>ascent</em> on $\lambda_j$, which can be achieved by negating its gradient before the descent step.
+On the other hand, <a href="https://www.stat.cmu.edu/~ryantibs/convexopt-F18/lectures/dual-ascent.pdf">dual gradient ascent</a> can be adopted.
+Here, given fixed $\lambda_j$, the objective (3) is minimized till a critical point; then given fixed $x_j$ and $\pi_j$, $\lambda_j$ is updated with one-step gradient ascent; finally, iterate.</p>
+
+<p>In practice, potentially a great number of signals are required to be sparse coded given the dictionary:</p>
+
+\[\min_{\boldsymbol x,\boldsymbol\pi}\max_{\boldsymbol\lambda \succeq 0}\ \sum_{j=1}^m \left\{\mathbb E_{q(z_j \mid \pi_j)}\left[\|y_j - \mathbf D (x_j' \odot z_j)\|_2^2\right] + \lambda_j(\mathbf 1^\top \pi_j - K)\right\}\,.\tag{4}\]
+
+<p>It’s not uncommon that all the variables to optimize, especially $\{x_j,\pi_j\}_{j=1}^m$, are unable to fit into memory, thus failing to run gradient descent.
+Notice that for each $j$, the optimal solution $(x_j^\ast,\pi_j^\ast)$ are related to $(y_j,\lambda_j)$; that is, $x_j^\ast = x(y_j,\lambda_j)$, $\pi_j^\ast = \pi(y_j,\lambda_j)$.
+Therefore, I propose to perform amortized inference: to use a neural network $f$ parameterized by $\boldsymbol\phi$ that takes as input $(y_j,\lambda_j)$ to predict $x_j$ and $\pi_j$.
+I found the use of ReLU activation in such network promotes training the most.
+The objective (4) now becomes:</p>
+
+\[\min_{\boldsymbol\phi} \max_{\boldsymbol\lambda \succeq 0}\ \sum_{j=1}^m \left\{\mathbb E_{q(z_j \mid \boldsymbol\phi)} \left[\|y_j - \mathbf D (f_x(y_j,\lambda_j;\boldsymbol\phi) \odot z_j)\|_2^2\right] + \lambda_j (\mathbf 1^\top f_\pi(y_j,\lambda_j;\boldsymbol\phi) - K)\right\}\,.\tag{5}\]
+
+<p>With dictionary learning, the dictionary need to be learned.
+Using the objective (5), I found it preferable to optimize using the procedure below:</p>
+
+<ol>
+  <li>Given $\boldsymbol\lambda$, <strong>reinitialize</strong> $\boldsymbol\phi$, and jointly learn $\boldsymbol\phi$ and $\mathbf D$ until stationary point.</li>
+  <li>Given $\boldsymbol\phi$ and $\mathbf D$, perform one-step gradient ascent on $\boldsymbol\lambda$.</li>
+  <li>Iterate.</li>
+</ol>
+
+<p>I found the reinitialization step on the amortized network critically important.
+Without it, the network tends to predict all-zero and eventually learns nothing.
+However, the dictionary needs to be initialized only at the very beginning.</p>
+
+<h2 id="experiments">Experiments</h2>
+
+<p>For dictionary learning without non-negativity constraint on sparse coding, I compared against (<a href="https://csaws.cs.technion.ac.il/~ronrubin/Publications/KSVD-OMP-v2.pdf">Rubinstein et al., 2008</a>) in image denoising.
+My proposed fully differentiable solution converges slower and denoises poorer than K-SVD supported by batch OMP.</p>
+
+<p>For dictionary learning <em>with</em> non-negative constraint on sparse coding, I compare against (<a href="https://hal.science/hal-02049424/file/paper1_hal.pdf">Nguyen et al., 2019</a>) in exploration of atoms of discourse, which is known to admit a non-negative sparse coding form (<a href="https://arxiv.org/abs/1601.03764">Arora et al., 2018</a>).
+While being faster, my proposed method still performs worse than non-negative OMP, in that the learned dictionary atoms are mostly not atoms of discourse.</p>
+
+<p>Hence, this is the main reason why I record my attempt here in a post rather than write a paper.
+Perhaps, the proposed method is promising, but it’s not well-prepared yet.</p>
+
+
+  </div>
+<a class="u-url" href="/2024/01/26/attempt-fully-differentiable-nnomp-alternative.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
