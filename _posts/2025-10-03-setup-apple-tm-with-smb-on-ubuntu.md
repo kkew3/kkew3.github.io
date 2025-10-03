@@ -10,7 +10,7 @@ Therefore, I spent several hours working on setting up an Ubuntu 22.04 home serv
 
 ## Install Samba
 
-Reference: https://ubuntu.com/tutorials/install-and-configure-samba.
+Reference: <https://ubuntu.com/tutorials/install-and-configure-samba>.
 
 Install samba with:
 
@@ -325,7 +325,7 @@ index 8fe8be8..55c516a 100644
 
 ## Setup Samba for Time Machine
 
-Reference: https://blog.jhnr.ch/2023/01/09/setup-apple-time-machine-network-drive-with-samba-on-ubuntu-22.04/.
+Reference: <https://blog.jhnr.ch/2023/01/09/setup-apple-time-machine-network-drive-with-samba-on-ubuntu-22.04/>.
 
 To make Samba work we need `samba-vfs-modules` package.
 Install it with:
@@ -446,7 +446,7 @@ index c516aac..5651005 100644
 
 ## Run the services
 
-Reference: https://ubuntu.com/tutorials/install-and-configure-samba.
+Reference: <https://ubuntu.com/tutorials/install-and-configure-samba>.
 
 Update the firewall rules:
 
@@ -454,7 +454,7 @@ Update the firewall rules:
 sudo ufw allow samba
 ```
 
-Reference: https://gist.github.com/davisford/5984768.
+Reference: <https://gist.github.com/davisford/5984768>.
 
 Finally (re)start the services.
 
