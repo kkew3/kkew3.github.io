@@ -31,7 +31,7 @@ In my case, I use the same username and password as the home server's login user
 
 Samba comes with the following default config `/etc/samba/smb.conf`, which can be edited with `sudo vim /etc/samba/smb.conf`:
 
-```ini
+```conf
 #
 # Sample configuration file for the Samba suite for Debian GNU/Linux.
 #
