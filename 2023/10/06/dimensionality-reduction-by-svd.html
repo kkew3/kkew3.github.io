@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Dimensionality reduction by SVD | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="Dimensionality reduction by SVD">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="Let $\mathbf X \in \mathbb R^{m \times d}$ be data matrix where the $t$-th row is the $t$-th item in the dataset. One may achieve dimensionality reduction from $\mathbf X$ to $\tilde{\mathbf X}$, by computing the SVD: $\mathbf X = \mathbf U \mathbf S \mathbf V^\top$, and let $\tilde{\mathbf X} = \mathbf U_k\mathbf S_k$, where $\mathbf U_k$ is the first $k$ columns of $\mathbf U$ and $\mathbf S_k$ is a diagonal matrix of the first $k$ diagonal elements of $\mathbf S$. The idea behind this process can be viewed as either the classic MDS or PCA.">
+<meta property="og:description" content="Let $\mathbf X \in \mathbb R^{m \times d}$ be data matrix where the $t$-th row is the $t$-th item in the dataset. One may achieve dimensionality reduction from $\mathbf X$ to $\tilde{\mathbf X}$, by computing the SVD: $\mathbf X = \mathbf U \mathbf S \mathbf V^\top$, and let $\tilde{\mathbf X} = \mathbf U_k\mathbf S_k$, where $\mathbf U_k$ is the first $k$ columns of $\mathbf U$ and $\mathbf S_k$ is a diagonal matrix of the first $k$ diagonal elements of $\mathbf S$. The idea behind this process can be viewed as either the classic MDS or PCA.">
+<link rel="canonical" href="https://kkew3.github.io/2023/10/06/dimensionality-reduction-by-svd.html">
+<meta property="og:url" content="https://kkew3.github.io/2023/10/06/dimensionality-reduction-by-svd.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2023-10-06T08:43:30+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Dimensionality reduction by SVD">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2023-10-06T08:43:30+00:00","datePublished":"2023-10-06T08:43:30+00:00","description":"Let $\\mathbf X \\in \\mathbb R^{m \\times d}$ be data matrix where the $t$-th row is the $t$-th item in the dataset. One may achieve dimensionality reduction from $\\mathbf X$ to $\\tilde{\\mathbf X}$, by computing the SVD: $\\mathbf X = \\mathbf U \\mathbf S \\mathbf V^\\top$, and let $\\tilde{\\mathbf X} = \\mathbf U_k\\mathbf S_k$, where $\\mathbf U_k$ is the first $k$ columns of $\\mathbf U$ and $\\mathbf S_k$ is a diagonal matrix of the first $k$ diagonal elements of $\\mathbf S$. The idea behind this process can be viewed as either the classic MDS or PCA.","headline":"Dimensionality reduction by SVD","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2023/10/06/dimensionality-reduction-by-svd.html"},"url":"https://kkew3.github.io/2023/10/06/dimensionality-reduction-by-svd.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+<script>MathJax={"tex":{"inlineMath":[["$","$"],["\\(","\\)"]],"displayMath":[["$$","$$"],["\\[","\\]"]]},"svg":{"fontCache":"global"}}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Dimensionality reduction by SVD</h1>
+    <span><a href="https://kkew3.github.io/tags/math--la"><code class="highlighter-rouge"><nobr>math/linear algebra</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2023-10-06T08:43:30+00:00" itemprop="datePublished">Oct 6, 2023 at 08:43:30
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Let $\mathbf X \in \mathbb R^{m \times d}$ be data matrix where the $t$-th row is the $t$-th item in the dataset.
+One may achieve dimensionality reduction from $\mathbf X$ to $\tilde{\mathbf X}$, by computing the SVD: $\mathbf X = \mathbf U \mathbf S \mathbf V^\top$, and let $\tilde{\mathbf X} = \mathbf U_k\mathbf S_k$, where $\mathbf U_k$ is the first $k$ columns of $\mathbf U$ and $\mathbf S_k$ is a diagonal matrix of the first $k$ diagonal elements of $\mathbf S$.
+The idea behind this process can be viewed as either the classic MDS or PCA.</p>
+
+<p>In classic MDS, one wants to maintain as much as possible the inner product matrix $\mathbf X\mathbf X^\top = \sum_{j=1}^r \sigma_j^2 \boldsymbol u_j \boldsymbol u_j^\top$ where $\sigma_j$’s have been sorted in descending order.
+Clearly, one may perform low-rank approximation of $\mathbf X$ by $\tilde{\mathbf X} = \mathbf U_k \mathbf S_k$ such that $\mathbf X \mathbf X^\top \approx \tilde{\mathbf X}\tilde{\mathbf X}^\top$.</p>
+
+<p>In PCA, one aims to find the orthonormal transformation matrix $\mathbf V_k$, which is the first $k$ columns of the eigenvectors of the covariance matrix $\mathbf X^\top \mathbf X$ (up to a constant) where the eigenvalues have been sorted in descending order, and then reaches the low-dimensional representation $\mathbf X \mathbf V_k$, which is identical to $\mathbf U_k \mathbf S_k$.</p>
+
+<p>One point to note is that, if the data matrix is arranged as $\mathbf X’ \in \mathbb R^{d \times m}$, where each column is a vector in the dataset, and let $\mathbf X’ = \mathbf U \mathbf S \mathbf V^\top$ instead, then the low-dimensional representation will be $\mathbf S_k \mathbf V_k^\top$.
+Let’s derive this with PCA:
+The covariance matrix is now $\mathbf X’ \mathbf X^{\prime\top}$ and so the transformed data matrix is $\mathbf U^\top \mathbf X’$.
+By SVD, clearly it equals $\mathbf S_k V_k^\top$.</p>
+
+<p>As a matter of fact, if we denote $\mathbf X=\mathbf U_1 \mathbf S_1 \mathbf V_1^\top$ and $\mathbf X^\top = \mathbf V_2 \mathbf S_2 \mathbf U_2^\top$, then it should turn out that $(\mathbf U_1 \mathbf S_1)^\top = \mathbf S_2 \mathbf U_2^\top$.
+Let’s write Python3 code to verify this:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="n">U1</span><span class="p">,</span> <span class="n">S1</span><span class="p">,</span> <span class="n">VT1</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="n">svd</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">V2</span><span class="p">,</span> <span class="n">S2</span><span class="p">,</span> <span class="n">UT2</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="n">svd</span><span class="p">(</span><span class="n">X</span><span class="p">.</span><span class="n">T</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">np</span><span class="p">.</span><span class="n">allclose</span><span class="p">((</span><span class="n">U1</span> <span class="o">@</span> <span class="n">np</span><span class="p">.</span><span class="n">diag</span><span class="p">(</span><span class="n">S1</span><span class="p">)).</span><span class="n">T</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="n">diag</span><span class="p">(</span><span class="n">S2</span><span class="p">)</span> <span class="o">@</span> <span class="n">UT2</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>It could occurs that the assertion fails.
+The reason is that given diagonal matrix $\mathbf Q$ where its diagonal elements be either $1$ or $-1$, and given SVD $\mathbf X = \mathbf U \mathbf S \mathbf V^\top$, the following holds for any such $\mathbf Q$: $\mathbf X = \mathbf U \mathbf Q \mathbf S \mathbf Q^\top \mathbf V^\top$.
+We need to take into account this case.
+Rewriting the code as:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="n">U1</span><span class="p">,</span> <span class="n">S1</span><span class="p">,</span> <span class="n">VT1</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="n">svd</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">V2</span><span class="p">,</span> <span class="n">S2</span><span class="p">,</span> <span class="n">UT2</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="n">svd</span><span class="p">(</span><span class="n">X</span><span class="p">.</span><span class="n">T</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="c1"># assert np.allclose((U1 @ np.diag(S1)).T, np.diag(S2) @ UT2)
+</span>
+<span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">mean</span><span class="p">(</span><span class="n">U1</span> <span class="o">/</span> <span class="n">UT2</span><span class="p">.</span><span class="n">T</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">np</span><span class="p">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">U1</span> <span class="o">/</span> <span class="n">UT2</span><span class="p">.</span><span class="n">T</span><span class="p">)</span>
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">diag</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">np</span><span class="p">.</span><span class="n">allclose</span><span class="p">((</span><span class="n">U1</span> <span class="o">@</span> <span class="n">np</span><span class="p">.</span><span class="n">diag</span><span class="p">(</span><span class="n">S1</span><span class="p">)).</span><span class="n">T</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="n">diag</span><span class="p">(</span><span class="n">S2</span><span class="p">)</span> <span class="o">@</span> <span class="n">Q</span> <span class="o">@</span> <span class="n">UT2</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>We should now pass the assertion.</p>
+
+  </div>
+<a class="u-url" href="/2023/10/06/dimensionality-reduction-by-svd.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

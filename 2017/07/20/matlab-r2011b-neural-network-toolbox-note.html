@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>MATLAB R2011b 神经网络工具箱注意事项 | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="MATLAB R2011b 神经网络工具箱注意事项">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="这是记录了我使用神经网络工具箱时遇到的坑，供自己和他人参考。先写一点，以后遇到再更新。">
+<meta property="og:description" content="这是记录了我使用神经网络工具箱时遇到的坑，供自己和他人参考。先写一点，以后遇到再更新。">
+<link rel="canonical" href="https://kkew3.github.io/2017/07/20/matlab-r2011b-neural-network-toolbox-note.html">
+<meta property="og:url" content="https://kkew3.github.io/2017/07/20/matlab-r2011b-neural-network-toolbox-note.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2017-07-20T09:50:56+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="MATLAB R2011b 神经网络工具箱注意事项">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2017-07-20T09:50:56+00:00","datePublished":"2017-07-20T09:50:56+00:00","description":"这是记录了我使用神经网络工具箱时遇到的坑，供自己和他人参考。先写一点，以后遇到再更新。","headline":"MATLAB R2011b 神经网络工具箱注意事项","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2017/07/20/matlab-r2011b-neural-network-toolbox-note.html"},"url":"https://kkew3.github.io/2017/07/20/matlab-r2011b-neural-network-toolbox-note.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">MATLAB R2011b 神经网络工具箱注意事项</h1>
+    <span><a href="https://kkew3.github.io/tags/dev--matlab"><code class="highlighter-rouge"><nobr>dev/matlab</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2017-07-20T09:50:56+00:00" itemprop="datePublished">Jul 20, 2017 at 09:50:56
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>这是记录了我使用神经网络工具箱时遇到的坑，供自己和他人参考。先写一点，以后遇到再更新。</p>
+
+<h2 id="1">1</h2>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">net</span> <span class="o">=</span> <span class="n">feedforwardnet</span><span class="p">;</span>
+<span class="n">net</span> <span class="o">=</span> <span class="n">train</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">targets</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>第一行创建了一个两层前馈网络，隐藏层神经元个数为默认的10，这没什么问题。创建完网络后，如果使用 view(net) 来查看网络拓扑的话，会发现输入向量和输出向量是没有的，这是因为还没有调用 configure 函数。configure 函数默认在第一次调用 train 函数时被自动调用。<strong>这里有一个坑</strong>。假设：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>X = [
+  1 1 2;
+  2 1 3;
+  3 1 1;
+  2 1 3]';
+Y = [
+  0 1 1 0];
+</code></pre></div></div>
+
+<p>即输入向量是3维向量，数据集X中包含4个样本，训练采用分批训练方式。经过 train 函数调用后，net.IW{1,1}的维度竟然会变成10x2！不应该是10x3吗（注：隐藏层神经元个数10，输入向量3维）？因为数据集X中所有样本的第二个属性都是一样的（值都是1），结果这个属性就被Matlab忽略掉了，不知是有意为之还是bug。解决方法</p>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">X</span><span class="p">(:,</span><span class="nb">find</span><span class="p">(</span><span class="nb">var</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">eps</span><span class="p">))</span> <span class="o">=</span> <span class="n">X</span><span class="p">(:,</span><span class="nb">find</span><span class="p">(</span><span class="nb">var</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)))</span> <span class="o">+</span> <span class="nb">min</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">X</span><span class="p">))</span><span class="o">*</span><span class="mf">1e-5</span><span class="o">*</span><span class="nb">randn</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="nb">length</span><span class="p">(</span><span class="nb">find</span><span class="p">(</span><span class="nb">var</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))));</span>
+</code></pre></div></div>
+
+<p>即，把被忽略的列加上一个小的白噪声让它们的值不一样。</p>
+
+  </div>
+<a class="u-url" href="/2017/07/20/matlab-r2011b-neural-network-toolbox-note.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
