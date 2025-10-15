@@ -460,7 +460,7 @@ Finally (re)start the services.
 
 ```bash
 sudo service smbd restart
-sudo systemctl restart
+sudo systemctl restart avahi-daemon
 ```
 
 These two commands should be rerun every time the `/etc/samba/smb.conf` config file is updated.
