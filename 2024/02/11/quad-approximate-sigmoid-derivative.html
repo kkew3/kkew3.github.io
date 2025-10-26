@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Piecewise quadratic approximation of sigmoid(z) (1-sigmoid(z)) | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="Piecewise quadratic approximation of sigmoid(z) (1-sigmoid(z))">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="This post shows an approach that approximates $\sigma(z)(1-\sigma(z))$ using piecewise quadratic function, where $\sigma(z)$ is defined to be $1/(1+\exp(-z))$, a.k.a. the sigmoid function.">
+<meta property="og:description" content="This post shows an approach that approximates $\sigma(z)(1-\sigma(z))$ using piecewise quadratic function, where $\sigma(z)$ is defined to be $1/(1+\exp(-z))$, a.k.a. the sigmoid function.">
+<link rel="canonical" href="https://kkew3.github.io/2024/02/11/quad-approximate-sigmoid-derivative.html">
+<meta property="og:url" content="https://kkew3.github.io/2024/02/11/quad-approximate-sigmoid-derivative.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2024-02-11T08:52:41+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Piecewise quadratic approximation of sigmoid(z) (1-sigmoid(z))">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-02-11T08:52:41+00:00","datePublished":"2024-02-11T08:52:41+00:00","description":"This post shows an approach that approximates $\\sigma(z)(1-\\sigma(z))$ using piecewise quadratic function, where $\\sigma(z)$ is defined to be $1/(1+\\exp(-z))$, a.k.a. the sigmoid function.","headline":"Piecewise quadratic approximation of sigmoid(z) (1-sigmoid(z))","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2024/02/11/quad-approximate-sigmoid-derivative.html"},"url":"https://kkew3.github.io/2024/02/11/quad-approximate-sigmoid-derivative.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+<script>MathJax={"tex":{"inlineMath":[["$","$"],["\\(","\\)"]],"displayMath":[["$$","$$"],["\\[","\\]"]]},"svg":{"fontCache":"global"}}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Piecewise quadratic approximation of sigmoid(z) (1-sigmoid(z))</h1>
+    <span><a href="https://kkew3.github.io/tags/math--approx"><code class="highlighter-rouge"><nobr>math/approximation</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2024-02-11T08:52:41+00:00" itemprop="datePublished">Feb 11, 2024 at 08:52:41
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>This post shows an approach that approximates $\sigma(z)(1-\sigma(z))$ using piecewise quadratic function, where $\sigma(z)$ is defined to be $1/(1+\exp(-z))$, a.k.a. the sigmoid function.</p>
+
+<p>First, notice that $\sigma(z)(1-\sigma(z)) \approx \log(1+\exp(h - a z^2))$ for certain choice of $h$ and $a$:</p>
+
+<p><img src="/assets/posts_imgs/2024-02-11/dsigma-softplus.png" alt="softplus approximate dsigma"></p>
+
+<p>Second, the approximator $\log(1+\exp(\cdot))$ is called a <a href="https://paperswithcode.com/method/softplus">softplus</a>.
+So it’s natural to proceed: $\log(1+\exp(h - a z^2)) \approx \max(0, h - a z^2)$.
+Our goal, then, is to choose the height parameter $h$ and width parameter $a$ such that $\sigma(z)(1-\sigma(z)) \approx \max(0, h - a z^2)$.</p>
+
+<p>The height parameter is straightforward to estimate.
+We need only to match the max of $\sigma(z)(1-\sigma(z))$ to $h$.
+Hence, $h := \sigma(0)(1-\sigma(0))$.</p>
+
+<p>Noticing that both the original function and the approximator are nonnegative, we may match up their integrals:</p>
+
+\[\int_{-\infty}^\infty \sigma(z)(1-\sigma(z))\,\mathrm d z = \int_{-\infty}^\infty \max(0, h - a z^2)\,\mathrm d z\]
+
+<p>where the left hand side is 1.
+Plugging in the value of $h$, this equation solves to $a := \frac{16}{9}(\sigma(0)(1-\sigma(0)))^3$.</p>
+
+<p><img src="/assets/posts_imgs/2024-02-11/dsigma-maxquad.png" alt="max quad approximate dsigma"></p>
+
+  </div>
+<a class="u-url" href="/2024/02/11/quad-approximate-sigmoid-derivative.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>vim/nvim 中文分词插件 jieba.vim | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="vim/nvim 中文分词插件 jieba.vim">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="jieba.vim，做最好的 Vim 中文分词插件。">
+<meta property="og:description" content="jieba.vim，做最好的 Vim 中文分词插件。">
+<link rel="canonical" href="https://kkew3.github.io/2024/11/10/jieba-vim.html">
+<meta property="og:url" content="https://kkew3.github.io/2024/11/10/jieba-vim.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2024-11-10T06:53:06+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="vim/nvim 中文分词插件 jieba.vim">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-11-10T06:53:06+00:00","datePublished":"2024-11-10T06:53:06+00:00","description":"jieba.vim，做最好的 Vim 中文分词插件。","headline":"vim/nvim 中文分词插件 jieba.vim","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2024/11/10/jieba-vim.html"},"url":"https://kkew3.github.io/2024/11/10/jieba-vim.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">vim/nvim 中文分词插件 jieba.vim</h1>
+    <span><a href="https://kkew3.github.io/tags/editor--vim"><code class="highlighter-rouge"><nobr>editor/vim</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2024-11-10T06:53:06+00:00" itemprop="datePublished">Nov 10, 2024 at 06:53:06
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <blockquote>
+  <p>jieba.vim，做最好的 Vim 中文分词插件。</p>
+</blockquote>
+
+<p>jieba.vim 正处于积极开发中，欢迎关注、Star ⭐️、下载试用<a href="https://github.com/kkew3/jieba.vim">最新进展</a>，欢迎在 <a href="https://github.com/kkew3/jieba.vim/issues">issue</a> 讨论并提意见建议。</p>
+
+<h2 id="vimnvim-中文编辑现状">Vim/Nvim 中文编辑现状</h2>
+
+<p><a href="https://www.vim.org/">Vim</a>/<a href="https://neovim.io/">Nvim</a> 的中文文本编辑体验不足是广为人知的问题。由于中文不用空格分隔词语，Vim 的原生 <a href="https://vimhelp.org/motion.txt.html#word-motions">word motion</a> 功能无法有效发挥作用，因此用户只能依赖基本的 h/l 键位逐字移动光标。作为一名常用 Vim 写作的人，我对这方面的不便深有体会，经过调研确定没有已存在的完善项目后，我于一年多前开始在业余时间开发 jieba.vim，旨在解决这个问题。</p>
+
+<h2 id="jiebavim-简介">jieba.vim 简介</h2>
+
+<p>jieba.vim 是一个基于 <a href="https://github.com/fxsjy/jieba">jieba</a> 的 Vim/Nvim 中文分词插件，通过增强 w/W/e/E/b/B/ge/gE 键位，使 Vim 能够按中文词语移动光标。jieba.vim 的<a href="https://github.com/kkew3/jieba.vim/tree/main">初版原型</a>使用 python3 开发，初步解决了按词移动光标的问题。虽然（可能）由于其过于缓慢的词典加载速度并没有获得什么关注，但是基于该原型的 lua 移植版 <a href="https://github.com/neo451/jieba.nvim">neo451/jieba.nvim</a> 在 Vim 中文编辑圈的小为人知还是证明了 jieba.vim 解决方案的有效性，给了我继续改进的动力。随后，我发布了 jieba.vim 的<a href="https://github.com/kkew3/jieba.vim/commit/7d03b0cc83dd21f32b0fcba027b191a7c93cd714">改进版</a>，解决了其速度问题，并于近一个月开始重写 jieba.vim 的核心逻辑，更严谨地确立其发展方向。</p>
+
+<h2 id="jiebavim-对自身的定位及路线图">jieba.vim 对自身的定位及路线图</h2>
+
+<p>Features 依重要性降序排序：</p>
+
+<ol>
+  <li>jieba.vim 应保持其与 Vim 的兼容性。经过增强的 w/W/e/E/b/B/ge/gE 键位在无中文 ASCII 文本上应与 Vim 原生行为<em>完全一致</em>，其中包括各种特殊情况（例如 <a href="https://vimhelp.org/change.txt.html#cw">cw</a>）。这需要通过大量测试，以及对单元测试的正确性验证（见 <a href="https://github.com/junegunn/vader.vim">junegunn/vader.vim</a>）予以保证。</li>
+  <li>jieba.vim 应具有较快的速度（包括词典加载速度、键位反应速度、词典懒加载），以确保良好的用户体验。</li>
+  <li>jieba.vim 应易于安装。通过发布预编译链接库，目前 jieba.vim 的<a href="https://github.com/kkew3/jieba.vim/releases/tag/v1.0.5">最新稳定版</a>已无需本地安装 Rust 并进行编译。</li>
+  <li>jieba.vim 应具有较广的功能覆盖，例如对自定义 Vim 选项 <a href="https://vimhelp.org/options.txt.html#%27iskeyword%27"><code class="language-plaintext highlighter-rouge">'iskeyword'</code></a>、<a href="https://vimhelp.org/options.txt.html#%27virtualedit%27"><code class="language-plaintext highlighter-rouge">'virtualedit'</code></a>、<a href="https://vimhelp.org/options.txt.html#%27encoding%27"><code class="language-plaintext highlighter-rouge">'encoding'</code></a> 的支持。</li>
+  <li>jieba.vim 应易于从 neovim 使用，针对 neovim 将尝试直接从 lua 链接 Rust 核心 crate，从而免除 lua 调用 python、python 再调用 Rust 的额外调用关系。</li>
+  <li>此外，对 word <a href="https://vimhelp.org/motion.txt.html#text-objects">text object</a> iw/iW/aw/aW 的支持也处于计划内。</li>
+</ol>
+
+<h2 id="jiebavim-分支一览">jieba.vim 分支一览</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>分支</th>
+      <th>简介</th>
+      <th>开发语言</th>
+      <th>许可</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+<a href="https://github.com/kkew3/jieba.vim/tree/main">初版原型</a> (main)</td>
+      <td>normal 模式下按词移动光标完善，其余模式下有 bug。</td>
+      <td>python3</td>
+      <td>MIT</td>
+    </tr>
+    <tr>
+      <td>
+<a href="https://github.com/kkew3/jieba.vim/commit/7d03b0cc83dd21f32b0fcba027b191a7c93cd714">改进版</a> (7d03b0cc)</td>
+      <td>normal 模式下按词移动光标完善，其余模式下有 bug，词典加载速度快 60%。</td>
+      <td>Rust + python3</td>
+      <td>MIT</td>
+    </tr>
+    <tr>
+      <td>
+<a href="https://github.com/kkew3/jieba.vim/releases/tag/v1.0.5">最新稳定版</a> (v1.0.5)</td>
+      <td>目前已完成 normal/visual/operator-pending 模式下的 {count}w/W/e/E/b/B/ge/gE/. 键位，支持 <a href="https://vimhelp.org/options.txt.html#%27iskeyword%27"><code class="language-plaintext highlighter-rouge">'iskeyword'</code></a>，欢迎下载试用。</td>
+      <td>Rust + python3</td>
+      <td>Apache v2.0</td>
+    </tr>
+    <tr>
+      <td>
+<a href="https://github.com/kkew3/jieba.vim">最新进展</a> (rust)</td>
+      <td>将尝试支持 lua。</td>
+      <td>Rust + python3</td>
+      <td>Apache v2.0</td>
+    </tr>
+  </tbody>
+</table>
+
+
+  </div>
+<a class="u-url" href="/2024/11/10/jieba-vim.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

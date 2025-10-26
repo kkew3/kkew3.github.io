@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>使用Cython在Python和C++间互传大小事先未知的numpy数组 | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="使用Cython在Python和C++间互传大小事先未知的numpy数组">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="从C++传到Python">
+<meta property="og:description" content="从C++传到Python">
+<link rel="canonical" href="https://kkew3.github.io/2022/06/02/pass-dynamic-array-between-cpp-and-python.html">
+<meta property="og:url" content="https://kkew3.github.io/2022/06/02/pass-dynamic-array-between-cpp-and-python.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2022-06-02T08:55:34+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="使用Cython在Python和C++间互传大小事先未知的numpy数组">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2022-06-02T08:55:34+00:00","datePublished":"2022-06-02T08:55:34+00:00","description":"从C++传到Python","headline":"使用Cython在Python和C++间互传大小事先未知的numpy数组","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2022/06/02/pass-dynamic-array-between-cpp-and-python.html"},"url":"https://kkew3.github.io/2022/06/02/pass-dynamic-array-between-cpp-and-python.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+<script>MathJax={"tex":{"inlineMath":[["$","$"],["\\(","\\)"]],"displayMath":[["$$","$$"],["\\[","\\]"]]},"svg":{"fontCache":"global"}}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">使用Cython在Python和C++间互传大小事先未知的numpy数组</h1>
+    <span><a href="https://kkew3.github.io/tags/dev--python"><code class="highlighter-rouge"><nobr>dev/python</nobr></code></a> | <a href="https://kkew3.github.io/tags/dev--cpp"><code class="highlighter-rouge"><nobr>dev/c++</nobr></code></a> | <a href="https://kkew3.github.io/tags/dev--cython"><code class="highlighter-rouge"><nobr>dev/cython</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2022-06-02T08:55:34+00:00" itemprop="datePublished">Jun 2, 2022 at 08:55:34
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="从c传到python">从C++传到Python</h2>
+
+<p>常见的教程如<a href="https://stackoverflow.com/q/17855032/7881370">这个问题及回答</a>是将大小已知的numpy数组传入传出C++，如确定会从C++传出大小为$M \times N$的矩阵。方法简单讲就是在Python端分配一个大小为$M \times N$的矩阵，把指向这个矩阵的指针传给C++，C++负责修改矩阵的内容，结束后矩阵就自动“传回”了。</p>
+
+<p>然而有时我们事先不知道从C++传回的矩阵是多大，这时我们可以用<a href="https://python.tutorialink.com/passing-c-vector-to-numpy-through-cython-without-copying-and-taking-care-of-memory-management-automatically/">这个回答</a>所提及的技术，即从C++传回<code class="language-plaintext highlighter-rouge">std::vector</code>，然后在Python端把它无拷贝地转成numpy数组。</p>
+
+<p>例子：从C++传回$M \times 2$大小的矩阵，$M$在Python端未知。例子主要来源于网络，但我稍微换了一下应用，并修改了里面的谬误。</p>
+
+<p><code class="language-plaintext highlighter-rouge">doit.h</code>:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#ifndef _DOIT_H_
+#define _DOIT_H_
+#include</span> <span class="cpf">&lt;vector&gt;</span><span class="cp">
+</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">long</span><span class="o">&gt;</span> <span class="n">arange2d</span><span class="p">();</span>
+<span class="cp">#endif
+</span></code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">doit.cpp</code>:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">"doit.h"</span><span class="cp">
+</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">long</span><span class="o">&gt;</span> <span class="n">arange2d</span><span class="p">()</span> <span class="p">{</span>
+	<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">long</span><span class="o">&gt;</span> <span class="n">arr</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+	<span class="kt">long</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">i</span> <span class="o">=</span> <span class="n">arr</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">arr</span><span class="p">.</span><span class="n">end</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+		<span class="o">*</span><span class="n">i</span> <span class="o">=</span> <span class="n">x</span><span class="o">++</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="n">arr</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">fast.pyx</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">from</span> <span class="n">libcpp</span><span class="p">.</span><span class="n">vector</span> <span class="n">cimport</span> <span class="n">vector</span>
+
+<span class="n">cdef</span> <span class="n">extern</span> <span class="k">from</span> <span class="s">'doit.h'</span><span class="p">:</span>
+    <span class="n">vector</span><span class="p">[</span><span class="nb">long</span><span class="p">]</span> <span class="n">arange2d</span><span class="p">()</span>
+
+<span class="n">cdef</span> <span class="k">class</span> <span class="nc">ArrayWrapper</span><span class="p">:</span>
+    <span class="n">cdef</span> <span class="n">vector</span><span class="p">[</span><span class="nb">long</span><span class="p">]</span> <span class="n">v</span>
+    <span class="n">cdef</span> <span class="n">Py_ssize_t</span> <span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+    <span class="n">cdef</span> <span class="n">Py_ssize_t</span> <span class="n">strides</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+
+    <span class="k">def</span> <span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vector</span><span class="p">[</span><span class="nb">long</span><span class="p">]</span><span class="o">&amp;</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">v</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># 注(1)
+</span>
+    <span class="k">def</span> <span class="nf">__getbuffer__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Py_buffer</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="nb">int</span> <span class="n">flags</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">strides</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sizeof</span><span class="p">(</span><span class="nb">long</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">strides</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">sizeof</span><span class="p">(</span><span class="nb">long</span><span class="p">)</span>
+
+        <span class="c1"># 注(2)
+</span>        <span class="n">buf</span><span class="p">.</span><span class="n">buf</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">char</span> <span class="o">*&gt;</span> <span class="bp">self</span><span class="p">.</span><span class="n">v</span><span class="p">.</span><span class="n">data</span><span class="p">()</span>
+        <span class="n">buf</span><span class="p">.</span><span class="nb">format</span> <span class="o">=</span> <span class="s">'l'</span>  <span class="c1"># 注(3)
+</span>        <span class="n">buf</span><span class="p">.</span><span class="n">internal</span> <span class="o">=</span> <span class="n">NULL</span>
+        <span class="n">buf</span><span class="p">.</span><span class="n">itemsize</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">Py_ssize_t</span><span class="o">&gt;</span> <span class="n">sizeof</span><span class="p">(</span><span class="nb">long</span><span class="p">)</span>
+        <span class="n">buf</span><span class="p">.</span><span class="nb">len</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">*</span> <span class="n">sizeof</span><span class="p">(</span><span class="nb">long</span><span class="p">)</span>
+        <span class="n">buf</span><span class="p">.</span><span class="n">ndim</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">buf</span><span class="p">.</span><span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">buf</span><span class="p">.</span><span class="n">readonly</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">buf</span><span class="p">.</span><span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">shape</span>
+        <span class="n">buf</span><span class="p">.</span><span class="n">strides</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">strides</span>
+        <span class="n">buf</span><span class="p">.</span><span class="n">suboffsets</span> <span class="o">=</span> <span class="n">NULL</span>
+
+<span class="k">def</span> <span class="nf">pyarange2d</span><span class="p">():</span>
+    <span class="n">cdef</span> <span class="n">vector</span><span class="p">[</span><span class="nb">long</span><span class="p">]</span> <span class="n">arr</span> <span class="o">=</span> <span class="n">arange2d</span><span class="p">()</span>
+    <span class="n">cdef</span> <span class="n">ArrayWrapper</span> <span class="n">wrapper</span> <span class="o">=</span> <span class="n">ArrayWrapper</span><span class="p">()</span>
+    <span class="n">wrapper</span><span class="p">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="p">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">wrapper</span><span class="p">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>注(1)：<code class="language-plaintext highlighter-rouge">std::vector&lt;T&gt;::swap</code>完成了无拷贝传值，另一种方法是用<code class="language-plaintext highlighter-rouge">std::move</code>，不过那需要<code class="language-plaintext highlighter-rouge">cdef extern from '&lt;utility&gt;' namespace 'std' nogil: vector[long] move(vector[long])</code>，应该是这样，不过我没试过</li>
+  <li>注(2)：numpy的Buffer Protocol见<a href="https://docs.python.org/3/c-api/buffer.html#buffer-structure">此处</a>，里面讲了<code class="language-plaintext highlighter-rouge">buf</code>需要设置哪些属性</li>
+  <li>注(3)：<code class="language-plaintext highlighter-rouge">buf.format</code>如何设置见<a href="https://docs.python.org/3/library/struct.html#format-characters">此处</a>
+</li>
+</ul>
+
+<p>至于从C++传回Python的多维数组有两个及以上的维度不知道的话（已知维度总数<code class="language-plaintext highlighter-rouge">ndim</code>），网络上没找到答案，但我是这么做的：</p>
+
+<ol>
+  <li>传给C++一个指向<code class="language-plaintext highlighter-rouge">Py_ssize_t</code>类型、长度为<code class="language-plaintext highlighter-rouge">ndim</code>的数组（即待传回数组的<code class="language-plaintext highlighter-rouge">shape</code>）的指针</li>
+  <li>C++传回一个<code class="language-plaintext highlighter-rouge">std::vector</code>并修改<code class="language-plaintext highlighter-rouge">shape</code>元素为合适的值</li>
+  <li>按照<code class="language-plaintext highlighter-rouge">shape</code>及<code class="language-plaintext highlighter-rouge">std::vector</code>的元素类型填写<code class="language-plaintext highlighter-rouge">buf</code>的属性，完成<code class="language-plaintext highlighter-rouge">std::vector</code>到numpy数组的转换</li>
+</ol>
+
+<h2 id="从python传到c">从Python传到C++</h2>
+
+<p>这应该已经耳熟能详了，我就不在此赘述了。不过有一点需要注意。传<code class="language-plaintext highlighter-rouge">double</code>数组时没问题，各平台<code class="language-plaintext highlighter-rouge">double</code>都对应<code class="language-plaintext highlighter-rouge">numpy.float64</code>。传<code class="language-plaintext highlighter-rouge">int</code>数组时需注意，Windows下对应<code class="language-plaintext highlighter-rouge">numpy.int32</code>、Linux/Mac下对应<code class="language-plaintext highlighter-rouge">numpy.int64</code>。所以直接用传<code class="language-plaintext highlighter-rouge">double</code>数组的方法传<code class="language-plaintext highlighter-rouge">int</code>数组会报这个错：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Cannot assign type 'int_t *' to 'int *'
+</code></pre></div></div>
+
+<p>见<a href="https://stackoverflow.com/q/72470641/7881370">这个问题</a>（就是我提的）。目前我还没有优雅的解决方法。我笨拙的方法（受<a href="https://stackoverflow.com/users/5769463/ead">ead</a>的启发）（请对照着“这个问题”看）如下：把所有的<code class="language-plaintext highlighter-rouge">int</code>全替换为<code class="language-plaintext highlighter-rouge">int64_t</code>（或<code class="language-plaintext highlighter-rouge">int32_t</code>，一致就行），例如<code class="language-plaintext highlighter-rouge">int * =&gt; int64_t *</code>、<code class="language-plaintext highlighter-rouge">np.int_t =&gt; np.int64_t</code>，然后在<code class="language-plaintext highlighter-rouge">dotit.h</code>包含头文件的地方加上<code class="language-plaintext highlighter-rouge">#include &lt;cstdint&gt;</code>，在<code class="language-plaintext highlighter-rouge">q.pyx</code>头部加上<code class="language-plaintext highlighter-rouge">from libc.stdint cimport int64_t</code>。应该就可以编译了。</p>
+
+<p>补充一点我近期观察到的：以上workaround在Windows下（Visual Studio 2022）貌似不行，会报不能将<code class="language-plaintext highlighter-rouge">numpy</code>的<code class="language-plaintext highlighter-rouge">int32_t</code>转为<code class="language-plaintext highlighter-rouge">int32_t</code>，类似这样的错。在Darwin和Linux下都是能通过编译的。</p>
+
+  </div>
+<a class="u-url" href="/2022/06/02/pass-dynamic-array-between-cpp-and-python.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

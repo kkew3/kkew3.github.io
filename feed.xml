@@ -1,0 +1,998 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="https://kkew3.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://kkew3.github.io/" rel="alternate" type="text/html" /><updated>2025-10-26T03:45:02+00:00</updated><id>https://kkew3.github.io/feed.xml</id><title type="html">Kaiwen’s personal website</title><subtitle>My blogs and research reports.</subtitle><entry><title type="html">Additive Gaussian noise makes any random variable absolutely continuous</title><link href="https://kkew3.github.io/2025/10/26/additive-gaussian-noise-density.html" rel="alternate" type="text/html" title="Additive Gaussian noise makes any random variable absolutely continuous" /><published>2025-10-26T03:06:25+00:00</published><updated>2025-10-26T03:06:25+00:00</updated><id>https://kkew3.github.io/2025/10/26/additive-gaussian-noise-density</id><content type="html" xml:base="https://kkew3.github.io/2025/10/26/additive-gaussian-noise-density.html"><![CDATA[<p>Adding independent Gaussian noise to any random variable—no matter its original form—ensures the result has a well-defined probability density.
+In machine learning, this principle is used in generative probabilistic modeling trained by MLE to ensure a well-defined objective.
+The note below explores the math behind this phenomenon and its practical implications: <a href="/assets/study-notes/additive-gaussian-noise-density.pdf">pdf</a>.</p>]]></content><author><name></name></author><category term="math--prob" /><summary type="html"><![CDATA[Adding independent Gaussian noise to any random variable—no matter its original form—ensures the result has a well-defined probability density. In machine learning, this principle is used in generative probabilistic modeling trained by MLE to ensure a well-defined objective. The note below explores the math behind this phenomenon and its practical implications: pdf.]]></summary></entry><entry><title type="html">Filter Text File In-place with Vim Ex Mode</title><link href="https://kkew3.github.io/2025/10/21/filter-text-file-in-place-vim-ex.html" rel="alternate" type="text/html" title="Filter Text File In-place with Vim Ex Mode" /><published>2025-10-21T03:07:26+00:00</published><updated>2025-10-21T03:07:26+00:00</updated><id>https://kkew3.github.io/2025/10/21/filter-text-file-in-place-vim-ex</id><content type="html" xml:base="https://kkew3.github.io/2025/10/21/filter-text-file-in-place-vim-ex.html"><![CDATA[<p>We sometimes need to filter a text file (denoted as <code class="language-plaintext highlighter-rouge">file.txt</code> in this post) using some external program in-place, e.g. pretty-formatting a compact json file using <a href="https://jqlang.org/"><code class="language-plaintext highlighter-rouge">jq</code></a>.
+By “filter in-place”, I mean to pass the text file to the external program as stdin, and overwrite the original file with the program’s stdout.
+A direct solution is:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">tmp</span><span class="o">=</span><span class="si">$(</span><span class="nb">mktemp </span>tmp.XXXXXX<span class="si">)</span> <span class="o">&amp;&amp;</span> jq &lt; file.txt <span class="o">&gt;</span> <span class="nv">$tmp</span> <span class="o">&amp;&amp;</span> <span class="nb">mv</span> <span class="nv">$tmp</span> file.txt
+</code></pre></div></div>
+
+<p>Inspired by <a href="https://vi.stackexchange.com/a/2692/48634">this</a> post, I found a more concise way to implement the function:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim <span class="nt">-es</span> <span class="nt">-c</span> <span class="s1">'%!jq'</span> <span class="nt">-cx</span> file.txt
+</code></pre></div></div>
+
+<p>Explanation:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">vim -es</code> starts <code class="language-plaintext highlighter-rouge">vim</code> in Ex mode (<code class="language-plaintext highlighter-rouge">-e</code>) silently (<code class="language-plaintext highlighter-rouge">-s</code>).</li>
+  <li><code class="language-plaintext highlighter-rouge">-c '%!jq'</code> filters (<code class="language-plaintext highlighter-rouge">!</code>) the entire (<code class="language-plaintext highlighter-rouge">%</code>) buffer using <code class="language-plaintext highlighter-rouge">jq</code>.</li>
+  <li><code class="language-plaintext highlighter-rouge">-cx</code> saves the buffer and exits (see <a href="https://vimhelp.org/editing.txt.html#%3Ax">vim-help</a> for more about <code class="language-plaintext highlighter-rouge">:x</code> command).</li>
+</ul>]]></content><author><name></name></author><category term="editor--vim" /><summary type="html"><![CDATA[We sometimes need to filter a text file (denoted as file.txt in this post) using some external program in-place, e.g. pretty-formatting a compact json file using jq. By “filter in-place”, I mean to pass the text file to the external program as stdin, and overwrite the original file with the program’s stdout. A direct solution is:]]></summary></entry><entry><title type="html">Stupidly Simple Way to Add Up Numbers in Shell</title><link href="https://kkew3.github.io/2025/10/21/add-up-numbers-shell-oneliner.html" rel="alternate" type="text/html" title="Stupidly Simple Way to Add Up Numbers in Shell" /><published>2025-10-21T02:38:49+00:00</published><updated>2025-10-21T02:38:49+00:00</updated><id>https://kkew3.github.io/2025/10/21/add-up-numbers-shell-oneliner</id><content type="html" xml:base="https://kkew3.github.io/2025/10/21/add-up-numbers-shell-oneliner.html"><![CDATA[<p>Sometimes we need to add up numbers that come from stdin, one per line.
+There are many ways to attack this problem.
+To name a few:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">awk '{sum += $_} END {print sum}'</code>;</li>
+  <li><code class="language-plaintext highlighter-rouge">perl -lne '$sum += $_; END {print $sum}'</code>;</li>
+  <li><code class="language-plaintext highlighter-rouge">python3 -c 'import sys; print(sum(map(int, sys.stdin)))'</code> (or run a float summation by changing <code class="language-plaintext highlighter-rouge">int</code> to <code class="language-plaintext highlighter-rouge">float</code>);</li>
+  <li><code class="language-plaintext highlighter-rouge">paste -sd+ - | bc</code>.</li>
+</ul>
+
+<p>But today I <a href="https://unix.stackexchange.com/a/249799">found</a> a stupidly simple and intuitive alternative: <code class="language-plaintext highlighter-rouge">jq -s add</code>, where <code class="language-plaintext highlighter-rouge">-s</code> treat the stdin as an array, and <code class="language-plaintext highlighter-rouge">add</code> add the elements in the array together.
+Example:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">shuf</span> <span class="nt">-e</span> 5 7 | jq <span class="nt">-s</span> add
+<span class="c"># output: 12</span>
+</code></pre></div></div>
+
+<p>Note: we have used <code class="language-plaintext highlighter-rouge">shuf</code> (part of GNU coreutils) to get numbers printed to stdout, one per line, as the input.
+Of course, we will need to have <a href="https://jqlang.org/"><code class="language-plaintext highlighter-rouge">jq</code></a> installed.</p>
+
+<p>We may also extend the use case a bit to computing the mean.
+For example:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">shuf</span> <span class="nt">-e</span> 5 7 | jq <span class="nt">-s</span> add/length
+<span class="c"># output: 6</span>
+</code></pre></div></div>]]></content><author><name></name></author><category term="dev--sh" /><summary type="html"><![CDATA[Sometimes we need to add up numbers that come from stdin, one per line. There are many ways to attack this problem. To name a few:]]></summary></entry><entry><title type="html">Setup Apple Time Machine network drive with Samba on Ubuntu 22.04</title><link href="https://kkew3.github.io/2025/10/03/setup-apple-tm-with-smb-on-ubuntu.html" rel="alternate" type="text/html" title="Setup Apple Time Machine network drive with Samba on Ubuntu 22.04" /><published>2025-10-03T04:25:14+00:00</published><updated>2025-10-03T04:25:14+00:00</updated><id>https://kkew3.github.io/2025/10/03/setup-apple-tm-with-smb-on-ubuntu</id><content type="html" xml:base="https://kkew3.github.io/2025/10/03/setup-apple-tm-with-smb-on-ubuntu.html"><![CDATA[<p>The backup drive for my Mac’s Time Machine fails this morning.
+Therefore, I spent several hours working on setting up an Ubuntu 22.04 home server to serve as a network backup drive.</p>
+
+<h2 id="install-samba">Install Samba</h2>
+
+<p>Reference: <a href="https://ubuntu.com/tutorials/install-and-configure-samba">https://ubuntu.com/tutorials/install-and-configure-samba</a>.</p>
+
+<p>Install samba with:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt update
+<span class="nb">sudo </span>apt <span class="nb">install </span>samba
+</code></pre></div></div>
+
+<p>Then, set up a samba user account using the following command:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>smbpasswd <span class="nt">-a</span> username
+</code></pre></div></div>
+
+<p>The command will prompt for a password for the new account.
+Note that the username must belong to a system account.
+In my case, I use the same username and password as the home server’s login user and password.</p>
+
+<p>Samba comes with the following default config <code class="language-plaintext highlighter-rouge">/etc/samba/smb.conf</code>, which can be edited with <code class="language-plaintext highlighter-rouge">sudo vim /etc/samba/smb.conf</code>:</p>
+
+<div class="language-conf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#
+# Sample configuration file for the Samba suite for Debian GNU/Linux.
+#
+#
+# This is the main Samba configuration file. You should read the
+# smb.conf(5) manual page in order to understand the options listed
+# here. Samba has a huge number of configurable options most of which
+# are not shown in this example
+#
+# Some options that are often worth tuning have been included as
+# commented-out examples in this file.
+#  - When such options are commented with ";", the proposed setting
+#    differs from the default Samba behaviour
+#  - When commented with "#", the proposed setting is the default
+#    behaviour of Samba but the option is considered important
+#    enough to be mentioned here
+#
+# NOTE: Whenever you modify this file you should run the command
+# "testparm" to check that you have not made any basic syntactic
+# errors.
+</span>
+<span class="c">#======================= Global Settings =======================
+</span>
+[<span class="n">global</span>]
+
+<span class="c">## Browsing/Identification ###
+</span>
+<span class="c"># Change this to the workgroup/NT-domain name your Samba server will part of
+</span>   <span class="n">workgroup</span> = <span class="n">WORKGROUP</span>
+
+<span class="c"># server string is the equivalent of the NT Description field
+</span>   <span class="n">server</span> <span class="n">string</span> = %<span class="n">h</span> <span class="n">server</span> (<span class="n">Samba</span>, <span class="n">Ubuntu</span>)
+
+<span class="c">#### Networking ####
+</span>
+<span class="c"># The specific set of interfaces / networks to bind to
+# This can be either the interface name or an IP address/netmask;
+# interface names are normally preferred
+</span>;   <span class="n">interfaces</span> = <span class="m">127</span>.<span class="m">0</span>.<span class="m">0</span>.<span class="m">0</span>/<span class="m">8</span> <span class="n">eth0</span>
+
+<span class="c"># Only bind to the named interfaces and/or networks; you must use the
+# 'interfaces' option above to use this.
+# It is recommended that you enable this feature if your Samba machine is
+# not protected by a firewall or is a firewall itself.  However, this
+# option cannot handle dynamic or non-broadcast interfaces correctly.
+</span>;   <span class="n">bind</span> <span class="n">interfaces</span> <span class="n">only</span> = <span class="n">yes</span>
+
+
+
+<span class="c">#### Debugging/Accounting ####
+</span>
+<span class="c"># This tells Samba to use a separate log file for each machine
+# that connects
+</span>   <span class="n">log</span> <span class="n">file</span> = /<span class="n">var</span>/<span class="n">log</span>/<span class="n">samba</span>/<span class="n">log</span>.%<span class="n">m</span>
+
+<span class="c"># Cap the size of the individual log files (in KiB).
+</span>   <span class="n">max</span> <span class="n">log</span> <span class="n">size</span> = <span class="m">1000</span>
+
+<span class="c"># We want Samba to only log to /var/log/samba/log.{smbd,nmbd}.
+# Append syslog@1 if you want important messages to be sent to syslog too.
+</span>   <span class="n">logging</span> = <span class="n">file</span>
+
+<span class="c"># Do something sensible when Samba crashes: mail the admin a backtrace
+</span>   <span class="n">panic</span> <span class="n">action</span> = /<span class="n">usr</span>/<span class="n">share</span>/<span class="n">samba</span>/<span class="n">panic</span>-<span class="n">action</span> %<span class="n">d</span>
+
+
+<span class="c">####### Authentication #######
+</span>
+<span class="c"># Server role. Defines in which mode Samba will operate. Possible
+# values are "standalone server", "member server", "classic primary
+# domain controller", "classic backup domain controller", "active
+# directory domain controller".
+#
+# Most people will want "standalone server" or "member server".
+# Running as "active directory domain controller" will require first
+# running "samba-tool domain provision" to wipe databases and create a
+# new domain.
+</span>   <span class="n">server</span> <span class="n">role</span> = <span class="n">standalone</span> <span class="n">server</span>
+
+   <span class="n">obey</span> <span class="n">pam</span> <span class="n">restrictions</span> = <span class="n">yes</span>
+
+<span class="c"># This boolean parameter controls whether Samba attempts to sync the Unix
+# password with the SMB password when the encrypted SMB password in the
+# passdb is changed.
+</span>   <span class="n">unix</span> <span class="n">password</span> <span class="n">sync</span> = <span class="n">yes</span>
+
+<span class="c"># For Unix password sync to work on a Debian GNU/Linux system, the following
+# parameters must be set (thanks to Ian Kahan &lt;&lt;kahan@informatik.tu-muenchen.de&gt; for
+# sending the correct chat script for the passwd program in Debian Sarge).
+</span>   <span class="n">passwd</span> <span class="n">program</span> = /<span class="n">usr</span>/<span class="n">bin</span>/<span class="n">passwd</span> %<span class="n">u</span>
+   <span class="n">passwd</span> <span class="n">chat</span> = *<span class="n">Enter</span>\<span class="n">snew</span>\<span class="n">s</span>*\<span class="n">spassword</span>:* %<span class="n">n</span>\<span class="n">n</span> *<span class="n">Retype</span>\<span class="n">snew</span>\<span class="n">s</span>*\<span class="n">spassword</span>:* %<span class="n">n</span>\<span class="n">n</span> *<span class="n">password</span>\<span class="n">supdated</span>\<span class="n">ssuccessfully</span>* .
+
+<span class="c"># This boolean controls whether PAM will be used for password changes
+# when requested by an SMB client instead of the program listed in
+# 'passwd program'. The default is 'no'.
+</span>   <span class="n">pam</span> <span class="n">password</span> <span class="n">change</span> = <span class="n">yes</span>
+
+<span class="c"># This option controls how unsuccessful authentication attempts are mapped
+# to anonymous connections
+</span>   <span class="n">map</span> <span class="n">to</span> <span class="n">guest</span> = <span class="n">bad</span> <span class="n">user</span>
+
+
+<span class="c">########## Domains ###########
+</span>
+<span class="c">#
+# The following settings only takes effect if 'server role = classic
+# primary domain controller', 'server role = classic backup domain controller'
+# or 'domain logons' is set
+#
+</span>
+<span class="c"># It specifies the location of the user's
+# profile directory from the client point of view) The following
+# required a [profiles] share to be setup on the samba server (see
+# below)
+</span>;   <span class="n">logon</span> <span class="n">path</span> = \%<span class="n">N</span>\<span class="n">profiles</span>\%<span class="n">U</span>
+<span class="c"># Another common choice is storing the profile in the user's home directory
+# (this is Samba's default)
+#   logon path = \%N\%U\profile
+</span>
+<span class="c"># The following setting only takes effect if 'domain logons' is set
+# It specifies the location of a user's home directory (from the client
+# point of view)
+</span>;   <span class="n">logon</span> <span class="n">drive</span> = <span class="n">H</span>:
+<span class="c">#   logon home = \%N\%U
+</span>
+<span class="c"># The following setting only takes effect if 'domain logons' is set
+# It specifies the script to run during logon. The script must be stored
+# in the [netlogon] share
+# NOTE: Must be store in 'DOS' file format convention
+</span>;   <span class="n">logon</span> <span class="n">script</span> = <span class="n">logon</span>.<span class="n">cmd</span>
+
+<span class="c"># This allows Unix users to be created on the domain controller via the SAMR
+# RPC pipe.  The example command creates a user account with a disabled Unix
+# password; please adapt to your needs
+</span>; <span class="n">add</span> <span class="n">user</span> <span class="n">script</span> = /<span class="n">usr</span>/<span class="n">sbin</span>/<span class="n">adduser</span> --<span class="n">quiet</span> --<span class="n">disabled</span>-<span class="n">password</span> --<span class="n">gecos</span> <span class="s2">""</span> %<span class="n">u</span>
+
+<span class="c"># This allows machine accounts to be created on the domain controller via the
+# SAMR RPC pipe.
+# The following assumes a "machines" group exists on the system
+</span>; <span class="n">add</span> <span class="n">machine</span> <span class="n">script</span>  = /<span class="n">usr</span>/<span class="n">sbin</span>/<span class="n">useradd</span> -<span class="n">g</span> <span class="n">machines</span> -<span class="n">c</span> <span class="s2">"%u machine account"</span> -<span class="n">d</span> /<span class="n">var</span>/<span class="n">lib</span>/<span class="n">samba</span> -<span class="n">s</span> /<span class="n">bin</span>/<span class="n">false</span> %<span class="n">u</span>
+
+<span class="c"># This allows Unix groups to be created on the domain controller via the SAMR
+# RPC pipe.
+</span>; <span class="n">add</span> <span class="n">group</span> <span class="n">script</span> = /<span class="n">usr</span>/<span class="n">sbin</span>/<span class="n">addgroup</span> --<span class="n">force</span>-<span class="n">badname</span> %<span class="n">g</span>
+
+<span class="c">############ Misc ############
+</span>
+<span class="c"># Using the following line enables you to customise your configuration
+# on a per machine basis. The %m gets replaced with the netbios name
+# of the machine that is connecting
+</span>;   <span class="n">include</span> = /<span class="n">home</span>/<span class="n">samba</span>/<span class="n">etc</span>/<span class="n">smb</span>.<span class="n">conf</span>.%<span class="n">m</span>
+
+<span class="c"># Some defaults for winbind (make sure you're not using the ranges
+# for something else.)
+</span>;   <span class="n">idmap</span> <span class="n">config</span> * :              <span class="n">backend</span> = <span class="n">tdb</span>
+;   <span class="n">idmap</span> <span class="n">config</span> * :              <span class="n">range</span>   = <span class="m">3000</span>-<span class="m">7999</span>
+;   <span class="n">idmap</span> <span class="n">config</span> <span class="n">YOURDOMAINHERE</span> : <span class="n">backend</span> = <span class="n">tdb</span>
+;   <span class="n">idmap</span> <span class="n">config</span> <span class="n">YOURDOMAINHERE</span> : <span class="n">range</span>   = <span class="m">100000</span>-<span class="m">999999</span>
+;   <span class="n">template</span> <span class="n">shell</span> = /<span class="n">bin</span>/<span class="n">bash</span>
+
+<span class="c"># Setup usershare options to enable non-root users to share folders
+# with the net usershare command.
+</span>
+<span class="c"># Maximum number of usershare. 0 means that usershare is disabled.
+#   usershare max shares = 100
+</span>
+<span class="c"># Allow users who've been granted usershare privileges to create
+# public shares, not just authenticated ones
+</span>   <span class="n">usershare</span> <span class="n">allow</span> <span class="n">guests</span> = <span class="n">yes</span>
+
+<span class="c">#======================= Share Definitions =======================
+</span>
+<span class="c"># Un-comment the following (and tweak the other settings below to suit)
+# to enable the default home directory shares. This will share each
+# user's home directory as \server\username
+</span>;[<span class="n">homes</span>]
+;   <span class="n">comment</span> = <span class="n">Home</span> <span class="n">Directories</span>
+;   <span class="n">browseable</span> = <span class="n">no</span>
+
+<span class="c"># By default, the home directories are exported read-only. Change the
+# next parameter to 'no' if you want to be able to write to them.
+</span>;   <span class="n">read</span> <span class="n">only</span> = <span class="n">yes</span>
+
+<span class="c"># File creation mask is set to 0700 for security reasons. If you want to
+# create files with group=rw permissions, set next parameter to 0775.
+</span>;   <span class="n">create</span> <span class="n">mask</span> = <span class="m">0700</span>
+
+<span class="c"># Directory creation mask is set to 0700 for security reasons. If you want to
+# create dirs. with group=rw permissions, set next parameter to 0775.
+</span>;   <span class="n">directory</span> <span class="n">mask</span> = <span class="m">0700</span>
+
+<span class="c"># By default, \server\username shares can be connected to by anyone
+# with access to the samba server.
+# Un-comment the following parameter to make sure that only "username"
+# can connect to \server\username
+# This might need tweaking when using external authentication schemes
+</span>;   <span class="n">valid</span> <span class="n">users</span> = %<span class="n">S</span>
+
+<span class="c"># Un-comment the following and create the netlogon directory for Domain Logons
+# (you need to configure Samba to act as a domain controller too.)
+</span>;[<span class="n">netlogon</span>]
+;   <span class="n">comment</span> = <span class="n">Network</span> <span class="n">Logon</span> <span class="n">Service</span>
+;   <span class="n">path</span> = /<span class="n">home</span>/<span class="n">samba</span>/<span class="n">netlogon</span>
+;   <span class="n">guest</span> <span class="n">ok</span> = <span class="n">yes</span>
+;   <span class="n">read</span> <span class="n">only</span> = <span class="n">yes</span>
+
+<span class="c"># Un-comment the following and create the profiles directory to store
+# users profiles (see the "logon path" option above)
+# (you need to configure Samba to act as a domain controller too.)
+# The path below should be writable by all users so that their
+# profile directory may be created the first time they log on
+</span>;[<span class="n">profiles</span>]
+;   <span class="n">comment</span> = <span class="n">Users</span> <span class="n">profiles</span>
+;   <span class="n">path</span> = /<span class="n">home</span>/<span class="n">samba</span>/<span class="n">profiles</span>
+;   <span class="n">guest</span> <span class="n">ok</span> = <span class="n">no</span>
+;   <span class="n">browseable</span> = <span class="n">no</span>
+;   <span class="n">create</span> <span class="n">mask</span> = <span class="m">0600</span>
+;   <span class="n">directory</span> <span class="n">mask</span> = <span class="m">0700</span>
+
+[<span class="n">printers</span>]
+   <span class="n">comment</span> = <span class="n">All</span> <span class="n">Printers</span>
+   <span class="n">browseable</span> = <span class="n">no</span>
+   <span class="n">path</span> = /<span class="n">var</span>/<span class="n">spool</span>/<span class="n">samba</span>
+   <span class="n">printable</span> = <span class="n">yes</span>
+   <span class="n">guest</span> <span class="n">ok</span> = <span class="n">no</span>
+   <span class="n">read</span> <span class="n">only</span> = <span class="n">yes</span>
+   <span class="n">create</span> <span class="n">mask</span> = <span class="m">0700</span>
+
+<span class="c"># Windows clients look for this share name as a source of downloadable
+# printer drivers
+</span>[<span class="n">print</span>$]
+   <span class="n">comment</span> = <span class="n">Printer</span> <span class="n">Drivers</span>
+   <span class="n">path</span> = /<span class="n">var</span>/<span class="n">lib</span>/<span class="n">samba</span>/<span class="n">printers</span>
+   <span class="n">browseable</span> = <span class="n">yes</span>
+   <span class="n">read</span> <span class="n">only</span> = <span class="n">yes</span>
+   <span class="n">guest</span> <span class="n">ok</span> = <span class="n">no</span>
+<span class="c"># Uncomment to allow remote administration of Windows print drivers.
+# You may need to replace 'lpadmin' with the name of the group your
+# admin users are members of.
+# Please note that you also need to set appropriate Unix permissions
+# to the drivers directory for these users to have write rights in it
+</span>;   <span class="n">write</span> <span class="n">list</span> = <span class="n">root</span>, @<span class="n">lpadmin</span>
+</code></pre></div></div>
+
+<p>I delete the printer sections:</p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gh">diff --git 1/smb.conf 2/smb.conf
+index 8fe8be8..55c516a 100644
+</span><span class="gd">--- 1/smb.conf
+</span><span class="gi">+++ 2/smb.conf
+</span><span class="p">@@ -217,23 +217,23 @@</span>
+ ;   create mask = 0600
+ ;   directory mask = 0700
+ 
+<span class="gd">-[printers]
+-   comment = All Printers
+-   browseable = no
+-   path = /var/spool/samba
+-   printable = yes
+-   guest ok = no
+-   read only = yes
+-   create mask = 0700
+</span><span class="gi">+#[printers]
++#   comment = All Printers
++#   browseable = no
++#   path = /var/spool/samba
++#   printable = yes
++#   guest ok = no
++#   read only = yes
++#   create mask = 0700
+</span> 
+ # Windows clients look for this share name as a source of downloadable
+ # printer drivers
+<span class="gd">-[print$]
+-   comment = Printer Drivers
+-   path = /var/lib/samba/printers
+-   browseable = yes
+-   read only = yes
+-   guest ok = no
+</span><span class="gi">+#[print$]
++#   comment = Printer Drivers
++#   path = /var/lib/samba/printers
++#   browseable = yes
++#   read only = yes
++#   guest ok = no
+</span> # Uncomment to allow remote administration of Windows print drivers.
+ # You may need to replace 'lpadmin' with the name of the group your
+ # admin users are members of.
+</code></pre></div></div>
+
+<h2 id="setup-samba-for-time-machine">Setup Samba for Time Machine</h2>
+
+<p>Reference: <a href="https://blog.jhnr.ch/2023/01/09/setup-apple-time-machine-network-drive-with-samba-on-ubuntu-22.04/">https://blog.jhnr.ch/2023/01/09/setup-apple-time-machine-network-drive-with-samba-on-ubuntu-22.04/</a>.</p>
+
+<p>To make Samba work we need <code class="language-plaintext highlighter-rouge">samba-vfs-modules</code> package.
+Install it with:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt <span class="nb">install </span>samba-vfs-modules
+</code></pre></div></div>
+
+<p>Create the backup directory in the home server:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">mkdir</span> /data/MyMacTimeMachine
+</code></pre></div></div>
+
+<p>We further configure <code class="language-plaintext highlighter-rouge">/etc/samba/smb.conf</code> as what follows:</p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gh">diff --git 2/smb.conf 3/smb.conf
+index 55c516a..98b10c5 100644
+</span><span class="gd">--- 2/smb.conf
+</span><span class="gi">+++ 3/smb.conf
+</span><span class="p">@@ -99,6 +99,21 @@</span>
+ # to anonymous connections
+    map to guest = bad user
+ 
+<span class="gi">+# Fruit global config
++   fruit:aapl = yes
++   fruit:nfs_aces = no
++   fruit:copyfile = no
++   fruit:model = MacSamba
++
++   inherit permissions = yes
++   multicast dns register = no
++
++# Protocol versions
++   client max protocol = default
++   client min protocol = SMB2_02
++   server max protocol = SMB3
++   server min protocol = SMB2_02
++
+</span> 
+ ########## Domains ###########
+ 
+<span class="p">@@ -240,3 +255,15 @@</span>
+ # Please note that you also need to set appropriate Unix permissions
+ # to the drivers directory for these users to have write rights in it
+ ;   write list = root, @lpadmin
+<span class="gi">+
++[myMacTimeMachine]
++   vfs objects = catia fruit streams_xattr
++   fruit:time machine = yes
++   fruit:time machine max size = 500G
++   comment = Time Machine backup
++   path = /data/MyMacTimeMachine
++   available = yes
++   valid users = kw
++   browseable = yes
++   guest ok = no
++   writable = yes
+</span></code></pre></div></div>
+
+<p>In my case, I set the section name as <code class="language-plaintext highlighter-rouge">myMacTimeMachine</code>.
+I’m not sure what characters are safe to use, but alphanumeric characters should be okay.</p>
+
+<h2 id="setup-avahi-daemon-for-time-machine">Setup avahi-daemon for Time Machine</h2>
+
+<p>Quoted from Johner’s post above:</p>
+
+<blockquote>
+  <p>Basically Samba shares the network drive and avahi makes it work with apple devices by implementing Apple’s Zeroconf architecture (also known as “Rendezvous” or “Bonjour”).</p>
+</blockquote>
+
+<p>Install with:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt <span class="nb">install </span>avahi-daemon
+</code></pre></div></div>
+
+<p>Create an avahi config file with <code class="language-plaintext highlighter-rouge">sudo vim /etc/avahi/services/samba.service</code>:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" standalone='no'?&gt;</span>
+<span class="cp">&lt;!DOCTYPE service-group SYSTEM "avahi-service.dtd"&gt;</span>
+<span class="nt">&lt;service-group&gt;</span>
+  <span class="nt">&lt;name</span> <span class="na">replace-wildcards=</span><span class="s">"yes"</span><span class="nt">&gt;</span>%h<span class="nt">&lt;/name&gt;</span>
+  <span class="nt">&lt;service&gt;</span>
+    <span class="nt">&lt;type&gt;</span>_smb._tcp<span class="nt">&lt;/type&gt;</span>
+    <span class="nt">&lt;port&gt;</span>445<span class="nt">&lt;/port&gt;</span>
+  <span class="nt">&lt;/service&gt;</span>
+  <span class="nt">&lt;service&gt;</span>
+    <span class="nt">&lt;type&gt;</span>_device-info._tcp<span class="nt">&lt;/type&gt;</span>
+    <span class="nt">&lt;port&gt;</span>0<span class="nt">&lt;/port&gt;</span>
+    <span class="nt">&lt;txt-record&gt;</span>model=TimeCapsule8,119<span class="nt">&lt;/txt-record&gt;</span>
+  <span class="nt">&lt;/service&gt;</span>
+  <span class="nt">&lt;service&gt;</span>
+    <span class="nt">&lt;type&gt;</span>_adisk._tcp<span class="nt">&lt;/type&gt;</span>
+    <span class="nt">&lt;txt-record&gt;</span>dk0=adVN=timemachine,adVF=0x82<span class="nt">&lt;/txt-record&gt;</span>
+    <span class="nt">&lt;txt-record&gt;</span>sys=waMa=0,adVF=0x100<span class="nt">&lt;/txt-record&gt;</span>
+  <span class="nt">&lt;/service&gt;</span>
+<span class="nt">&lt;/service-group&gt;</span>
+</code></pre></div></div>
+
+<p>Be sure to fill the section name of <code class="language-plaintext highlighter-rouge">/etc/samba/smb.conf</code> in the first <code class="language-plaintext highlighter-rouge">&lt;txt-record&gt;</code>:</p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gh">diff --git 1/samba.service 2/samba.service
+index c516aac..5651005 100644
+</span><span class="gd">--- 1/samba.service
+</span><span class="gi">+++ 2/samba.service
+</span><span class="p">@@ -13,7 +13,7 @@</span>
+   &lt;/service&gt;
+   &lt;service&gt;
+     &lt;type&gt;_adisk._tcp&lt;/type&gt;
+<span class="gd">-    &lt;txt-record&gt;dk0=adVN=timemachine,adVF=0x82&lt;/txt-record&gt;
+</span><span class="gi">+    &lt;txt-record&gt;dk0=adVN=myMacTimeMachine,adVF=0x82&lt;/txt-record&gt;
+</span>     &lt;txt-record&gt;sys=waMa=0,adVF=0x100&lt;/txt-record&gt;
+   &lt;/service&gt;
+ &lt;/service-group&gt;
+</code></pre></div></div>
+
+<h2 id="run-the-services">Run the services</h2>
+
+<p>Reference: <a href="https://ubuntu.com/tutorials/install-and-configure-samba">https://ubuntu.com/tutorials/install-and-configure-samba</a>.</p>
+
+<p>Update the firewall rules:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>ufw allow samba
+</code></pre></div></div>
+
+<p>Reference: <a href="https://gist.github.com/davisford/5984768">https://gist.github.com/davisford/5984768</a>.</p>
+
+<p>Finally (re)start the services.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>service smbd restart
+<span class="nb">sudo </span>systemctl restart avahi-daemon
+</code></pre></div></div>
+
+<p>These two commands should be rerun every time the <code class="language-plaintext highlighter-rouge">/etc/samba/smb.conf</code> config file is updated.</p>
+
+<h2 id="configure-time-machine-on-mac-side">Configure Time Machine on Mac side</h2>
+
+<p>Open <code class="language-plaintext highlighter-rouge">System Preferences &gt; Time Machine &gt; Select Disk</code>.
+The samba shared folder <code class="language-plaintext highlighter-rouge">myMacTimeMachine</code> should now appear in the <code class="language-plaintext highlighter-rouge">Available Disks</code> list.</p>]]></content><author><name></name></author><category term="dev--network" /><category term="os--ubuntu" /><summary type="html"><![CDATA[The backup drive for my Mac’s Time Machine fails this morning. Therefore, I spent several hours working on setting up an Ubuntu 22.04 home server to serve as a network backup drive.]]></summary></entry><entry><title type="html">尝试用小语言模型翻译网络新闻</title><link href="https://kkew3.github.io/2025/08/21/translate-news-story-on-web-slm.html" rel="alternate" type="text/html" title="尝试用小语言模型翻译网络新闻" /><published>2025-08-21T11:14:32+00:00</published><updated>2025-08-21T11:14:32+00:00</updated><id>https://kkew3.github.io/2025/08/21/translate-news-story-on-web-slm</id><content type="html" xml:base="https://kkew3.github.io/2025/08/21/translate-news-story-on-web-slm.html"><![CDATA[<h2 id="契机">契机</h2>
+
+<p>为了让妈妈多了解国际新闻，周末简单做了一个用<em>免费</em>小语言模型 <a href="https://ai.baidu.com/ai-doc/WENXINWORKSHOP/Qm9cw2s7m">ERNIE-speed-128k</a> 和 <a href="https://bigmodel.cn/pricing">GLM-4.5-Flash</a> 翻译 <a href="https://news.ycombinator.com/">Hacker News</a> 头条的 proof-of-concept 项目。</p>
+
+<h2 id="步骤">步骤</h2>
+
+<h3 id="获取新闻-url">获取新闻 url</h3>
+
+<p>有多种选择。比如如果在 <a href="https://kkew3.github.io/2024/12/31/miniflux-on-mac.html">Miniflux</a> 中订阅了 Hacker News，可以用以下 bash 命令得到最新的 Hacker News 新闻网址：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 按需设置这些变量</span>
+<span class="nv">MINIFLUX_API_KEY</span><span class="o">=</span>xxxxxxxxxxxxxx
+<span class="nv">MINIFLUX_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8050
+<span class="nv">HACKER_NEWS_FEED_ID</span><span class="o">=</span>57
+<span class="c"># 获取最新新闻网址并保存到 NEWS_URL 文件</span>
+curl <span class="nt">-s</span> <span class="nt">--get</span> <span class="se">\</span>
+    <span class="nt">-d</span> <span class="s1">'status=unread'</span> <span class="se">\</span>
+    <span class="nt">-d</span> <span class="s1">'order=published_at'</span> <span class="se">\</span>
+    <span class="nt">-d</span> <span class="s1">'direction=desc'</span> <span class="se">\</span>
+    <span class="nt">-d</span> <span class="s1">'limit=1'</span> <span class="se">\</span>
+    <span class="nt">-H</span> <span class="s2">"X-Auth-Token: </span><span class="nv">$MINIFLUX_API_KEY</span><span class="s2">"</span> <span class="se">\</span>
+    <span class="s2">"</span><span class="nv">$MINIFLUX_BASE_URL</span><span class="s2">/v1/feeds/</span><span class="nv">$HACKER_NEWS_FEED_ID</span><span class="s2">/entries"</span> <span class="se">\</span>
+    | jq <span class="nt">--raw-output</span> <span class="s1">'.entries[] | .url'</span> <span class="se">\</span>
+    | <span class="nb">tee </span>NEWS_URL
+</code></pre></div></div>
+
+<p>我的输出为：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://www.databricks.com/company/newsroom/press-releases/databricks-raising-series-k-investment-100-billion-valuation
+</code></pre></div></div>
+
+<h3 id="下载网页为-markdown">下载网页为 Markdown</h3>
+
+<p>假设下载为 <code class="language-plaintext highlighter-rouge">NEWS.md</code>。有多种工具可以实现：</p>
+
+<ol>
+  <li><a href="https://jina.ai/reader/">jina.ai reader api</a></li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-so</span> NEWS.md <span class="s2">"https://r.jina.ai/</span><span class="si">$(</span><span class="nb">cat </span>NEWS_URL<span class="si">)</span><span class="s2">"</span>
+</code></pre></div></div>
+
+<ol start="2">
+  <li><a href="https://github.com/docling-project/docling">docling</a>:</li>
+</ol>
+
+<p>首先新建 <code class="language-plaintext highlighter-rouge">run_docling.py</code>：</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">docling.document_converter</span> <span class="kn">import</span> <span class="n">DocumentConverter</span><span class="p">,</span> <span class="n">DocumentStream</span>
+<span class="k">with</span> <span class="n">BytesIO</span><span class="p">(</span><span class="n">sys</span><span class="p">.</span><span class="n">stdin</span><span class="p">.</span><span class="nb">buffer</span><span class="p">.</span><span class="n">read</span><span class="p">())</span> <span class="k">as</span> <span class="n">buf</span><span class="p">:</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">DocumentStream</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">"file.html"</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="n">buf</span><span class="p">)</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">converter</span><span class="p">.</span><span class="n">convert</span><span class="p">(</span><span class="n">source</span><span class="p">).</span><span class="n">document</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">doc</span><span class="p">.</span><span class="n">export_to_markdown</span><span class="p">(),</span> <span class="n">end</span><span class="o">=</span><span class="s">""</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>然后在 bash 调用：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-fsSL</span> <span class="s2">"</span><span class="si">$(</span><span class="nb">cat </span>NEWS_URL<span class="si">)</span><span class="s2">"</span> <span class="se">\</span>
+    | python3 run_docling.py <span class="se">\</span>
+    <span class="o">&gt;</span> NEWS.md
+</code></pre></div></div>
+
+<ol start="3">
+  <li><a href="https://github.com/kkew3/html2obsidian">html2obsidian</a>:</li>
+</ol>
+
+<p>在 bash 使用如下：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">url</span><span class="o">=</span><span class="s2">"</span><span class="si">$(</span><span class="nb">cat </span>NEWS_URL<span class="si">)</span><span class="s2">"</span>
+curl <span class="nt">-fsSL</span> <span class="s2">"</span><span class="nv">$url</span><span class="s2">"</span> <span class="se">\</span>
+    | html2obsidian <span class="nt">--url</span> <span class="s2">"</span><span class="nv">$url</span><span class="s2">"</span> - <span class="se">\</span>
+    <span class="o">&gt;</span> NEWS.md
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">NEWS.md</code> 内容如下（使用 <code class="language-plaintext highlighter-rouge">html2obsidian</code>）：</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Skip to main content<span class="p">[</span><span class="nv">![</span><span class="p">](</span><span class="sx">assets/59e4fdd3b5ef082d0e991df58b6539be1dad4067.svg+xml</span><span class="p">)</span>](https://www.databricks.com/)
+
+<span class="p">[</span><span class="nv">Login</span><span class="p">](</span><span class="sx">https://login.databricks.com/?dbx_source=www&amp;itm=main-cta-login&amp;l=en-EN</span><span class="p">)</span>
+
+<span class="p">[</span><span class="nv">![</span><span class="p">](</span><span class="sx">assets/59e4fdd3b5ef082d0e991df58b6539be1dad4067.svg+xml</span><span class="p">)</span>](https://www.databricks.com/)-     -         - Discover
+<span class="p">            -</span> <span class="p">[</span><span class="nv">For Executives</span><span class="p">](</span><span class="sx">https://www.databricks.com/why-databricks/executives</span><span class="p">)</span>            - <span class="p">[</span><span class="nv">For Startups</span><span class="p">](</span><span class="sx">https://www.databricks.com/product/startups</span><span class="p">)</span>            - <span class="p">[</span><span class="nv">Lakehouse Architecture</span><span class="p">](</span><span class="sx">https://www.databricks.com/product/data-lakehouse</span><span class="p">)</span>            - <span class="p">[</span><span class="nv">Mosaic Research</span><span class="p">](</span><span class="sx">https://www.databricks.com/research/mosaic</span><span class="p">)</span>        - Customers
+<span class="p">            -</span> <span class="p">[</span><span class="nv">Customer Stories</span><span class="p">](</span><span class="sx">https://www.databricks.com/customers</span><span class="p">)</span>        - Partners
+
+[..]
+
+<span class="gh"># Databricks is raising a Series K Investment at &gt;$100 billion valuation</span>
+
+<span class="gu">###### August 19, 2025</span>
+
+Share this post
+
+[..]
+
+<span class="gs">**SAN FRANCISCO, CA — August 19, 2025**</span> — <span class="p">[</span><span class="nv">Databricks</span><span class="p">](</span><span class="sx">https://www.databricks.com/</span><span class="p">)</span>, the Data and AI company, today announced it has signed a term sheet for its Series K round, which it expects to close soon with backing from existing investors. This funding values the company at &gt;$100 billion.
+
+The company expects to use the new capital to accelerate its AI strategy — expanding Agent Bricks, investing in its new database offering Lakebase, and fueling global growth. At the June Data + AI Summit, Databricks introduced a new product, Agent Bricks, which builds high-quality, production AI agents optimized on your enterprise data, and Lakebase, a new type of operational database (OLTP), built on open source Postgres, and optimized for AI Agents. The investment is also expected to support future AI acquisitions and deepen AI research.
+
+“We’re seeing tremendous investor interest because of the momentum behind our AI products, which power the world's largest businesses and AI services,” said Ali Ghodsi, co-founder and CEO of Databricks. “Every company can securely turn its enterprise data into AI apps and agents to grow revenue faster, operate more efficiently, and make smarter decisions with less risk. Databricks is benefiting from an unprecedented global demand for AI apps and agents, turning companies’ data into goldmines. We’re thrilled this round is already over-subscribed and to partner with strategic, long-term investors who share our vision for the future of AI.”
+
+This new investment comes on the heels of strong momentum for Databricks. In the last two quarters, the company has launched or expanded partnerships with Microsoft, Google Cloud, Anthropic, SAP, and Palantir. More than 15,000 customers around the world use the <span class="p">[</span><span class="nv">Databricks Data Intelligence Platform</span><span class="p">](</span><span class="sx">https://www.databricks.com/product/data-intelligence-platform</span><span class="p">)</span> to democratize access to data and AI, making it easier to harness the power of their data for analytics and AI apps and agents. Built on an open source foundation, the platform enables organizations to drive innovation that increases revenue, lowers costs, and reduces risk. 
+
+<span class="gs">**About Databricks**</span>
+
+Databricks is the Data and AI company. More than 15,000 organizations worldwide — including Block, Comcast, Condé Nast, Rivian, Shell and over 60% of the Fortune 500 — rely on the Databricks Data Intelligence Platform to take control of their data and put it to work with AI. Databricks is headquartered in San Francisco, with offices around the globe and was founded by the original creators of Lakehouse, Apache Spark™, Delta Lake, MLflow, and Unity Catalog. To learn more, follow Databricks on <span class="p">[</span><span class="nv">X</span><span class="p">](</span><span class="sx">https://twitter.com/databricks</span><span class="p">)</span>, <span class="p">[</span><span class="nv">LinkedIn</span><span class="p">](</span><span class="sx">https://www.linkedin.com/company/databricks</span><span class="p">)</span> and <span class="p">[</span><span class="nv">Facebook</span><span class="p">](</span><span class="sx">https://www.facebook.com/databricksinc</span><span class="p">)</span>.
+
+[..]
+</code></pre></div></div>
+
+<h3 id="提取主要内容">提取主要内容</h3>
+
+<p>此步骤很重要。<code class="language-plaintext highlighter-rouge">NEWS.md</code> 通常会包含大量链接 markup、图片 base64 等噪声。直接将 <code class="language-plaintext highlighter-rouge">NEWS.md</code> 输入 <a href="https://ai.baidu.com/ai-doc/WENXINWORKSHOP/Qm9cw2s7m">ERNIE-speed-128k</a> 进行翻译将会导致大量幻觉。</p>
+
+<p>关键假设：</p>
+
+<blockquote>
+  <p>一篇新闻 markdown 文档至多包含一块<em>连续</em>的主要内容段落。</p>
+</blockquote>
+
+<p>因此可将提取主要内容的任务规约为 selective copy 任务 (<a href="https://arxiv.org/pdf/2312.00752">Gu &amp; Dao, 2024</a>; <a href="https://arxiv.org/pdf/2405.18719">Golovneva et al., 2024</a>)。</p>
+
+<p>系统提示词：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>You are a simple echo bot. Given a markdown document that contains a news story, find and return exactly one consecutive block of plain news text from that document in verbatim. Follow these rules:
+
+- Return only one block. A block is one or more consecutive lines separated from other content by blank lines or markdown structure.
+- Prefer a block that reads like a coherent news paragraph with complete sentences and factual information.
+- Do not return blocks that are mostly code, lists, tables, base64, timestamps, dates-only lines, metadata, image encodings, captions, or short fragments (less than one sentence).
+- If multiple candidate blocks qualify, choose the longest coherent paragraph.
+- Preserve the original text and punctuation of the chosen block exactly. Do not add, remove, summarize, or rewrite.
+- Output only the chosen block. Do not add any commentary, labels, quotes, or extra whitespace before or after.
+- If the document contains no suitable news paragraph, output exactly this text: "Not found".
+
+Keep the response minimal and exact.
+</code></pre></div></div>
+
+<p>用户提示词：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;markdown-input&gt;
+[..]
+&lt;/markdown-input&gt;
+</code></pre></div></div>
+
+<p>其中 <code class="language-plaintext highlighter-rouge">[..]</code> 需要被替换为 <code class="language-plaintext highlighter-rouge">NEWS.md</code> 的内容。</p>
+
+<p>ERNIE-speed-128k 小模型的输出如下：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Databricks is raising a Series K Investment at &gt;$100 billion valuation
+
+SAN FRANCISCO, CA — August 19, 2025 — Databricks, the Data and AI company, today announced it has signed a term sheet for its Series K round, which it expects to close soon with backing from existing investors. This funding values the company at &gt;$100 billion.
+
+The company expects to use the new capital to accelerate its AI strategy — expanding Agent Bricks, investing in its new database offering Lakebase, and fueling global growth. At the June Data + AI Summit, Databricks introduced a new product, Agent Bricks, which builds high-quality, production AI agents optimized on your enterprise data, and Lakebase, a new type of operational database (OLTP), built on open source Postgres, and optimized for AI Agents. The investment is also expected to support future AI acquisitions and deepen AI research.
+
+“We’re seeing tremendous investor interest because of the momentum behind our AI products, which power the world's largest businesses and AI services,” said Ali Ghodsi, co-founder and CEO of Databricks. “Every company can securely turn its enterprise data into AI apps and agents to grow revenue faster, operate more efficiently, and make smarter decisions with less risk. Databricks is benefiting from an unprecedented global demand for AI apps and agents, turning companies’ data into goldmines. We’re thrilled this round is already over-subscribed and to partner with strategic, long-term investors who share our vision for the future of AI.”
+
+This new investment comes on the heels of strong momentum for Databricks. In the last two quarters, the company has launched or expanded partnerships with Microsoft, Google Cloud, Anthropic, SAP, and Palantir. More than 15,000 customers around the world use the Databricks Data Intelligence Platform to democratize access to data and AI, making it easier to harness the power of their data for analytics and AI apps and agents. Built on an open source foundation, the platform enables organizations to drive innovation that increases revenue, lowers costs, and reduces risk.
+</code></pre></div></div>
+
+<p>可见提取质量很高。</p>
+
+<p>此步骤用时大约 7 秒。</p>
+
+<h3 id="翻译">翻译</h3>
+
+<p>实测 ERNIE-speed-128k 翻译质量不佳，于是我们可以转而使用另一个<em>免费</em>小模型 GLM-4.5-Flash。</p>
+
+<p>系统提示词：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>You are a professional English-to-Chinese translator. Translate the provided markdown text to natural and fluent simplified Chinese text. Output plain text and ignore any markdown markups if any.
+</code></pre></div></div>
+
+<p>用户提示词为上一步提取的新闻主要内容。</p>
+
+<p>GLM-4.5-Flash 输出：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Databricks正以超过1000亿美元的估值进行K轮融资
+
+加利福尼亚州旧金山 — 2025年8月19日 — 数据与人工智能公司Databricks今日宣布，其已签署K轮融资的条款清单，预计很快将在现有投资者的支持下完成本轮融资。此轮融资对该公司的估值超过1000亿美元。
+
+公司计划利用新资金加速其人工智能战略——扩展Agent Bricks产品线，投资其新的数据库产品Lakebase，并推动全球业务增长。在6月的数据与人工智能峰会上，Databricks推出了新产品Agent Bricks，该产品构建基于企业数据优化生产的高质量AI代理，以及Lakebase，一种基于开源Postgres构建的新型操作数据库(OLTP)，并针对AI代理进行了优化。此次投资还预计将支持未来的AI收购并深化AI研究。
+
+Databricks联合创始人兼首席执行官Ali Ghodsi表示："我们正看到投资者对我们AI产品的巨大兴趣，这些产品为全球最大的企业和AI服务提供动力。每家公司都可以安全地将企业数据转化为AI应用和代理，以更快地增长收入、更高效地运营，并在更低风险的情况下做出更明智的决策。Databricks正受益于前所未有的全球AI应用和代理需求，将公司的数据转化为金矿。我们对本轮融资已超额认购感到非常兴奋，并与那些分享我们对AI未来愿景的战略性长期投资者合作。"
+
+这项新投资正值Databricks势头强劲之际。在过去两个季度，该公司已与微软、谷歌云、Anthropic、SAP和Palantir建立了或扩大了合作伙伴关系。全球超过15,000家客户使用Databricks数据智能平台来普及数据和AI的访问，使利用其数据进行分析以及AI应用和代理更加容易。该平台建立在开源基础上，使组织能够推动增加收入、降低成本和减少风险的创新。
+</code></pre></div></div>
+
+<p>此步骤用时大约 34 秒。</p>]]></content><author><name></name></author><category term="llm" /><summary type="html"><![CDATA[契机]]></summary></entry><entry><title type="html">Poor man’s parallel gzip</title><link href="https://kkew3.github.io/2025/07/15/poor-mans-parallel-gzip.html" rel="alternate" type="text/html" title="Poor man’s parallel gzip" /><published>2025-07-15T09:52:27+00:00</published><updated>2025-07-15T09:52:27+00:00</updated><id>https://kkew3.github.io/2025/07/15/poor-mans-parallel-gzip</id><content type="html" xml:base="https://kkew3.github.io/2025/07/15/poor-mans-parallel-gzip.html"><![CDATA[<p>There have been several tools aiming to incorporate multiple CPU cores to accelerate large file compression.
+To name a few: <a href="https://zlib.net/pigz/"><code class="language-plaintext highlighter-rouge">pigz</code></a>, <a href="https://facebook.github.io/zstd/"><code class="language-plaintext highlighter-rouge">zstd</code></a>, <a href="https://tukaani.org/xz/"><code class="language-plaintext highlighter-rouge">xz</code></a>.
+Here I suggest a minimalist approach to parallel compression.
+The core idea:</p>
+
+<ol>
+  <li>Split a file into chunks.</li>
+  <li>Compress the chunks in parallel.</li>
+  <li>Bundle the results in a tarball.</li>
+</ol>
+
+<p>This approach is remarkably easy to implement and surprisingly effective for many use-cases—especially when you just want “good enough” speed without extra software.</p>
+
+<p>Here’re the hackable shell functions that implement compression and decompression:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Write the tarball containing gzipped chunks to stdout.</span>
+<span class="c"># Usage: cat FILE | pgzip &gt; OUTPUT.tar</span>
+pgzip<span class="o">()</span> <span class="o">{</span>
+    <span class="nb">local </span><span class="nv">workdir</span><span class="o">=</span><span class="s2">"</span><span class="si">$(</span><span class="nb">mktemp</span> <span class="nt">-d</span> <span class="s2">"</span><span class="k">${</span><span class="nv">TMPDIR</span><span class="k">:-</span><span class="p">/tmp</span><span class="k">}</span><span class="s2">/tmpXXXXXX"</span><span class="si">)</span><span class="s2">"</span>
+    <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> <span class="nt">-ne</span> 0 <span class="o">]</span><span class="p">;</span> <span class="k">then
+        </span><span class="nb">echo</span> <span class="s2">"Failed to mktemp -d"</span> <span class="o">&gt;</span>&amp;2
+        <span class="k">return </span>1
+    <span class="k">fi</span>
+
+    <span class="c"># Some fancy strategies to decide the number of chunks to split.</span>
+    <span class="nb">local </span><span class="nv">ncpu</span><span class="o">=</span><span class="s2">"</span><span class="si">$(</span><span class="nb">nproc</span><span class="si">)</span><span class="s2">"</span>  <span class="c"># Get the number of processors.</span>
+    <span class="nv">ncpu</span><span class="o">=</span><span class="k">$((</span> <span class="nv">$ncpu</span> <span class="o">*</span> <span class="m">8</span> <span class="o">/</span> <span class="m">10</span> <span class="k">))</span>  <span class="c"># Use 80% of all processors.</span>
+    <span class="nv">ncpu</span><span class="o">=</span><span class="k">$((</span> <span class="nv">$ncpu</span> &lt; <span class="m">10</span> ? <span class="nv">$ncpu</span> : <span class="m">10</span> <span class="k">))</span>  <span class="c"># Use at most 10 processors.</span>
+
+    <span class="c"># Step 1: split stdin into chunks.</span>
+    <span class="nb">split</span> <span class="nt">-d</span> <span class="nt">-a</span> 1 <span class="nt">-n</span> <span class="nv">$ncpu</span> - <span class="s2">"</span><span class="nv">$workdir</span><span class="s2">/chunk_"</span>
+    <span class="c"># Step 2: parallel gzip.</span>
+    find <span class="s2">"</span><span class="nv">$workdir</span><span class="s2">"</span> <span class="nt">-name</span> <span class="s1">'chunk_*'</span> | xargs <span class="nt">-n1</span> <span class="nt">-P</span> <span class="nv">$ncpu</span> <span class="nb">gzip</span>
+    <span class="c"># Step 3: bundle into tarball, which goes to stdout.</span>
+    <span class="o">{</span> <span class="nb">echo</span> <span class="s2">"-C </span><span class="nv">$workdir</span><span class="s2">"</span><span class="p">;</span> find <span class="s2">"</span><span class="nv">$workdir</span><span class="s2">"</span> <span class="nt">-name</span> <span class="s1">'chunk_*'</span> | xargs <span class="nb">basename</span> | <span class="nb">sort</span><span class="p">;</span> <span class="o">}</span> | <span class="nb">tar </span>cf - <span class="nt">-T</span> -
+    <span class="nb">rm</span> <span class="nt">-rf</span> <span class="s2">"</span><span class="nv">$workdir</span><span class="s2">"</span>
+<span class="o">}</span>
+
+<span class="c"># Decompress the output tarball to stdout.</span>
+<span class="c"># Usage: pgunzip OUTPUT.tar &gt; FILE</span>
+pgunzip<span class="o">()</span> <span class="o">{</span>
+    <span class="nb">local </span><span class="nv">INPUT</span><span class="o">=</span><span class="s2">"</span><span class="nv">$1</span><span class="s2">"</span>
+    <span class="k">if</span> <span class="o">[</span> <span class="nt">-z</span> <span class="s2">"</span><span class="nv">$INPUT</span><span class="s2">"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then
+        </span><span class="nb">echo</span> <span class="s2">"Missing input file"</span> <span class="o">&gt;</span>&amp;2
+        <span class="k">return </span>1
+    <span class="k">fi
+    </span><span class="nb">tar </span>xOf <span class="s2">"</span><span class="nv">$INPUT</span><span class="s2">"</span> | <span class="nb">gzip</span> <span class="nt">-cd</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>That’s it. No compilation, no installation, just shell and standard tools.</p>
+
+<p>What’s more, the result tarball can be easily handled by python, with builtin modules only (i.e. <code class="language-plaintext highlighter-rouge">tarfile</code> and <code class="language-plaintext highlighter-rouge">gzip</code>).</p>
+
+<p>The limitation is obvious:</p>
+
+<ul>
+  <li>Not robust against failures mid-process.</li>
+</ul>]]></content><author><name></name></author><category term="dev--sh" /><summary type="html"><![CDATA[There have been several tools aiming to incorporate multiple CPU cores to accelerate large file compression. To name a few: pigz, zstd, xz. Here I suggest a minimalist approach to parallel compression. The core idea:]]></summary></entry><entry><title type="html">Synchronize files using git over ssh</title><link href="https://kkew3.github.io/2025/05/05/sync-files-with-git-ssh.html" rel="alternate" type="text/html" title="Synchronize files using git over ssh" /><published>2025-05-05T03:48:55+00:00</published><updated>2025-05-05T03:48:55+00:00</updated><id>https://kkew3.github.io/2025/05/05/sync-files-with-git-ssh</id><content type="html" xml:base="https://kkew3.github.io/2025/05/05/sync-files-with-git-ssh.html"><![CDATA[<p>I typically write model code on a consumer-grade laptop, and <code class="language-plaintext highlighter-rouge">rsync</code> the code to a remote server, where the model is trained.
+The price is that for every project, I have to write a script doing this job.
+Furthermore, <code class="language-plaintext highlighter-rouge">rsync</code> is not very smart in managing deleted files—it either deletes all extraneous files or keep all those files.
+While it’s probably not impossible to overcome the limitation by carefully reading the <a href="https://linux.die.net/man/1/rsync">manual</a>, delving into it would take tons of time as the manual contains over 19k words.</p>
+
+<p>Recently, I find that <code class="language-plaintext highlighter-rouge">git</code> over ssh can be used to resolve the isssue.
+The procedure is simple.
+Let us denote the remote server by <code class="language-plaintext highlighter-rouge">remote.server</code>, i.e. with an entry in <code class="language-plaintext highlighter-rouge">~/.ssh/config</code> similar to:</p>
+
+<pre><code class="language-sshconfig">Host remote.server
+  User ubuntu
+  HostName XXX.XXX.XXX.XXX
+  IdentityFile ~/.ssh/id_rsa
+</code></pre>
+
+<p>On the local laptop:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> /path/to/my_project
+<span class="c"># We store the bare repo under ~/git/my_project.git.</span>
+ssh remote.server <span class="s1">'git init --bare ~/git/my_project.git'</span>
+<span class="c"># Setup remote over ssh.</span>
+git remote add origin remote.server:~/git/my_project.git
+git push <span class="nt">-u</span> origin master
+</code></pre></div></div>
+
+<p>On the remote server (if we are setting up from scratch):</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> /path/to/projects/dir
+<span class="c"># Git clone local repo.</span>
+git clone ~/git/my_project.git
+</code></pre></div></div>
+
+<p>On the remote server (if we already have an existing remote directory):</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> /path/to/my_project
+<span class="nv">tmp</span><span class="o">=</span><span class="si">$(</span><span class="nb">mktemp</span> <span class="nt">-d</span> tmpXXXXXX<span class="si">)</span>
+<span class="c"># Git clone local repo.</span>
+git clone ~/git/my_project.git <span class="nv">$tmp</span>
+<span class="c"># See https://stackoverflow.com/a/13852329/7881370.</span>
+<span class="nb">mv</span> <span class="nv">$tmp</span>/.git .git
+<span class="nb">rm</span> <span class="nt">-rf</span> <span class="nv">$tmp</span>
+<span class="c"># Then resolve conflicts by referring to git status.</span>
+<span class="c">#git status</span>
+</code></pre></div></div>
+
+<p>After this setup, for some further local updates, we just <code class="language-plaintext highlighter-rouge">git push</code> locally and <code class="language-plaintext highlighter-rouge">git pull</code> remotely.</p>]]></content><author><name></name></author><category term="git" /><summary type="html"><![CDATA[I typically write model code on a consumer-grade laptop, and rsync the code to a remote server, where the model is trained. The price is that for every project, I have to write a script doing this job. Furthermore, rsync is not very smart in managing deleted files—it either deletes all extraneous files or keep all those files. While it’s probably not impossible to overcome the limitation by carefully reading the manual, delving into it would take tons of time as the manual contains over 19k words.]]></summary></entry><entry><title type="html">在 macOS 上折腾 RSS 阅读器</title><link href="https://kkew3.github.io/2024/12/31/miniflux-on-mac.html" rel="alternate" type="text/html" title="在 macOS 上折腾 RSS 阅读器" /><published>2024-12-31T08:39:31+00:00</published><updated>2024-12-31T08:39:31+00:00</updated><id>https://kkew3.github.io/2024/12/31/miniflux-on-mac</id><content type="html" xml:base="https://kkew3.github.io/2024/12/31/miniflux-on-mac.html"><![CDATA[<h2 id="背景">背景</h2>
+
+<p>本来之前一直用 <a href="https://netnewswire.com/"><code class="language-plaintext highlighter-rouge">NetNewsWire</code></a> 阅读 RSS，直到我自己 host 的 RSS 源的 IP 地址变了，而貌似 NetNewsWire 无法修改已订阅的 RSS 源的 IP 地址（以前的版本是<a href="https://apple.stackexchange.com/a/20282">可以</a>修改的）。不得已切换到了 <a href="https://vivaldi.com/zh-hans/"><code class="language-plaintext highlighter-rouge">Vivaldi</code></a>，这是一个浏览器，但它有一个附加的阅读 RSS 的小功能。随着 RSS 积累得越来越多，最近逐渐开始变卡，明明 <code class="language-plaintext highlighter-rouge">NetNewsWire</code> 用了那么久都很流畅的说。在<a href="https://lukesingham.com/rss-feed-reader/">这篇博客</a>的指点下我找到了 <a href="https://miniflux.app/"><code class="language-plaintext highlighter-rouge">Miniflux</code></a>，于是开始了一天的折腾。</p>
+
+<h2 id="docker-安装-miniflux">Docker 安装 Miniflux</h2>
+
+<p>首先尝试最简单的 <a href="https://miniflux.app/docs/docker.html">Docker 安装</a>，就按照官网文档的样子写好 <code class="language-plaintext highlighter-rouge">docker-compose.yaml</code>，然后</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose up <span class="nt">-d</span>
+</code></pre></div></div>
+
+<p>就行了，不用安装 postgres 环境。但是服务起来后发现连不上自己 host 的 RSS，原来是因为那个 RSS 源也是在 Docker 容器里跑的，而且它的 network scope 为 <code class="language-plaintext highlighter-rouge">Local</code>，意思是除非其它 Docker container 和它在一个 host 上，否则就无法连接。因为我在自己 Mac 上安装的 Miniflux 容器，而 RSS 源没有 host 在本地，那显然这条路是走不通的。</p>
+
+<h2 id="本地安装-miniflux">本地安装 Miniflux</h2>
+
+<p>首先安装 postgres，就用最简单的 <a href="https://postgresapp.com/"><code class="language-plaintext highlighter-rouge">Postgres.app</code></a>，按照网站流程一路安装即可，但是不用修改 <code class="language-plaintext highlighter-rouge">$PATH</code> 环境变量，见下文。</p>
+
+<p>然后按照 Miniflux 的 <a href="https://miniflux.app/docs/database.html">Database Configuration</a> 页面配置 postgres，在<em>交互式</em> bash 下：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 暂时把 Postgres.app 附带的命令行工具引入 PATH</span>
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"/Applications/Postgres.app/Contents/Versions/latest/bin:</span><span class="nv">$PATH</span><span class="s2">"</span>
+
+<span class="c"># 新建 postgres 用户，名为 miniflux。`-P` 是用来输入密码的。</span>
+createuser <span class="nt">-P</span> miniflux
+<span class="c"># 这里输入密码，然后再输一次。我输的是 secret。之后要用。</span>
+
+<span class="c"># 在用户 miniflux 下新建名为 miniflux 的数据库。</span>
+createdb <span class="nt">-O</span> miniflux miniflux
+
+<span class="c"># 启用 hstore 扩展</span>
+psql miniflux <span class="nt">-c</span> <span class="s1">'create extension hstore'</span>
+</code></pre></div></div>
+
+<p>第三步新建配置文件。这里也可以用环境变量的方式，但我倾向于用配置文件。文档见<a href="https://miniflux.app/docs/configuration.html">这里</a>。我把配置文件搁在 <code class="language-plaintext highlighter-rouge">~/.config/miniflux/</code> 下。名字叫 <code class="language-plaintext highlighter-rouge">config</code>。配置文件路径其实是随意的。我是这么写的：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 格式为 postgres://{用户}:{密码}@localhost/{数据库名}?sslmode=disable。</span>
+<span class="nv">DATABASE_URL</span><span class="o">=</span>postgres://miniflux:secret@localhost/miniflux?sslmode<span class="o">=</span>disable
+
+<span class="c"># 创建第一个用户，要不然 Miniflux 运行起来后无法登录。省去运行 `miniflux -create-admin`</span>
+<span class="c"># 的麻烦。</span>
+<span class="nv">CREATE_ADMIN</span><span class="o">=</span>1
+<span class="nv">ADMIN_USERNAME</span><span class="o">=</span>admin
+<span class="c"># 密码必须是六个字母及以上。</span>
+<span class="nv">ADMIN_PASSWORD</span><span class="o">=</span>admin123
+
+<span class="c"># 省去运行 `miniflux -migrate` 的麻烦。</span>
+<span class="nv">RUN_MIGRATIONS</span><span class="o">=</span>1
+
+<span class="c"># 我喜欢 8050 这个端口号。</span>
+<span class="nv">LISTEN_ADDR</span><span class="o">=</span>127.0.0.1:8050
+</code></pre></div></div>
+
+<p>第四步，从 Miniflux 的 <a href="https://github.com/miniflux/v2/releases">Release</a> 页面下载可执行程序。我是因特尔芯片的 Mac，所以下载 <code class="language-plaintext highlighter-rouge">miniflux-darwin-amd64</code>。把它放到方便的路径下，然后 bash 中运行：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 赋予可执行权限。</span>
+<span class="nb">chmod </span>u+x miniflux-darwin-amd64
+
+<span class="c"># 重命名一下以后敲起来方便。</span>
+<span class="nb">mv </span>miniflux-darwin-amd64 miniflux
+
+<span class="c"># 运行 Miniflux。</span>
+./miniflux <span class="nt">-c</span> ~/.config/miniflux/config
+
+<span class="c"># 也可以用 tmux 后台运行：</span>
+<span class="c">#tmux new -ds miniflux ./miniflux -c ~/.config/miniflux/config</span>
+
+<span class="c"># 如果 RSS 源里有 youtube，不要忘记在运行 miniflux 前 export HTTP_PROXY 和</span>
+<span class="c"># HTTPS_PROXY。这两个变量设置在配置文件里是没用的。</span>
+</code></pre></div></div>
+
+<p>最后，浏览器访问 <code class="language-plaintext highlighter-rouge">127.0.0.1:8050</code>，用户名填 <code class="language-plaintext highlighter-rouge">admin</code>, 密码填 <code class="language-plaintext highlighter-rouge">admin123</code>（即配置文件里填的那些），就可以使用了。</p>]]></content><author><name></name></author><category term="rss" /><category term="os--macos" /><summary type="html"><![CDATA[背景]]></summary></entry><entry><title type="html">Share my unicode finder bot</title><link href="https://kkew3.github.io/2024/12/26/unicode-finder.html" rel="alternate" type="text/html" title="Share my unicode finder bot" /><published>2024-12-26T08:38:48+00:00</published><updated>2024-12-26T08:38:48+00:00</updated><id>https://kkew3.github.io/2024/12/26/unicode-finder</id><content type="html" xml:base="https://kkew3.github.io/2024/12/26/unicode-finder.html"><![CDATA[<p><img src="/assets/posts_imgs/2024-12-26/unicode-finder-bot-chat.png" alt="" /></p>
+
+<p>I’d like to share my new bot <a href="https://poe.com/unicode-finder">unicode-finder</a> on <a href="https://poe.com/">Poe</a>.
+It echos unicode(s) given plain English description of it, so that you won’t need to search all over the Internet for such a seemingly simple task.
+The prompt is:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Your are a helpful assistant. Your task is to find unicode(s) given user's
+description. Your answer should be concise, including only the unicode itself
+and the unicode code point, so that the user may copy and paste from your
+answer with ease.  Note that the answer may involve multiple unicodes. For
+example, given description "a", you should answer "a U+0061"; given description
+"underlined c", you should answer "c̲ U+0063 U+0332".
+</code></pre></div></div>]]></content><author><name></name></author><category term="llm" /><summary type="html"><![CDATA[]]></summary></entry><entry><title type="html">KL divergence between two full-rank Gaussians in PyTorch</title><link href="https://kkew3.github.io/2024/12/09/gaussian-kl-div-torch.html" rel="alternate" type="text/html" title="KL divergence between two full-rank Gaussians in PyTorch" /><published>2024-12-09T08:03:00+00:00</published><updated>2024-12-09T08:03:00+00:00</updated><id>https://kkew3.github.io/2024/12/09/gaussian-kl-div-torch</id><content type="html" xml:base="https://kkew3.github.io/2024/12/09/gaussian-kl-div-torch.html"><![CDATA[<h2 id="abstract">Abstract</h2>
+
+<p>In this post, we will go through the <a href="https://pytorch.org/">PyTorch</a> code to compute the Kullback-Leibler divergence between two full-rank Gaussians.
+The code might be useful if one considers using full-rank Gaussian as variational posterior while training a <a href="https://arxiv.org/abs/1312.6114">variational autoencoder</a>.</p>
+
+<h2 id="kl-divergence-between-two-full-rank-gaussians">KL divergence between two full-rank Gaussians</h2>
+
+<p>It’s common practice to parameterize the covariance matrix $\boldsymbol\Sigma$ of a $d$-dimensional full-rank Gaussian using a $D$-dimensional vector of nonzero elements of $\mathbf L$, where $D = d(1+d)/2$ and $\boldsymbol\Sigma = \mathbf L \mathbf L^\top$ is the Cholesky decomposition.
+So we will assume it here.
+Note that the diagonal of $\mathbf L$ must be positive so that $\boldsymbol\Sigma$ is positive definite.
+We will enforce this by taking the exponential on the diagonal elements (e.g. the first $d$ elements of our parameterization).</p>
+
+<p>Let the two Gaussians be $p(\boldsymbol x) = \mathcal N(\boldsymbol x \mid \boldsymbol\mu_1, \boldsymbol\Sigma_1)$ and $q(\boldsymbol x) = \mathcal N(\boldsymbol x \mid \boldsymbol\mu_2, \boldsymbol\Sigma_2)$.
+Per <a href="https://statproofbook.github.io/P/mvn-kl">The Book of Statistical Proofs</a>, the KL divergence between them is:</p>
+
+\[D_\mathrm{KL}(p \parallel q) = \frac{1}{2}\left((\boldsymbol\mu_2 - \boldsymbol\mu_1)^\top \boldsymbol\Sigma_2^{-1} (\boldsymbol\mu_2 - \boldsymbol\mu_1) + \operatorname{tr}(\boldsymbol\Sigma_2^{-1} \boldsymbol\Sigma_1) - \log \frac{\det \boldsymbol\Sigma_1}{\det \boldsymbol\Sigma_2} - d\right)\,.\]
+
+<p>Plugging in our parameterization of the covariance matrices:</p>
+
+\[\begin{aligned}
+    D_\mathrm{KL}(p \parallel q)
+    &amp;= \frac{1}{2}\left((\boldsymbol\mu_2 - \boldsymbol\mu_1)^\top \mathbf L_2^{-\top} \mathbf L_2^{-1} (\boldsymbol\mu_2 - \boldsymbol\mu_1) + \operatorname{tr}((\mathbf L_2 \mathbf L_2^\top)^{-1} (\mathbf L_1 \mathbf L_1^\top)) - \log \frac{\det(\mathbf L_1 \mathbf L_1^\top)}{\det(\mathbf L_2 \mathbf L_2^\top)} - d\right)\\
+    &amp;= \frac{1}{2}\left((\mathbf L_2^{-1} (\boldsymbol\mu_2 - \boldsymbol\mu_1))^\top (\mathbf L_2^{-1} (\boldsymbol\mu_2 - \boldsymbol\mu_1)) + \operatorname{tr}((\mathbf L_2^{-1} \mathbf L_1)^\top (\mathbf L_2^{-1} \mathbf L_1)) - 2\log\frac{\det\mathbf L_1}{\det\mathbf L_2} - d\right)\,.\\
+\end{aligned}\]
+
+<p>We have used the following facts:</p>
+
+<ul>
+  <li>the <a href="https://en.wikipedia.org/wiki/Trace_(linear_algebra)#Cyclic_property">cyclic property of trace</a>;</li>
+  <li>$\det \mathbf A = \det \mathbf A^\top$;</li>
+  <li>$\log\det (\mathbf A \mathbf B) = \log\det(\mathbf A) + \log\det(\mathbf B)$.</li>
+</ul>
+
+<p>It follows that:</p>
+
+\[D_\mathrm{KL}(p \parallel q) = \frac{1}{2}\big(\boldsymbol y^\top \boldsymbol y + \|\mathbf M\|_F^2 - 2 (\operatorname{tr}(\log \mathbf L_1) - \operatorname{tr}(\log \mathbf L_2)) - d\big)\,,\]
+
+<p>where $\mathbf L_2 \boldsymbol y = \boldsymbol\mu_2 - \boldsymbol\mu_1$, and $\mathbf L_2 \mathbf M = \mathbf L_1$.</p>
+
+<p>We have denoted:</p>
+
+<ul>
+  <li>$\|\cdot\|_F$ as the Frobenius norm of a matrix;</li>
+  <li>$\log \mathbf A$ as the elementwise logarithm of $\mathbf A$.</li>
+</ul>
+
+<p>We have used the following facts:</p>
+
+<ul>
+  <li>$\operatorname{tr}(\mathbf A^\top \mathbf A) = \|\mathbf A\|_F^2$;</li>
+  <li>$\log\det \mathbf L = \operatorname{tr}(\log \mathbf L)$ when $\mathbf L$ is a lower triangular matrix.</li>
+</ul>
+
+<h3 id="code">Code</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">distributions</span> <span class="k">as</span> <span class="n">D</span>
+
+
+<span class="k">def</span> <span class="nf">form_cholesky_tril_from_elements</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">scale_tril_elems</span><span class="p">):</span>
+    <span class="s">"""
+    Form the Cholesky lower triangular matrix from its elements.
+
+    Args:
+        d (int): The number of rows/columns in the square matrix.
+        scale_tril_elems (torch.Tensor): The Cholesky lower triangular
+            elements, of shape (batch_size, (1 + d) * d // 2).
+
+    Returns:
+        torch.Tensor: A tensor of shape (batch_size, d, d).
+    """</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">scale_tril_elems</span><span class="p">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">scale_tril_elems</span><span class="p">.</span><span class="n">device</span>
+    <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">tril_indices</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">l_mat</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">l_mat</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">scale_tril_elems</span>
+    <span class="n">l_mat_diag</span> <span class="o">=</span> <span class="n">l_mat</span><span class="p">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">dim1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">l_mat_diag</span><span class="p">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">l_mat_diag</span><span class="p">.</span><span class="n">exp</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">l_mat</span>
+
+
+<span class="n">d</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">5</span>
+
+
+<span class="k">def</span> <span class="nf">groundtruth</span><span class="p">(</span><span class="n">mean1</span><span class="p">,</span> <span class="n">scale_tril1</span><span class="p">,</span> <span class="n">mean2</span><span class="p">,</span> <span class="n">scale_tril2</span><span class="p">):</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">D</span><span class="p">.</span><span class="n">MultivariateNormal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">mean1</span><span class="p">,</span> <span class="n">scale_tril</span><span class="o">=</span><span class="n">scale_tril1</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">D</span><span class="p">.</span><span class="n">MultivariateNormal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">mean2</span><span class="p">,</span> <span class="n">scale_tril</span><span class="o">=</span><span class="n">scale_tril2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">D</span><span class="p">.</span><span class="n">kl_divergence</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">ours</span><span class="p">(</span><span class="n">mean1</span><span class="p">,</span> <span class="n">scale_tril1</span><span class="p">,</span> <span class="n">mean2</span><span class="p">,</span> <span class="n">scale_tril2</span><span class="p">):</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="n">solve_triangular</span><span class="p">(</span>
+        <span class="n">scale_tril2</span><span class="p">,</span> <span class="p">(</span><span class="n">mean2</span> <span class="o">-</span> <span class="n">mean1</span><span class="p">).</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">upper</span><span class="o">=</span><span class="bp">False</span><span class="p">).</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">y2</span> <span class="o">=</span> <span class="n">y</span><span class="p">.</span><span class="n">square</span><span class="p">().</span><span class="nb">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="n">scale_tril2</span><span class="p">,</span> <span class="n">scale_tril1</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">M2</span> <span class="o">=</span> <span class="n">M</span><span class="p">.</span><span class="n">square</span><span class="p">().</span><span class="n">flatten</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">).</span><span class="nb">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">y2</span> <span class="o">+</span> <span class="n">M2</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="n">scale_tril1</span><span class="p">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">dim1</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=-</span><span class="mi">1</span><span class="p">).</span><span class="n">log</span><span class="p">().</span><span class="nb">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">scale_tril2</span><span class="p">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">dim1</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=-</span><span class="mi">1</span><span class="p">).</span><span class="n">log</span><span class="p">().</span><span class="nb">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="n">d</span><span class="p">)</span>
+
+
+<span class="c1"># Randomize p and q's parameterization.
+</span><span class="n">mean1</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+<span class="n">mean2</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+<span class="n">scale_tril1</span> <span class="o">=</span> <span class="n">form_cholesky_tril_from_elements</span><span class="p">(</span>
+    <span class="n">d</span><span class="p">,</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">d</span><span class="p">)</span> <span class="o">*</span> <span class="n">d</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">scale_tril2</span> <span class="o">=</span> <span class="n">form_cholesky_tril_from_elements</span><span class="p">(</span>
+    <span class="n">d</span><span class="p">,</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">d</span><span class="p">)</span> <span class="o">*</span> <span class="n">d</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="c1"># Assert the correctness.
+</span><span class="k">assert</span> <span class="n">torch</span><span class="p">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">groundtruth</span><span class="p">(</span><span class="n">mean1</span><span class="p">,</span> <span class="n">scale_tril1</span><span class="p">,</span> <span class="n">mean2</span><span class="p">,</span> <span class="n">scale_tril2</span><span class="p">),</span>
+                      <span class="n">ours</span><span class="p">(</span><span class="n">mean1</span><span class="p">,</span> <span class="n">scale_tril1</span><span class="p">,</span> <span class="n">mean2</span><span class="p">,</span> <span class="n">scale_tril2</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>Profile our implementation:</p>
+
+<p><code class="language-plaintext highlighter-rouge">%timeit groundtruth(mean1, scale_tril1, mean2, scale_tril2)</code> (baseline):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>164 μs ± 178 ns per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">%timeit ours(mean1, scale_tril1, mean2, scale_tril2)</code> (our implementation):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>46.2 μs ± 71.6 ns per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
+</code></pre></div></div>]]></content><author><name></name></author><category term="math--prob" /><category term="dev--pytorch" /><summary type="html"><![CDATA[Abstract]]></summary></entry></feed>

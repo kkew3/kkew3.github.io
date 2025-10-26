@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>尝试用小语言模型翻译网络新闻 | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="尝试用小语言模型翻译网络新闻">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="契机">
+<meta property="og:description" content="契机">
+<link rel="canonical" href="https://kkew3.github.io/2025/08/21/translate-news-story-on-web-slm.html">
+<meta property="og:url" content="https://kkew3.github.io/2025/08/21/translate-news-story-on-web-slm.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2025-08-21T11:14:32+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="尝试用小语言模型翻译网络新闻">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2025-08-21T11:14:32+00:00","datePublished":"2025-08-21T11:14:32+00:00","description":"契机","headline":"尝试用小语言模型翻译网络新闻","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2025/08/21/translate-news-story-on-web-slm.html"},"url":"https://kkew3.github.io/2025/08/21/translate-news-story-on-web-slm.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">尝试用小语言模型翻译网络新闻</h1>
+    <span><a href="https://kkew3.github.io/tags/llm"><code class="highlighter-rouge"><nobr>llm</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2025-08-21T11:14:32+00:00" itemprop="datePublished">Aug 21, 2025 at 11:14:32
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="契机">契机</h2>
+
+<p>为了让妈妈多了解国际新闻，周末简单做了一个用<em>免费</em>小语言模型 <a href="https://ai.baidu.com/ai-doc/WENXINWORKSHOP/Qm9cw2s7m">ERNIE-speed-128k</a> 和 <a href="https://bigmodel.cn/pricing">GLM-4.5-Flash</a> 翻译 <a href="https://news.ycombinator.com/">Hacker News</a> 头条的 proof-of-concept 项目。</p>
+
+<h2 id="步骤">步骤</h2>
+
+<h3 id="获取新闻-url">获取新闻 url</h3>
+
+<p>有多种选择。比如如果在 <a href="https://kkew3.github.io/2024/12/31/miniflux-on-mac.html">Miniflux</a> 中订阅了 Hacker News，可以用以下 bash 命令得到最新的 Hacker News 新闻网址：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 按需设置这些变量</span>
+<span class="nv">MINIFLUX_API_KEY</span><span class="o">=</span>xxxxxxxxxxxxxx
+<span class="nv">MINIFLUX_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8050
+<span class="nv">HACKER_NEWS_FEED_ID</span><span class="o">=</span>57
+<span class="c"># 获取最新新闻网址并保存到 NEWS_URL 文件</span>
+curl <span class="nt">-s</span> <span class="nt">--get</span> <span class="se">\</span>
+    <span class="nt">-d</span> <span class="s1">'status=unread'</span> <span class="se">\</span>
+    <span class="nt">-d</span> <span class="s1">'order=published_at'</span> <span class="se">\</span>
+    <span class="nt">-d</span> <span class="s1">'direction=desc'</span> <span class="se">\</span>
+    <span class="nt">-d</span> <span class="s1">'limit=1'</span> <span class="se">\</span>
+    <span class="nt">-H</span> <span class="s2">"X-Auth-Token: </span><span class="nv">$MINIFLUX_API_KEY</span><span class="s2">"</span> <span class="se">\</span>
+    <span class="s2">"</span><span class="nv">$MINIFLUX_BASE_URL</span><span class="s2">/v1/feeds/</span><span class="nv">$HACKER_NEWS_FEED_ID</span><span class="s2">/entries"</span> <span class="se">\</span>
+    | jq <span class="nt">--raw-output</span> <span class="s1">'.entries[] | .url'</span> <span class="se">\</span>
+    | <span class="nb">tee </span>NEWS_URL
+</code></pre></div></div>
+
+<p>我的输出为：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://www.databricks.com/company/newsroom/press-releases/databricks-raising-series-k-investment-100-billion-valuation
+</code></pre></div></div>
+
+<h3 id="下载网页为-markdown">下载网页为 Markdown</h3>
+
+<p>假设下载为 <code class="language-plaintext highlighter-rouge">NEWS.md</code>。有多种工具可以实现：</p>
+
+<ol>
+  <li><a href="https://jina.ai/reader/">jina.ai reader api</a></li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-so</span> NEWS.md <span class="s2">"https://r.jina.ai/</span><span class="si">$(</span><span class="nb">cat </span>NEWS_URL<span class="si">)</span><span class="s2">"</span>
+</code></pre></div></div>
+
+<ol start="2">
+  <li>
+<a href="https://github.com/docling-project/docling">docling</a>:</li>
+</ol>
+
+<p>首先新建 <code class="language-plaintext highlighter-rouge">run_docling.py</code>：</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">docling.document_converter</span> <span class="kn">import</span> <span class="n">DocumentConverter</span><span class="p">,</span> <span class="n">DocumentStream</span>
+<span class="k">with</span> <span class="n">BytesIO</span><span class="p">(</span><span class="n">sys</span><span class="p">.</span><span class="n">stdin</span><span class="p">.</span><span class="nb">buffer</span><span class="p">.</span><span class="n">read</span><span class="p">())</span> <span class="k">as</span> <span class="n">buf</span><span class="p">:</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">DocumentStream</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">"file.html"</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="n">buf</span><span class="p">)</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">converter</span><span class="p">.</span><span class="n">convert</span><span class="p">(</span><span class="n">source</span><span class="p">).</span><span class="n">document</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">doc</span><span class="p">.</span><span class="n">export_to_markdown</span><span class="p">(),</span> <span class="n">end</span><span class="o">=</span><span class="s">""</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>然后在 bash 调用：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-fsSL</span> <span class="s2">"</span><span class="si">$(</span><span class="nb">cat </span>NEWS_URL<span class="si">)</span><span class="s2">"</span> <span class="se">\</span>
+    | python3 run_docling.py <span class="se">\</span>
+    <span class="o">&gt;</span> NEWS.md
+</code></pre></div></div>
+
+<ol start="3">
+  <li>
+<a href="https://github.com/kkew3/html2obsidian">html2obsidian</a>:</li>
+</ol>
+
+<p>在 bash 使用如下：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">url</span><span class="o">=</span><span class="s2">"</span><span class="si">$(</span><span class="nb">cat </span>NEWS_URL<span class="si">)</span><span class="s2">"</span>
+curl <span class="nt">-fsSL</span> <span class="s2">"</span><span class="nv">$url</span><span class="s2">"</span> <span class="se">\</span>
+    | html2obsidian <span class="nt">--url</span> <span class="s2">"</span><span class="nv">$url</span><span class="s2">"</span> - <span class="se">\</span>
+    <span class="o">&gt;</span> NEWS.md
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">NEWS.md</code> 内容如下（使用 <code class="language-plaintext highlighter-rouge">html2obsidian</code>）：</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Skip to main content<span class="p">[</span><span class="nv">![</span><span class="p">](</span><span class="sx">assets/59e4fdd3b5ef082d0e991df58b6539be1dad4067.svg+xml</span><span class="p">)</span>](https://www.databricks.com/)
+
+<span class="p">[</span><span class="nv">Login</span><span class="p">](</span><span class="sx">https://login.databricks.com/?dbx_source=www&itm=main-cta-login&l=en-EN</span><span class="p">)</span>
+
+<span class="p">[</span><span class="nv">![</span><span class="p">](</span><span class="sx">assets/59e4fdd3b5ef082d0e991df58b6539be1dad4067.svg+xml</span><span class="p">)</span>](https://www.databricks.com/)-     -         - Discover
+<span class="p">            -</span> <span class="p">[</span><span class="nv">For Executives</span><span class="p">](</span><span class="sx">https://www.databricks.com/why-databricks/executives</span><span class="p">)</span>            - <span class="p">[</span><span class="nv">For Startups</span><span class="p">](</span><span class="sx">https://www.databricks.com/product/startups</span><span class="p">)</span>            - <span class="p">[</span><span class="nv">Lakehouse Architecture</span><span class="p">](</span><span class="sx">https://www.databricks.com/product/data-lakehouse</span><span class="p">)</span>            - <span class="p">[</span><span class="nv">Mosaic Research</span><span class="p">](</span><span class="sx">https://www.databricks.com/research/mosaic</span><span class="p">)</span>        - Customers
+<span class="p">            -</span> <span class="p">[</span><span class="nv">Customer Stories</span><span class="p">](</span><span class="sx">https://www.databricks.com/customers</span><span class="p">)</span>        - Partners
+
+[..]
+
+<span class="gh"># Databricks is raising a Series K Investment at &gt;$100 billion valuation</span>
+
+<span class="gu">###### August 19, 2025</span>
+
+Share this post
+
+[..]
+
+<span class="gs">**SAN FRANCISCO, CA — August 19, 2025**</span> — <span class="p">[</span><span class="nv">Databricks</span><span class="p">](</span><span class="sx">https://www.databricks.com/</span><span class="p">)</span>, the Data and AI company, today announced it has signed a term sheet for its Series K round, which it expects to close soon with backing from existing investors. This funding values the company at &gt;$100 billion.
+
+The company expects to use the new capital to accelerate its AI strategy — expanding Agent Bricks, investing in its new database offering Lakebase, and fueling global growth. At the June Data + AI Summit, Databricks introduced a new product, Agent Bricks, which builds high-quality, production AI agents optimized on your enterprise data, and Lakebase, a new type of operational database (OLTP), built on open source Postgres, and optimized for AI Agents. The investment is also expected to support future AI acquisitions and deepen AI research.
+
+“We’re seeing tremendous investor interest because of the momentum behind our AI products, which power the world's largest businesses and AI services,” said Ali Ghodsi, co-founder and CEO of Databricks. “Every company can securely turn its enterprise data into AI apps and agents to grow revenue faster, operate more efficiently, and make smarter decisions with less risk. Databricks is benefiting from an unprecedented global demand for AI apps and agents, turning companies’ data into goldmines. We’re thrilled this round is already over-subscribed and to partner with strategic, long-term investors who share our vision for the future of AI.”
+
+This new investment comes on the heels of strong momentum for Databricks. In the last two quarters, the company has launched or expanded partnerships with Microsoft, Google Cloud, Anthropic, SAP, and Palantir. More than 15,000 customers around the world use the <span class="p">[</span><span class="nv">Databricks Data Intelligence Platform</span><span class="p">](</span><span class="sx">https://www.databricks.com/product/data-intelligence-platform</span><span class="p">)</span> to democratize access to data and AI, making it easier to harness the power of their data for analytics and AI apps and agents. Built on an open source foundation, the platform enables organizations to drive innovation that increases revenue, lowers costs, and reduces risk. 
+
+<span class="gs">**About Databricks**</span>
+
+Databricks is the Data and AI company. More than 15,000 organizations worldwide — including Block, Comcast, Condé Nast, Rivian, Shell and over 60% of the Fortune 500 — rely on the Databricks Data Intelligence Platform to take control of their data and put it to work with AI. Databricks is headquartered in San Francisco, with offices around the globe and was founded by the original creators of Lakehouse, Apache Spark™, Delta Lake, MLflow, and Unity Catalog. To learn more, follow Databricks on <span class="p">[</span><span class="nv">X</span><span class="p">](</span><span class="sx">https://twitter.com/databricks</span><span class="p">)</span>, <span class="p">[</span><span class="nv">LinkedIn</span><span class="p">](</span><span class="sx">https://www.linkedin.com/company/databricks</span><span class="p">)</span> and <span class="p">[</span><span class="nv">Facebook</span><span class="p">](</span><span class="sx">https://www.facebook.com/databricksinc</span><span class="p">)</span>.
+
+[..]
+</code></pre></div></div>
+
+<h3 id="提取主要内容">提取主要内容</h3>
+
+<p>此步骤很重要。<code class="language-plaintext highlighter-rouge">NEWS.md</code> 通常会包含大量链接 markup、图片 base64 等噪声。直接将 <code class="language-plaintext highlighter-rouge">NEWS.md</code> 输入 <a href="https://ai.baidu.com/ai-doc/WENXINWORKSHOP/Qm9cw2s7m">ERNIE-speed-128k</a> 进行翻译将会导致大量幻觉。</p>
+
+<p>关键假设：</p>
+
+<blockquote>
+  <p>一篇新闻 markdown 文档至多包含一块<em>连续</em>的主要内容段落。</p>
+</blockquote>
+
+<p>因此可将提取主要内容的任务规约为 selective copy 任务 (<a href="https://arxiv.org/pdf/2312.00752">Gu &amp; Dao, 2024</a>; <a href="https://arxiv.org/pdf/2405.18719">Golovneva et al., 2024</a>)。</p>
+
+<p>系统提示词：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>You are a simple echo bot. Given a markdown document that contains a news story, find and return exactly one consecutive block of plain news text from that document in verbatim. Follow these rules:
+
+- Return only one block. A block is one or more consecutive lines separated from other content by blank lines or markdown structure.
+- Prefer a block that reads like a coherent news paragraph with complete sentences and factual information.
+- Do not return blocks that are mostly code, lists, tables, base64, timestamps, dates-only lines, metadata, image encodings, captions, or short fragments (less than one sentence).
+- If multiple candidate blocks qualify, choose the longest coherent paragraph.
+- Preserve the original text and punctuation of the chosen block exactly. Do not add, remove, summarize, or rewrite.
+- Output only the chosen block. Do not add any commentary, labels, quotes, or extra whitespace before or after.
+- If the document contains no suitable news paragraph, output exactly this text: "Not found".
+
+Keep the response minimal and exact.
+</code></pre></div></div>
+
+<p>用户提示词：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;markdown-input&gt;
+[..]
+&lt;/markdown-input&gt;
+</code></pre></div></div>
+
+<p>其中 <code class="language-plaintext highlighter-rouge">[..]</code> 需要被替换为 <code class="language-plaintext highlighter-rouge">NEWS.md</code> 的内容。</p>
+
+<p>ERNIE-speed-128k 小模型的输出如下：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Databricks is raising a Series K Investment at &gt;$100 billion valuation
+
+SAN FRANCISCO, CA — August 19, 2025 — Databricks, the Data and AI company, today announced it has signed a term sheet for its Series K round, which it expects to close soon with backing from existing investors. This funding values the company at &gt;$100 billion.
+
+The company expects to use the new capital to accelerate its AI strategy — expanding Agent Bricks, investing in its new database offering Lakebase, and fueling global growth. At the June Data + AI Summit, Databricks introduced a new product, Agent Bricks, which builds high-quality, production AI agents optimized on your enterprise data, and Lakebase, a new type of operational database (OLTP), built on open source Postgres, and optimized for AI Agents. The investment is also expected to support future AI acquisitions and deepen AI research.
+
+“We’re seeing tremendous investor interest because of the momentum behind our AI products, which power the world's largest businesses and AI services,” said Ali Ghodsi, co-founder and CEO of Databricks. “Every company can securely turn its enterprise data into AI apps and agents to grow revenue faster, operate more efficiently, and make smarter decisions with less risk. Databricks is benefiting from an unprecedented global demand for AI apps and agents, turning companies’ data into goldmines. We’re thrilled this round is already over-subscribed and to partner with strategic, long-term investors who share our vision for the future of AI.”
+
+This new investment comes on the heels of strong momentum for Databricks. In the last two quarters, the company has launched or expanded partnerships with Microsoft, Google Cloud, Anthropic, SAP, and Palantir. More than 15,000 customers around the world use the Databricks Data Intelligence Platform to democratize access to data and AI, making it easier to harness the power of their data for analytics and AI apps and agents. Built on an open source foundation, the platform enables organizations to drive innovation that increases revenue, lowers costs, and reduces risk.
+</code></pre></div></div>
+
+<p>可见提取质量很高。</p>
+
+<p>此步骤用时大约 7 秒。</p>
+
+<h3 id="翻译">翻译</h3>
+
+<p>实测 ERNIE-speed-128k 翻译质量不佳，于是我们可以转而使用另一个<em>免费</em>小模型 GLM-4.5-Flash。</p>
+
+<p>系统提示词：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>You are a professional English-to-Chinese translator. Translate the provided markdown text to natural and fluent simplified Chinese text. Output plain text and ignore any markdown markups if any.
+</code></pre></div></div>
+
+<p>用户提示词为上一步提取的新闻主要内容。</p>
+
+<p>GLM-4.5-Flash 输出：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Databricks正以超过1000亿美元的估值进行K轮融资
+
+加利福尼亚州旧金山 — 2025年8月19日 — 数据与人工智能公司Databricks今日宣布，其已签署K轮融资的条款清单，预计很快将在现有投资者的支持下完成本轮融资。此轮融资对该公司的估值超过1000亿美元。
+
+公司计划利用新资金加速其人工智能战略——扩展Agent Bricks产品线，投资其新的数据库产品Lakebase，并推动全球业务增长。在6月的数据与人工智能峰会上，Databricks推出了新产品Agent Bricks，该产品构建基于企业数据优化生产的高质量AI代理，以及Lakebase，一种基于开源Postgres构建的新型操作数据库(OLTP)，并针对AI代理进行了优化。此次投资还预计将支持未来的AI收购并深化AI研究。
+
+Databricks联合创始人兼首席执行官Ali Ghodsi表示："我们正看到投资者对我们AI产品的巨大兴趣，这些产品为全球最大的企业和AI服务提供动力。每家公司都可以安全地将企业数据转化为AI应用和代理，以更快地增长收入、更高效地运营，并在更低风险的情况下做出更明智的决策。Databricks正受益于前所未有的全球AI应用和代理需求，将公司的数据转化为金矿。我们对本轮融资已超额认购感到非常兴奋，并与那些分享我们对AI未来愿景的战略性长期投资者合作。"
+
+这项新投资正值Databricks势头强劲之际。在过去两个季度，该公司已与微软、谷歌云、Anthropic、SAP和Palantir建立了或扩大了合作伙伴关系。全球超过15,000家客户使用Databricks数据智能平台来普及数据和AI的访问，使利用其数据进行分析以及AI应用和代理更加容易。该平台建立在开源基础上，使组织能够推动增加收入、降低成本和减少风险的创新。
+</code></pre></div></div>
+
+<p>此步骤用时大约 34 秒。</p>
+
+  </div>
+<a class="u-url" href="/2025/08/21/translate-news-story-on-web-slm.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

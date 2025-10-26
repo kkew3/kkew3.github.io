@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Lower bound of KL divergence between any density and Gaussian | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="Lower bound of KL divergence between any density and Gaussian">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="Abstract">
+<meta property="og:description" content="Abstract">
+<link rel="canonical" href="https://kkew3.github.io/2024/08/09/lower-bound-of-kl-divergence-between-any-density-and-gaussian.html">
+<meta property="og:url" content="https://kkew3.github.io/2024/08/09/lower-bound-of-kl-divergence-between-any-density-and-gaussian.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2024-08-09T09:03:39+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Lower bound of KL divergence between any density and Gaussian">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-08-09T09:03:39+00:00","datePublished":"2024-08-09T09:03:39+00:00","description":"Abstract","headline":"Lower bound of KL divergence between any density and Gaussian","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2024/08/09/lower-bound-of-kl-divergence-between-any-density-and-gaussian.html"},"url":"https://kkew3.github.io/2024/08/09/lower-bound-of-kl-divergence-between-any-density-and-gaussian.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+<script>MathJax={"tex":{"inlineMath":[["$","$"],["\\(","\\)"]],"displayMath":[["$$","$$"],["\\[","\\]"]]},"svg":{"fontCache":"global"}}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Lower bound of KL divergence between any density and Gaussian</h1>
+    <span><a href="https://kkew3.github.io/tags/math--prob"><code class="highlighter-rouge"><nobr>math/probability</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2024-08-09T09:03:39+00:00" itemprop="datePublished">Aug 9, 2024 at 09:03:39
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="abstract">Abstract</h2>
+
+<p>In this post, I explain how to derive a lower bound of the <a href="https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence">Kullback-Leibler divergence</a> between any density $q$, e.g. a Gaussian mixture, and a Gaussian $p$.</p>
+
+<h2 id="framework">Framework</h2>
+
+<p>We may cast the problem finding the lower bound to a constrained minimization problem:</p>
+
+<div id="eq-1"></div>
+
+\[\begin{aligned}
+    \min_{q'}\ &amp;D_{KL}(q' \parallel p)\\
+    \text{s.t. } &amp;\int_{\mathcal X} q'(x)\,\mathrm dx = 1\\
+                 &amp;\ldots \ \text{other constraints}
+\end{aligned}\tag{1}\]
+
+<p>where $\mathcal X$ is the support of $q’$, and we’ll fill in “other constraints” with what we know about the density $q$, like its mean and variance.
+The solution of Equation (<a href="#eq-1">1</a>) will be the lower bound we’re seeking for.</p>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Lagrange_multiplier">Lagrangian</a> would be:</p>
+
+\[L = \int_{\mathcal X} q'(x)\log \frac{q'(x)}{p(x)}\,\mathrm dx + \lambda_0 (\int_{\mathcal X} q'(x)\,\mathrm dx - 1) + \ldots \tag{2}\]
+
+<p>Taking the functional derivative of $L$ with respect to $q’$ and letting it equal zero yields:</p>
+
+\[\begin{aligned}
+    0 &amp;= 1 + \log q'(x) - \log p(x) + \lambda_0 + \ldots\\
+    \log q'(x) &amp;= -\lambda_0 - 1 + \log p(x) + \ldots\\
+    q'(x) &amp;= \exp(-\lambda_0 -1 + \log p(x) + \ldots)
+\end{aligned}\]
+
+<p>Finally, plugging $q’(x)$ back into the constraints and solve for the Lagrange multipliers $\lambda_0$, etc.</p>
+
+<h2 id="example">Example</h2>
+
+<p>In this simple example, we assume that $p(x) = \mathcal N(x \mid 0, 1)$ be a standard univariate Gaussian, and assume that $q$ and $p$ have the same support.
+Suppose also that we know the mean and variance of $q$ to be: $\mathbb E_q[x] = 0$, $\mathbb E_q[x^2] - \mathbb E_q[x]^2 = \mathbb E_q[x^2] = \sigma^2$.</p>
+
+<p>The Lagrangian is:</p>
+
+<div id="eq-3"></div>
+
+\[\require{enclose}
+L = \int_{-\infty}^\infty q'(x) \log \frac{q'(x)}{p(x)}\,\mathrm dx + \lambda_0 (\underbrace{\int_{-\infty}^\infty q'(x)\,\mathrm dx - 1}_{\substack{\enclose{circle}{1}}}) + \lambda_1 (\underbrace{\int_{-\infty}^\infty x^2 q'(x)\,\mathrm dx - \sigma^2}_{\substack{\enclose{circle}{2}}})\tag{3}\]
+
+<p>where we have encoded the mean and variance constraints into one term (see why <a href="https://michael-franke.github.io/intro-data-analysis/the-maximum-entropy-principle.html#example-2-derivation-of-maximum-entropy-pdf-with-given-mean-mu-and-variance-sigma2">here</a>).
+Taking the derivative and letting it equal zero yields:</p>
+
+<div id="eq-4"></div>
+
+\[\begin{align}
+    0 &amp;= 1 + \log q'(x) - \log p(x) + \lambda_0 + \lambda_1 x^2\\
+    \log q'(x) &amp;\stackrel{1}{=} -\lambda_0 - 1 - (\frac{1}{2} + \lambda_1) x^2\\
+    q'(x) &amp;= \exp(-\lambda_0 - 1 - (\frac{1}{2} + \lambda_1) x^2)\tag{4}\\
+\end{align}\]
+
+<p>where equal sign ‘$1$’ is because $\log p(x) = -\frac{1}{2}x^2 + C$, and the constant $C$ has been absorbed into $\lambda_0$.</p>
+
+<p>Plugging Equation (<a href="#eq-4">4</a>) back to <a href="#eq-3">⓵</a> and solving the integral yields:</p>
+
+<div id="eq-5.1"></div>
+
+\[\frac{\sqrt{\pi}\exp(-\lambda_0 - 1)}{\sqrt{\frac{1}{2} + \lambda_1}} = 1\tag{5.1}\]
+
+<p>Likewise, plugging (<a href="#eq-4">4</a>) back to <a href="#eq-3">⓶</a> and solving the integral yields:</p>
+
+<div id="eq-5.2"></div>
+
+\[\frac{\sqrt{\pi} \exp(-\lambda_0 - 1)}{2\sqrt{(\frac{1}{2} + \lambda_1)^3}} = \sigma^2\tag{5.2}\]
+
+<p>Solving Equations (<a href="#eq-5.1">5.1</a>, <a href="#eq-5.2">5.2</a>) gives:</p>
+
+<div id="eq-6"></div>
+
+\[\begin{cases}
+    \lambda_0 = -1 + \frac{1}{2} \log 2\pi\sigma^2\\
+    \lambda_1 = -\frac{1}{2} + \frac{1}{2\sigma^2}\\
+\end{cases}\tag{6}\]
+
+<p>Plugging Equation (<a href="#eq-6">6</a>) to Equation (<a href="#eq-4">4</a>), it’s immediate that</p>
+
+\[q'(x) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp(-\frac{x^2}{2\sigma^2})\]
+
+<p>i.e., a Gaussian $\mathcal N(x \mid 0, \sigma^2)$.
+Therefore, according to <a href="https://statproofbook.github.io/P/norm-kl">Soch, Joram, et al. (2024)</a>,</p>
+
+\[D_{KL}(q \parallel p) \ge \frac{1}{2}(\sigma^2 - \log\sigma^2 - 1)\]
+
+
+  </div>
+<a class="u-url" href="/2024/08/09/lower-bound-of-kl-divergence-between-any-density-and-gaussian.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

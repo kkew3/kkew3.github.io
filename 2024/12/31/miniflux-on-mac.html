@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>在 macOS 上折腾 RSS 阅读器 | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="在 macOS 上折腾 RSS 阅读器">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="背景">
+<meta property="og:description" content="背景">
+<link rel="canonical" href="https://kkew3.github.io/2024/12/31/miniflux-on-mac.html">
+<meta property="og:url" content="https://kkew3.github.io/2024/12/31/miniflux-on-mac.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2024-12-31T08:39:31+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="在 macOS 上折腾 RSS 阅读器">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-12-31T08:39:31+00:00","datePublished":"2024-12-31T08:39:31+00:00","description":"背景","headline":"在 macOS 上折腾 RSS 阅读器","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2024/12/31/miniflux-on-mac.html"},"url":"https://kkew3.github.io/2024/12/31/miniflux-on-mac.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">在 macOS 上折腾 RSS 阅读器</h1>
+    <span><a href="https://kkew3.github.io/tags/rss"><code class="highlighter-rouge"><nobr>rss</nobr></code></a> | <a href="https://kkew3.github.io/tags/os--macos"><code class="highlighter-rouge"><nobr>os/macOS</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2024-12-31T08:39:31+00:00" itemprop="datePublished">Dec 31, 2024 at 08:39:31
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="背景">背景</h2>
+
+<p>本来之前一直用 <a href="https://netnewswire.com/"><code class="language-plaintext highlighter-rouge">NetNewsWire</code></a> 阅读 RSS，直到我自己 host 的 RSS 源的 IP 地址变了，而貌似 NetNewsWire 无法修改已订阅的 RSS 源的 IP 地址（以前的版本是<a href="https://apple.stackexchange.com/a/20282">可以</a>修改的）。不得已切换到了 <a href="https://vivaldi.com/zh-hans/"><code class="language-plaintext highlighter-rouge">Vivaldi</code></a>，这是一个浏览器，但它有一个附加的阅读 RSS 的小功能。随着 RSS 积累得越来越多，最近逐渐开始变卡，明明 <code class="language-plaintext highlighter-rouge">NetNewsWire</code> 用了那么久都很流畅的说。在<a href="https://lukesingham.com/rss-feed-reader/">这篇博客</a>的指点下我找到了 <a href="https://miniflux.app/"><code class="language-plaintext highlighter-rouge">Miniflux</code></a>，于是开始了一天的折腾。</p>
+
+<h2 id="docker-安装-miniflux">Docker 安装 Miniflux</h2>
+
+<p>首先尝试最简单的 <a href="https://miniflux.app/docs/docker.html">Docker 安装</a>，就按照官网文档的样子写好 <code class="language-plaintext highlighter-rouge">docker-compose.yaml</code>，然后</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose up <span class="nt">-d</span>
+</code></pre></div></div>
+
+<p>就行了，不用安装 postgres 环境。但是服务起来后发现连不上自己 host 的 RSS，原来是因为那个 RSS 源也是在 Docker 容器里跑的，而且它的 network scope 为 <code class="language-plaintext highlighter-rouge">Local</code>，意思是除非其它 Docker container 和它在一个 host 上，否则就无法连接。因为我在自己 Mac 上安装的 Miniflux 容器，而 RSS 源没有 host 在本地，那显然这条路是走不通的。</p>
+
+<h2 id="本地安装-miniflux">本地安装 Miniflux</h2>
+
+<p>首先安装 postgres，就用最简单的 <a href="https://postgresapp.com/"><code class="language-plaintext highlighter-rouge">Postgres.app</code></a>，按照网站流程一路安装即可，但是不用修改 <code class="language-plaintext highlighter-rouge">$PATH</code> 环境变量，见下文。</p>
+
+<p>然后按照 Miniflux 的 <a href="https://miniflux.app/docs/database.html">Database Configuration</a> 页面配置 postgres，在<em>交互式</em> bash 下：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 暂时把 Postgres.app 附带的命令行工具引入 PATH</span>
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"/Applications/Postgres.app/Contents/Versions/latest/bin:</span><span class="nv">$PATH</span><span class="s2">"</span>
+
+<span class="c"># 新建 postgres 用户，名为 miniflux。`-P` 是用来输入密码的。</span>
+createuser <span class="nt">-P</span> miniflux
+<span class="c"># 这里输入密码，然后再输一次。我输的是 secret。之后要用。</span>
+
+<span class="c"># 在用户 miniflux 下新建名为 miniflux 的数据库。</span>
+createdb <span class="nt">-O</span> miniflux miniflux
+
+<span class="c"># 启用 hstore 扩展</span>
+psql miniflux <span class="nt">-c</span> <span class="s1">'create extension hstore'</span>
+</code></pre></div></div>
+
+<p>第三步新建配置文件。这里也可以用环境变量的方式，但我倾向于用配置文件。文档见<a href="https://miniflux.app/docs/configuration.html">这里</a>。我把配置文件搁在 <code class="language-plaintext highlighter-rouge">~/.config/miniflux/</code> 下。名字叫 <code class="language-plaintext highlighter-rouge">config</code>。配置文件路径其实是随意的。我是这么写的：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 格式为 postgres://{用户}:{密码}@localhost/{数据库名}?sslmode=disable。</span>
+<span class="nv">DATABASE_URL</span><span class="o">=</span>postgres://miniflux:secret@localhost/miniflux?sslmode<span class="o">=</span>disable
+
+<span class="c"># 创建第一个用户，要不然 Miniflux 运行起来后无法登录。省去运行 `miniflux -create-admin`</span>
+<span class="c"># 的麻烦。</span>
+<span class="nv">CREATE_ADMIN</span><span class="o">=</span>1
+<span class="nv">ADMIN_USERNAME</span><span class="o">=</span>admin
+<span class="c"># 密码必须是六个字母及以上。</span>
+<span class="nv">ADMIN_PASSWORD</span><span class="o">=</span>admin123
+
+<span class="c"># 省去运行 `miniflux -migrate` 的麻烦。</span>
+<span class="nv">RUN_MIGRATIONS</span><span class="o">=</span>1
+
+<span class="c"># 我喜欢 8050 这个端口号。</span>
+<span class="nv">LISTEN_ADDR</span><span class="o">=</span>127.0.0.1:8050
+</code></pre></div></div>
+
+<p>第四步，从 Miniflux 的 <a href="https://github.com/miniflux/v2/releases">Release</a> 页面下载可执行程序。我是因特尔芯片的 Mac，所以下载 <code class="language-plaintext highlighter-rouge">miniflux-darwin-amd64</code>。把它放到方便的路径下，然后 bash 中运行：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 赋予可执行权限。</span>
+<span class="nb">chmod </span>u+x miniflux-darwin-amd64
+
+<span class="c"># 重命名一下以后敲起来方便。</span>
+<span class="nb">mv </span>miniflux-darwin-amd64 miniflux
+
+<span class="c"># 运行 Miniflux。</span>
+./miniflux <span class="nt">-c</span> ~/.config/miniflux/config
+
+<span class="c"># 也可以用 tmux 后台运行：</span>
+<span class="c">#tmux new -ds miniflux ./miniflux -c ~/.config/miniflux/config</span>
+
+<span class="c"># 如果 RSS 源里有 youtube，不要忘记在运行 miniflux 前 export HTTP_PROXY 和</span>
+<span class="c"># HTTPS_PROXY。这两个变量设置在配置文件里是没用的。</span>
+</code></pre></div></div>
+
+<p>最后，浏览器访问 <code class="language-plaintext highlighter-rouge">127.0.0.1:8050</code>，用户名填 <code class="language-plaintext highlighter-rouge">admin</code>, 密码填 <code class="language-plaintext highlighter-rouge">admin123</code>（即配置文件里填的那些），就可以使用了。</p>
+
+
+  </div>
+<a class="u-url" href="/2024/12/31/miniflux-on-mac.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

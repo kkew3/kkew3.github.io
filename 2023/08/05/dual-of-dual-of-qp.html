@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>The dual of the dual of a QP is itself | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="The dual of the dual of a QP is itself">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="Given a Quadratic Program (QP), we will show that the dual of the dual of the QP is itself.">
+<meta property="og:description" content="Given a Quadratic Program (QP), we will show that the dual of the dual of the QP is itself.">
+<link rel="canonical" href="https://kkew3.github.io/2023/08/05/dual-of-dual-of-qp.html">
+<meta property="og:url" content="https://kkew3.github.io/2023/08/05/dual-of-dual-of-qp.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2023-08-05T10:54:12+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="The dual of the dual of a QP is itself">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2023-08-05T10:54:12+00:00","datePublished":"2023-08-05T10:54:12+00:00","description":"Given a Quadratic Program (QP), we will show that the dual of the dual of the QP is itself.","headline":"The dual of the dual of a QP is itself","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2023/08/05/dual-of-dual-of-qp.html"},"url":"https://kkew3.github.io/2023/08/05/dual-of-dual-of-qp.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+<script>MathJax={"tex":{"inlineMath":[["$","$"],["\\(","\\)"]],"displayMath":[["$$","$$"],["\\[","\\]"]]},"svg":{"fontCache":"global"}}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">The dual of the dual of a QP is itself</h1>
+    <span><a href="https://kkew3.github.io/tags/math--la"><code class="highlighter-rouge"><nobr>math/linear algebra</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2023-08-05T10:54:12+00:00" itemprop="datePublished">Aug 5, 2023 at 10:54:12
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Given a Quadratic Program (QP), we will show that the dual of the dual of the QP is itself.</p>
+
+<p>Let the QP be in its standard form:</p>
+
+\[\min_{\boldsymbol x}\frac{1}{2}\boldsymbol x^\top\mathbf Q\boldsymbol x + \boldsymbol p^\top\boldsymbol x\,;
+\quad\text{s.t. }\mathbf A\boldsymbol x=\boldsymbol b,\ x_i \ge 0\,,\]
+
+<p>where $\mathbf Q \succ 0$ is positive definite.
+The Lagrangian is</p>
+
+\[L(\boldsymbol x,\boldsymbol\lambda,\boldsymbol\mu) = \frac{1}{2}\boldsymbol x^\top\mathbf Q\boldsymbol x + \boldsymbol p^\top\boldsymbol x + \boldsymbol\lambda^\top(\mathbf A\boldsymbol x-\boldsymbol b)-\boldsymbol\mu^\top\boldsymbol x\,,\tag{1}\]
+
+<p>where $\mu_i \ge 0$.
+Since $\mathbf Q \succ 0$, we may find the minimum of the $(1)$ with respect to $\boldsymbol x$ by driving $\partial L/\partial\boldsymbol x$ to $\mathbf 0$:</p>
+
+\[\mathbf Q\boldsymbol x + p + \mathbf A^\top\boldsymbol\lambda - \boldsymbol\mu = \mathbf 0\,,\]
+
+<p>and it follows that</p>
+
+\[\boldsymbol x = \mathbf Q^{-1}(-\mathbf A^\top\boldsymbol\lambda - \boldsymbol p + \boldsymbol\mu)\,.\]
+
+<p>Therefore, the dual formulation of the QP is:</p>
+
+\[\max_{\boldsymbol\lambda,\boldsymbol\mu}-\frac{1}{2}(\mathbf A^\top\boldsymbol\lambda+\boldsymbol p-\boldsymbol\mu)^\top\mathbf Q^{-1}(\mathbf A^\top\boldsymbol\lambda+\boldsymbol p-\boldsymbol\mu)-\boldsymbol\lambda^\top\boldsymbol b\,;\quad\text{s.t. }\mu_i \ge 0\,.\tag{2}\]
+
+<p>Now we will find the dual of the dual formulation.
+First make Equation $(2)$ a minimization, and find its Lagrangian:</p>
+
+\[\hat L(\boldsymbol\lambda,\boldsymbol\mu,\boldsymbol y) = \frac{1}{2}(\mathbf A^\top\boldsymbol\lambda+\boldsymbol p-\boldsymbol\mu)^\top\mathbf Q^{-1}(\mathbf A^\top\boldsymbol\lambda+\boldsymbol p-\boldsymbol\mu) + \boldsymbol\lambda^\top\boldsymbol b - \boldsymbol y^\top\boldsymbol\mu\,,\tag{3}\]
+
+<p>where $y_i \ge 0$.
+Since $\mathbf Q^{-1} \succ 0$, we may also find its minimum with respect to $\boldsymbol\lambda$ and $\boldsymbol\mu$ by driving corresponding partial derivatives to zero:</p>
+
+\[\begin{align}
+\frac{\partial\hat L}{\partial\boldsymbol\lambda} &amp;= \frac{1}{2}(2\mathbf A\mathbf Q^{-1}\mathbf A^\top\boldsymbol\lambda+\mathbf A\mathbf Q^{-1}\boldsymbol p-\mathbf A\mathbf Q^{-1}\boldsymbol\mu+\mathbf A\mathbf Q^{-\top}\boldsymbol p-\mathbf A\mathbf Q^{-\top}\boldsymbol\mu)+\boldsymbol b = 0\,,\tag{4.1}\\
+\frac{\partial\hat L}{\partial\boldsymbol\mu} &amp;= \frac{1}{2}(-\mathbf Q^{-\top}\mathbf A^\top\boldsymbol\lambda-\mathbf Q^{-\top}\boldsymbol p-\mathbf Q^{-1}\mathbf A^\top\boldsymbol\lambda-\mathbf Q^{-1}\boldsymbol p+2\mathbf Q^{-1}\boldsymbol\mu) - \boldsymbol y = 0\,,\tag{4.2}\\
+\end{align}\]
+
+<p>where $\mathbf Q^{-\top} \equiv (\mathbf Q^{-1})^\top$.
+Left-multiplying $(4.2)$ by $\mathbf A$ and adding it to $(4.1)$ yields</p>
+
+\[\mathbf A\boldsymbol y=\boldsymbol b\,.\tag{5}\]
+
+<p>This holds since positive definite matrices are symmetric.
+It follows from $(4.2)$ that</p>
+
+\[-\mathbf Q\boldsymbol y = \mathbf A^\top\boldsymbol\lambda-\boldsymbol\mu+\boldsymbol p\,.\tag{6.1}\]
+
+<p>or</p>
+
+\[\boldsymbol y = -\mathbf Q^{-1}(\mathbf A^\top\boldsymbol\lambda-\boldsymbol\mu+\boldsymbol p)\,.\tag{6.2}\]
+
+<p>Plugging $(6.1)$ and $(6.2)$ back to $(3)$ gives</p>
+
+\[\begin{aligned}
+\hat L(\boldsymbol\lambda,\boldsymbol\mu,\boldsymbol y)
+&amp;= \frac{1}{2}(\mathbf A^\top\boldsymbol\lambda+\boldsymbol p-\boldsymbol\mu)^\top\mathbf Q^{-1}\mathbf A^\top\boldsymbol\lambda+\boldsymbol p-\boldsymbol\mu - (\mathbf A^\top\boldsymbol\lambda-\boldsymbol\mu)^\top\mathbf Q^{-1}(\mathbf A^\top\boldsymbol\lambda+\boldsymbol p-\boldsymbol\mu)\\
+&amp;= \frac{1}{2}(-\mathbf Q\boldsymbol y)^\top\mathbf Q^{-1}(-\mathbf Q\boldsymbol y)-(-\mathbf Q\boldsymbol y-\boldsymbol p)^\top\mathbf Q^{-1}(-\mathbf Q\boldsymbol y)\\
+&amp;= -\frac{1}{2}\boldsymbol y^\top\mathbf Q\boldsymbol y-\boldsymbol p^\top\boldsymbol y\,.\\
+\end{aligned}\]
+
+<p>Together with Equation $(5)$ and $y_i \ge 0$, we have the dual of the dual formulation:</p>
+
+\[\max_{\boldsymbol y}-\frac{1}{2}\boldsymbol y^\top\mathbf Q\boldsymbol y-\boldsymbol p^\top\boldsymbol y\,;\quad\text{s.t. }\mathbf A\boldsymbol y=\boldsymbol b,\ y_i \ge 0\,.\]
+
+<p>Clearly, this is equivalent to the original QP.</p>
+
+  </div>
+<a class="u-url" href="/2023/08/05/dual-of-dual-of-qp.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

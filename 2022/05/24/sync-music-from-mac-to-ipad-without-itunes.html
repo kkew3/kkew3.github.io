@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>如何不通过iTunes将Mac上的音乐同步到iPad | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="如何不通过iTunes将Mac上的音乐同步到iPad">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="本文记录了如何不通过iTunes（或Finder，如果是新系统的话）将苹果电脑上的文件（音乐、视频等）同步到iPad。本文以同步音乐为例。">
+<meta property="og:description" content="本文记录了如何不通过iTunes（或Finder，如果是新系统的话）将苹果电脑上的文件（音乐、视频等）同步到iPad。本文以同步音乐为例。">
+<link rel="canonical" href="https://kkew3.github.io/2022/05/24/sync-music-from-mac-to-ipad-without-itunes.html">
+<meta property="og:url" content="https://kkew3.github.io/2022/05/24/sync-music-from-mac-to-ipad-without-itunes.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2022-05-24T12:09:10+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="如何不通过iTunes将Mac上的音乐同步到iPad">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2022-05-24T12:09:10+00:00","datePublished":"2022-05-24T12:09:10+00:00","description":"本文记录了如何不通过iTunes（或Finder，如果是新系统的话）将苹果电脑上的文件（音乐、视频等）同步到iPad。本文以同步音乐为例。","headline":"如何不通过iTunes将Mac上的音乐同步到iPad","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2022/05/24/sync-music-from-mac-to-ipad-without-itunes.html"},"url":"https://kkew3.github.io/2022/05/24/sync-music-from-mac-to-ipad-without-itunes.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">如何不通过iTunes将Mac上的音乐同步到iPad</h1>
+    <span><a href="https://kkew3.github.io/tags/os--ios"><code class="highlighter-rouge"><nobr>os/ios</nobr></code></a> | <a href="https://kkew3.github.io/tags/os--macos"><code class="highlighter-rouge"><nobr>os/macOS</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2022-05-24T12:09:10+00:00" itemprop="datePublished">May 24, 2022 at 12:09:10
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>本文记录了如何不通过iTunes（或Finder，如果是新系统的话）将苹果电脑上的文件（音乐、视频等）同步到iPad。本文以同步音乐为例。</p>
+
+<ol>
+  <li>在Terminal中<code class="language-plaintext highlighter-rouge">cd</code>到音乐文件夹（如<code class="language-plaintext highlighter-rouge">~/Music</code>），使用<a href="https://github.com/sharkdp/fd">fd</a>命令列出所有音乐并传给zip打包，假设打包为<code class="language-plaintext highlighter-rouge">share.zip</code>：<code class="language-plaintext highlighter-rouge">fd -emp4 -etma -em4a -emp3 -d1 . | zip -0qT share.zip -@</code>
+</li>
+  <li>在Terminal中输入<code class="language-plaintext highlighter-rouge">ifconfig | grep 192 | awk '{ print $2 }'</code>确认自己在局域网中的IP地址。</li>
+  <li>使用<code class="language-plaintext highlighter-rouge">python3 -m http.server 9000</code>建立一个http服务器，这里建立在9000端口上。</li>
+  <li>将iPad连接至与Mac同一局域网。打开iPad的Safari浏览器，在地址栏输入<code class="language-plaintext highlighter-rouge">http://192.168.0.xxx:9000</code>，其中<code class="language-plaintext highlighter-rouge">192.168.0.xxx</code>表示在第2步中确认的IP地址。</li>
+  <li>在<code class="language-plaintext highlighter-rouge">Directory listing for /</code>下面找到<code class="language-plaintext highlighter-rouge">share.zip</code>，单击下载。下载完毕后应该在<code class="language-plaintext highlighter-rouge">Files</code>应用中的<code class="language-plaintext highlighter-rouge">On My iPad/Downloads</code>下面找到。</li>
+  <li>单击<code class="language-plaintext highlighter-rouge">share.zip</code>，此时会自动解压为<code class="language-plaintext highlighter-rouge">share</code>文件夹。单击<code class="language-plaintext highlighter-rouge">share</code>文件夹进入，右上角点击<code class="language-plaintext highlighter-rouge">Select</code>，然后左上角点击<code class="language-plaintext highlighter-rouge">Select All</code>全选，然后下面点击<code class="language-plaintext highlighter-rouge">Move</code>，选择位置，例如移动到<code class="language-plaintext highlighter-rouge">On My iPad/Music</code>，音乐就都移动过去了。</li>
+  <li>删除<code class="language-plaintext highlighter-rouge">share</code>文件夹和<code class="language-plaintext highlighter-rouge">share.zip</code>。</li>
+</ol>
+
+<p>虽然步骤有点多，熟练了也不是很麻烦。第3步中建立的服务器可以常开着，以便随时同步。</p>
+
+  </div>
+<a class="u-url" href="/2022/05/24/sync-music-from-mac-to-ipad-without-itunes.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
