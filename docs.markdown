@@ -12,4 +12,4 @@ permalink: /docs/
 
 ## Study notes
 
-- <a href="/assets/spare-time-research/additive-gaussian-noise-density.pdf" type="application/pdf">Measure-theoretic Probability Note: Any Random Variable Plus Independent Gaussian Possesses Density</a>
+- <a href="/assets/study-notes/additive-gaussian-noise-density.pdf" type="application/pdf">Measure-theoretic Probability Note: Any Random Variable Plus Independent Gaussian Possesses Density</a>
