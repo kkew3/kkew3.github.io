@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Read HDF5 file from C++ | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="Read HDF5 file from C++">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="Introduction">
+<meta property="og:description" content="Introduction">
+<link rel="canonical" href="https://kkew3.github.io/2022/07/24/read-hdf5-from-cpp.html">
+<meta property="og:url" content="https://kkew3.github.io/2022/07/24/read-hdf5-from-cpp.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2022-07-24T04:20:10+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Read HDF5 file from C++">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2022-07-24T04:20:10+00:00","datePublished":"2022-07-24T04:20:10+00:00","description":"Introduction","headline":"Read HDF5 file from C++","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2022/07/24/read-hdf5-from-cpp.html"},"url":"https://kkew3.github.io/2022/07/24/read-hdf5-from-cpp.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Read HDF5 file from C++</h1>
+    <span><a href="https://kkew3.github.io/tags/dev--cpp"><code class="highlighter-rouge"><nobr>dev/c++</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2022-07-24T04:20:10+00:00" itemprop="datePublished">Jul 24, 2022 at 04:20:10
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="introduction">Introduction</h2>
+
+<p><a href="https://portal.hdfgroup.org/display/HDF5/HDF5">HDF5</a> is a cross-platform data format used to save (high dimensional) arrays.
+There are various language bindings out there for manipulating HDF5 files, including C++.
+I record here, after stumbling around many hours, how to read data using C++.</p>
+
+<h2 id="read-scalars">Read scalars</h2>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// note the header is not "hdf5.h"</span>
+<span class="cp">#include</span> <span class="cpf">"H5Cpp.h"</span><span class="cp">
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="n">H5</span><span class="o">::</span><span class="n">H5File</span> <span class="n">file</span><span class="p">(</span><span class="s">"/path/to/data.h5"</span><span class="p">,</span> <span class="n">H5F_ACC_RDONLY</span><span class="p">);</span>
+	<span class="n">H5</span><span class="o">::</span><span class="n">DataSet</span> <span class="n">dataset</span> <span class="o">=</span> <span class="n">file</span><span class="p">.</span><span class="n">openDataSet</span><span class="p">(</span><span class="s">"dataset/path"</span><span class="p">);</span>
+	<span class="n">H5</span><span class="o">::</span><span class="n">DataSpace</span> <span class="n">filespace</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="n">getSpace</span><span class="p">();</span>
+	<span class="c1">// it might be more than sufficient to use `1` here</span>
+	<span class="n">hsize_t</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+	<span class="c1">// `_dims` must be 0;</span>
+	<span class="c1">// `shape` shouldn't be touched</span>
+	<span class="kt">int</span> <span class="n">_dims</span> <span class="o">=</span> <span class="n">filespace</span><span class="p">.</span><span class="n">getSimpleExtentDims</span><span class="p">(</span><span class="n">shape</span><span class="p">);</span>
+	<span class="n">H5</span><span class="o">::</span><span class="n">DataSpace</span> <span class="n">mspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">shape</span><span class="p">);</span>  <span class="c1">// where 0 comes from `_dims`</span>
+	<span class="kt">double</span> <span class="n">buf</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+	<span class="n">dataset</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">H5</span><span class="o">::</span><span class="n">PredType</span><span class="o">::</span><span class="n">NATIVE_DOUBLE</span><span class="p">,</span> <span class="n">mspace</span><span class="p">,</span> <span class="n">filespace</span><span class="p">);</span>
+
+	<span class="c1">// the scalar is in `buf[0]`</span>
+
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="read-vector-to-array">Read vector to array</h2>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">"H5Cpp.h"</span><span class="cp">
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="n">H5</span><span class="o">::</span><span class="n">H5File</span> <span class="n">file</span><span class="p">(</span><span class="s">"/path/to/data.h5"</span><span class="p">,</span> <span class="n">H5F_ACC_RDONLY</span><span class="p">);</span>
+	<span class="n">H5</span><span class="o">::</span><span class="n">DataSet</span> <span class="n">dataset</span> <span class="o">=</span> <span class="n">file</span><span class="p">.</span><span class="n">openDataSet</span><span class="p">(</span><span class="s">"dataset/path"</span><span class="p">);</span>
+	<span class="n">H5</span><span class="o">::</span><span class="n">DataSpace</span> <span class="n">filespace</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="n">getSpace</span><span class="p">();</span>
+	<span class="c1">// `1` corresponds to 1D array (vectors);</span>
+	<span class="c1">// if reading 2D array (matrices), replace `1` with `2`, so forth</span>
+	<span class="n">hsize_t</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+	<span class="c1">// `_dims` is the actual N in N-D array; should be the same as</span>
+	<span class="c1">// previously set; `shape` has now been set</span>
+	<span class="kt">int</span> <span class="n">_dims</span> <span class="o">=</span> <span class="n">filespace</span><span class="p">.</span><span class="n">getSimpleExtentDims</span><span class="p">(</span><span class="n">shape</span><span class="p">);</span>
+	<span class="n">H5</span><span class="o">::</span><span class="n">DataSpace</span> <span class="n">mspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="p">);</span> <span class="c1">// replace `1` with `2` if like above</span>
+	<span class="kt">double</span> <span class="o">*</span><span class="n">buf</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">double</span><span class="p">[</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]];</span>
+	<span class="c1">// if reading 2D array the previous line should be replaced by:</span>
+	<span class="c1">//double *buf = new double[shape[0] * shape[1]];</span>
+	<span class="c1">// so forth</span>
+	<span class="n">dataset</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">H5</span><span class="o">::</span><span class="n">PredType</span><span class="o">::</span><span class="n">NATIVE_DOUBLE</span><span class="p">,</span> <span class="n">mspace</span><span class="p">,</span> <span class="n">filespace</span><span class="p">);</span>
+
+	<span class="c1">// the vector (or flatten matrix if reading matrix) is in `buf`</span>
+
+	<span class="k">delete</span><span class="p">[]</span> <span class="n">buf</span><span class="p">;</span>
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Note that arrays are stored contiguously.
+Read arrays using something like <code class="language-plaintext highlighter-rouge">double buf[M][N]</code> is not allowed.
+See this <a href="https://stackoverflow.com/a/17110562/7881370">answer</a>.</p>
+
+<h2 id="read-vector-to-stdvector">Read vector to <code class="language-plaintext highlighter-rouge">std::vector</code>
+</h2>
+
+<p>Basically the same …</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">"H5Cpp.h"</span><span class="cp">
+#include</span> <span class="cpf">&lt;vector&gt;</span><span class="cp">
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="n">H5</span><span class="o">::</span><span class="n">H5File</span> <span class="n">file</span><span class="p">(</span><span class="s">"/path/to/data.h5"</span><span class="p">,</span> <span class="n">H5F_ACC_RDONLY</span><span class="p">);</span>
+	<span class="n">H5</span><span class="o">::</span><span class="n">DataSet</span> <span class="n">dataset</span> <span class="o">=</span> <span class="n">file</span><span class="p">.</span><span class="n">openDataSet</span><span class="p">(</span><span class="s">"dataset/path"</span><span class="p">);</span>
+	<span class="n">H5</span><span class="o">::</span><span class="n">DataSpace</span> <span class="n">filespace</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="n">getSpace</span><span class="p">();</span>
+	<span class="c1">// `1` corresponds to 1D array (vectors);</span>
+	<span class="c1">// if reading 2D array (matrices), replace `1` with `2`, so forth</span>
+	<span class="n">hsize_t</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+	<span class="c1">// `_dims` is the actual N in N-D array; should be the same as</span>
+	<span class="c1">// previously set; `shape` has now been set</span>
+	<span class="kt">int</span> <span class="n">_dims</span> <span class="o">=</span> <span class="n">filespace</span><span class="p">.</span><span class="n">getSimpleExtentDims</span><span class="p">(</span><span class="n">shape</span><span class="p">);</span>
+	<span class="n">H5</span><span class="o">::</span><span class="n">DataSpace</span> <span class="n">mspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="p">);</span> <span class="c1">// replace `1` with `2` if like above</span>
+	<span class="c1">// must preserve enough space here</span>
+	<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">buf</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+	<span class="c1">// likewise, previous line should be written as</span>
+	<span class="c1">//std::vector&lt;double&gt; buf(shape[0] * shape[1]);</span>
+	<span class="c1">// if reading 2D array, so forth</span>
+	<span class="c1">// note the `.data()` here</span>
+	<span class="n">dataset</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">buf</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span> <span class="n">H5</span><span class="o">::</span><span class="n">PredType</span><span class="o">::</span><span class="n">NATIVE_DOUBLE</span><span class="p">,</span> <span class="n">mspace</span><span class="p">,</span> <span class="n">filespace</span><span class="p">);</span>
+
+	<span class="c1">// the vector is in `buf`</span>
+
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="compile-above-code">Compile above code</h2>
+
+<p>I’m not quite sure how to compile on Windows, but for Linux and macOS, <code class="language-plaintext highlighter-rouge">Makefile</code> should be written like this.</p>
+
+<div class="language-make highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">LDFLAGS</span> <span class="o">=</span> <span class="se">\</span>
+	<span class="nt">-L</span>/path/to/hdf5/incstall/directory/lib
+<span class="c"># note the library names here; only `-lhdf5` is not enough
+</span><span class="nv">LDLIBS</span> <span class="o">=</span> <span class="se">\</span>
+	<span class="nt">-lhdf5</span> <span class="se">\</span>
+	<span class="nt">-lhdf5_cpp</span> <span class="se">\</span>
+	<span class="nt">-lhdf5_hl_cpp</span>
+<span class="nv">CPPFLAGS</span> <span class="o">=</span> <span class="se">\</span>
+	<span class="nt">-I</span>/path/to/hdf5/install/directory/include
+<span class="nv">CXX</span> <span class="o">=</span> clang++
+
+<span class="c"># I haven't tried what if `-std=c++11` is not added, but I guess it
+# should be okay
+</span><span class="nl">a.out </span><span class="o">:</span> <span class="nf">source.cpp</span>
+	<span class="nv">$(CXX)</span> <span class="nv">$(CPPFLAGS)</span> <span class="nv">$(LDFLAGS)</span> <span class="nt">-std</span><span class="o">=</span>c++11 <span class="nt">-o</span> <span class="nv">$@</span> <span class="nv">$^</span> <span class="nv">$(LDLIBS)</span>
+</code></pre></div></div>
+
+  </div>
+<a class="u-url" href="/2022/07/24/read-hdf5-from-cpp.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

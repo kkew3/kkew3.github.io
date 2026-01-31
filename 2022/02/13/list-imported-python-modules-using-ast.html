@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>使用抽象语法树ast统计哪些Python包与模块被导入了 | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="使用抽象语法树ast统计哪些Python包与模块被导入了">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="长话短说，我的Gist。">
+<meta property="og:description" content="长话短说，我的Gist。">
+<link rel="canonical" href="https://kkew3.github.io/2022/02/13/list-imported-python-modules-using-ast.html">
+<meta property="og:url" content="https://kkew3.github.io/2022/02/13/list-imported-python-modules-using-ast.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2022-02-13T14:25:18+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="使用抽象语法树ast统计哪些Python包与模块被导入了">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2022-02-13T14:25:18+00:00","datePublished":"2022-02-13T14:25:18+00:00","description":"长话短说，我的Gist。","headline":"使用抽象语法树ast统计哪些Python包与模块被导入了","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2022/02/13/list-imported-python-modules-using-ast.html"},"url":"https://kkew3.github.io/2022/02/13/list-imported-python-modules-using-ast.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">使用抽象语法树ast统计哪些Python包与模块被导入了</h1>
+    <span><a href="https://kkew3.github.io/tags/dev--python"><code class="highlighter-rouge"><nobr>dev/python</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2022-02-13T14:25:18+00:00" itemprop="datePublished">Feb 13, 2022 at 14:25:18
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>长话短说，我的<a href="https://gist.github.com/kkew3/3bd1e0255af63e3ac0801c7bbc89e7bf">Gist</a>。</p>
+
+<p>给定一个没有<code class="language-plaintext highlighter-rouge">requirements.txt</code>的Python项目，如果想知道需要安装哪些包才能满足这个项目的依赖需求，一个容易想到的方法就是对每一个<code class="language-plaintext highlighter-rouge">.py</code>文件，用模式匹配（如正则表达式）找<code class="language-plaintext highlighter-rouge">import xxx</code>，并记录<code class="language-plaintext highlighter-rouge">xxx</code>为需要的包。然而<code class="language-plaintext highlighter-rouge">import</code>语句有很多形式，如：<code class="language-plaintext highlighter-rouge">import xxx</code>、<code class="language-plaintext highlighter-rouge">import xxx as aaa</code>、<code class="language-plaintext highlighter-rouge">import xxx as aaa, yyy as bbb</code>、<code class="language-plaintext highlighter-rouge">from xxx.yyy import fff as ccc</code>、<code class="language-plaintext highlighter-rouge">from .zzz import ggg</code>。因此，更好的方法是利用抽象语法树<code class="language-plaintext highlighter-rouge">ast</code>模块来找出所有<code class="language-plaintext highlighter-rouge">import</code>语句。</p>
+
+<p>Python的<code class="language-plaintext highlighter-rouge">import</code>语句对应<code class="language-plaintext highlighter-rouge">ast</code>的两种节点：<code class="language-plaintext highlighter-rouge">ast.Import</code>和<code class="language-plaintext highlighter-rouge">ast.ImportFrom</code>。要从<a href="https://docs.python.org/3/library/ast.html#ast.Import"><code class="language-plaintext highlighter-rouge">ast.Import</code></a>获取导入包的列表，可用：</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="n">a</span><span class="p">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">node</span><span class="p">.</span><span class="n">names</span><span class="p">]</span>  <span class="c1"># 其中node是ast.Import类型的
+</span></code></pre></div></div>
+
+<p>要从<a href="https://docs.python.org/3/library/ast.html#ast.ImportFrom"><code class="language-plaintext highlighter-rouge">ast.ImportFrom</code></a>获取导入的包，可用：</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">node</span><span class="p">.</span><span class="n">module</span>  <span class="c1"># 其中node是ast.ImportFrom类型的
+</span></code></pre></div></div>
+
+<p>值得注意的是如果当前<code class="language-plaintext highlighter-rouge">import</code>语句是<code class="language-plaintext highlighter-rouge">from . import xxx</code>，<code class="language-plaintext highlighter-rouge">node.module</code>将会是<code class="language-plaintext highlighter-rouge">None</code>，此时<code class="language-plaintext highlighter-rouge">node.level &gt; 0</code>，意味着相对导入。因此，要想获得所有导入的包（除了相对导入外，因为相对导入的包绝不会是需要安装的依赖），可以这样：</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">ast</span>
+<span class="c1"># 假设source包含待解析源码
+</span><span class="n">root</span> <span class="o">=</span> <span class="n">ast</span><span class="p">.</span><span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">ast</span><span class="p">.</span><span class="n">walk</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="p">.</span><span class="n">Import</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">node</span><span class="p">.</span><span class="n">names</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">name</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="s">'.'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="p">.</span><span class="n">ImportFrom</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span><span class="p">.</span><span class="n">level</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">.</span><span class="n">module</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="s">'.'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>然而绝对导入的包也有可能是工作目录中已存在的模块或包啊，此时我们就可以根据导入路径判断它是不是指工作目录下的包：</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">exists_local</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">rootpkg</span><span class="p">):</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">rootpkg</span><span class="p">,</span> <span class="n">path</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="s">'.'</span><span class="p">,</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">sep</span><span class="p">))</span>
+    <span class="c1"># see if path is a local package
+</span>    <span class="k">if</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">isfile</span><span class="p">(</span>
+            <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s">'__init__.py'</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="c1"># see if path is a local module
+</span>    <span class="k">if</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filepath</span> <span class="o">+</span> <span class="s">'.py'</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">return</span> <span class="bp">False</span>
+</code></pre></div></div>
+
+<p>其中<code class="language-plaintext highlighter-rouge">path</code>是导入路径，<code class="language-plaintext highlighter-rouge">rootpkg</code>是根包所在目录（定义见<a href="https://docs.python.org/3.7/distutils/setupscript.html#listing-whole-packages">这里</a>）。</p>
+
+<p>把这个核心功能稍作包装，便可写出下面的完整可执行代码：</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">ast</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">pkgutil</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+
+<span class="k">def</span> <span class="nf">make_parser</span><span class="p">():</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="p">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s">'List all root imports. The *root* import of '</span>
+                     <span class="s">'`import pkg1.mod1` is "pkg1".'</span><span class="p">))</span>
+    <span class="n">parse_opts</span> <span class="o">=</span> <span class="n">parser</span><span class="p">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">()</span>
+    <span class="n">parse_opts</span><span class="p">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">'-g'</span><span class="p">,</span>
+        <span class="s">'--greedy'</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s">'store_true'</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s">'find also import statements within try block, '</span>
+              <span class="s">'if block, while block, function definition, '</span>
+              <span class="s">'etc.'</span><span class="p">))</span>
+    <span class="n">parse_opts</span><span class="p">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">'-a'</span><span class="p">,</span>
+        <span class="s">'--all'</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s">'store_true'</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s">'first list all minimal-required root '</span>
+              <span class="s">'imports (without `-g
+
+需要注意的是，程序的输出并不一定是PyPI上包的名字（例如，`import bs4`然而`pip install beautifulsoup4`）。
+
+---
+
+类似项目：[pipreqs](https://github.com/bndr/pipreqs)。核心代码是几乎一样的，但包装得不同。
+), then list '</span>
+              <span class="s">'additionally-required root imports (with '</span>
+              <span class="s">'`-g
+
+需要注意的是，程序的输出并不一定是PyPI上包的名字（例如，`import bs4`然而`pip install beautifulsoup4`）。
+
+---
+
+类似项目：[pipreqs](https://github.com/bndr/pipreqs)。核心代码是几乎一样的，但包装得不同。
+), and explain the two lists'</span><span class="p">))</span>
+    <span class="n">parser</span><span class="p">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">'-i'</span><span class="p">,</span>
+        <span class="s">'--include-installed'</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s">'store_true'</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s">'include installed/built-in modules/packages'</span><span class="p">)</span>
+    <span class="n">parser</span><span class="p">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">'-T'</span><span class="p">,</span>
+        <span class="s">'--files-from'</span><span class="p">,</span>
+        <span class="n">metavar</span><span class="o">=</span><span class="s">'LIST_FILE'</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s">'if specified, the files to process '</span>
+              <span class="s">'will be read one per line from '</span>
+              <span class="s">'LIST_FILE; if specified as `-
+
+需要注意的是，程序的输出并不一定是PyPI上包的名字（例如，`import bs4`然而`pip install beautifulsoup4`）。
+
+---
+
+类似项目：[pipreqs](https://github.com/bndr/pipreqs)。核心代码是几乎一样的，但包装得不同。
+, '</span>
+              <span class="s">'stdin will be expected to contain '</span>
+              <span class="s">'the files to process. Note that '</span>
+              <span class="s">'SOURCE_FILEs, if exist, take '</span>
+              <span class="s">'precedence (see below)'</span><span class="p">))</span>
+    <span class="n">parser</span><span class="p">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">'--ipynb'</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s">'store_true'</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s">'if specified, the files ending with '</span>
+              <span class="s">'".ipynb" in either SOURCE_FILEs or '</span>
+              <span class="s">'LIST_FILE will be parsed as ipython '</span>
+              <span class="s">'notebook files rather than Python '</span>
+              <span class="s">'files'</span><span class="p">))</span>
+    <span class="n">parser</span><span class="p">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">'rootpkg'</span><span class="p">,</span>
+        <span class="n">metavar</span><span class="o">=</span><span class="s">'ROOTPKG_DIR'</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="n">dir_type</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span>
+        <span class="p">(</span><span class="s">'the directory of the root package. See '</span>
+         <span class="s">'https://docs.python.org/3.7/distutils/setupscript.html#listing-whole-packages '</span>
+         <span class="s">'about *root package*. Local packages/modules will be '</span>
+         <span class="s">'excluded from the results. For example, if '</span>
+         <span class="s">'there are "mod1.py" and "mod2.py", and in '</span>
+         <span class="s">'"mod2.py" there is `import mod1`, then "mod1" '</span>
+         <span class="s">'won
+
+需要注意的是，程序的输出并不一定是PyPI上包的名字（例如，`import bs4`然而`pip install beautifulsoup4`）。
+
+---
+
+类似项目：[pipreqs](https://github.com/bndr/pipreqs)。核心代码是几乎一样的，但包装得不同。
+t be listed in the result.'</span><span class="p">))</span>
+    <span class="n">parser</span><span class="p">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">'filenames'</span><span class="p">,</span>
+        <span class="n">metavar</span><span class="o">=</span><span class="s">'SOURCE_FILE'</span><span class="p">,</span>
+        <span class="n">nargs</span><span class="o">=</span><span class="s">'*'</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s">'if specified one or more files, '</span>
+              <span class="s">'only these SOURCE_FILEs will get '</span>
+              <span class="s">'processed regardless of `-T
+
+需要注意的是，程序的输出并不一定是PyPI上包的名字（例如，`import bs4`然而`pip install beautifulsoup4`）。
+
+---
+
+类似项目：[pipreqs](https://github.com/bndr/pipreqs)。核心代码是几乎一样的，但包装得不同。
+ '</span>
+              <span class="s">'option; if no SOURCE_FILE is '</span>
+              <span class="s">'specified, `-T
+
+需要注意的是，程序的输出并不一定是PyPI上包的名字（例如，`import bs4`然而`pip install beautifulsoup4`）。
+
+---
+
+类似项目：[pipreqs](https://github.com/bndr/pipreqs)。核心代码是几乎一样的，但包装得不同。
+, if exists, is '</span>
+              <span class="s">'processed. In both cases, the '</span>
+              <span class="s">'final results will be joined'</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">parser</span>
+
+
+<span class="k">def</span> <span class="nf">dir_type</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">argparse</span><span class="p">.</span><span class="n">ArgumentTypeError</span><span class="p">(</span><span class="s">'must be a directory'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">string</span>
+
+
+<span class="c1"># Reference: https://stackoverflow.com/a/9049549/7881370
+</span><span class="k">def</span> <span class="nf">yield_imports</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">greedy</span><span class="p">):</span>
+    <span class="s">"""
+    Yield all absolute imports.
+    """</span>
+    <span class="n">traverse</span> <span class="o">=</span> <span class="n">ast</span><span class="p">.</span><span class="n">walk</span> <span class="k">if</span> <span class="n">greedy</span> <span class="k">else</span> <span class="n">ast</span><span class="p">.</span><span class="n">iter_child_nodes</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">traverse</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="p">.</span><span class="n">Import</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">node</span><span class="p">.</span><span class="n">names</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">a</span><span class="p">.</span><span class="n">name</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="p">.</span><span class="n">ImportFrom</span><span class="p">):</span>
+            <span class="c1"># if node.level &gt; 0, the import is relative
+</span>            <span class="k">if</span> <span class="n">node</span><span class="p">.</span><span class="n">level</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">node</span><span class="p">.</span><span class="n">module</span>
+
+
+<span class="k">def</span> <span class="nf">exists_local</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">rootpkg</span><span class="p">):</span>
+    <span class="s">"""
+    Returns ``True`` if the absolute import ``path`` refers to a package or
+    a module residing under the working directory, else ``False``.
+    """</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">rootpkg</span><span class="p">,</span> <span class="n">path</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="s">'.'</span><span class="p">,</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">sep</span><span class="p">))</span>
+    <span class="c1"># see if path is a local package
+</span>    <span class="k">if</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">isfile</span><span class="p">(</span>
+            <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s">'__init__.py'</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="c1"># see if path is a local module
+</span>    <span class="k">if</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filepath</span> <span class="o">+</span> <span class="s">'.py'</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">return</span> <span class="bp">False</span>
+
+
+<span class="k">def</span> <span class="nf">filter_local</span><span class="p">(</span><span class="n">imports_iterable</span><span class="p">,</span> <span class="n">rootpkg</span><span class="p">):</span>
+    <span class="s">"""
+    Remove modules and packages in the working directory, and yield root
+    imports.
+    """</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">imports_iterable</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">exists_local</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">rootpkg</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">path</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="s">'.'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">filter_installed</span><span class="p">(</span><span class="n">imports_iterable</span><span class="p">):</span>
+    <span class="s">"""
+    Remove modules and packages already installed, which include built-in
+    modules and packages and those already installed (e.g. via ``pip``).
+    """</span>
+    <span class="n">installed</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
+        <span class="n">itertools</span><span class="p">.</span><span class="n">chain</span><span class="p">(</span><span class="n">sys</span><span class="p">.</span><span class="n">builtin_module_names</span><span class="p">,</span>
+                        <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">pkgutil</span><span class="p">.</span><span class="n">iter_modules</span><span class="p">())))</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">imports_iterable</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">installed</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">name</span>
+
+
+<span class="k">def</span> <span class="nf">collect_sources</span><span class="p">(</span><span class="n">filenames</span><span class="p">,</span> <span class="n">files_from</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">filenames</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">filename</span>
+    <span class="k">elif</span> <span class="n">files_from</span> <span class="o">==</span> <span class="s">'-'</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">sys</span><span class="p">.</span><span class="n">stdin</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">line</span><span class="p">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">files_from</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">files_from</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">infile</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">line</span><span class="p">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">OSError</span><span class="p">:</span>
+            <span class="n">logging</span><span class="p">.</span><span class="n">exception</span><span class="p">(</span><span class="s">'failed to read from "{}"'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">files_from</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">parse_python</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">ast</span><span class="p">.</span><span class="n">parse</span><span class="p">(</span><span class="n">infile</span><span class="p">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">root</span>
+
+
+<span class="k">def</span> <span class="nf">parse_ipynb</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">[</span><span class="s">'cells'</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="s">'cell_type'</span><span class="p">]</span> <span class="o">==</span> <span class="s">'code'</span><span class="p">:</span>
+            <span class="n">source</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">.</span><span class="n">rstrip</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="s">'source'</span><span class="p">]))</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="p">(</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">source</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">l</span><span class="p">.</span><span class="n">lstrip</span><span class="p">().</span><span class="n">startswith</span><span class="p">(</span><span class="s">'%'</span><span class="p">))</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">ast</span><span class="p">.</span><span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">root</span>
+
+
+<span class="k">def</span> <span class="nf">produce_results</span><span class="p">(</span><span class="n">filenames</span><span class="p">,</span> <span class="n">files_from</span><span class="p">,</span> <span class="n">greedy</span><span class="p">,</span> <span class="n">rootpkg</span><span class="p">,</span> <span class="n">include_installed</span><span class="p">,</span>
+                    <span class="n">ipynb</span><span class="p">):</span>
+    <span class="n">all_imports</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">collect_sources</span><span class="p">(</span><span class="n">filenames</span><span class="p">,</span> <span class="n">files_from</span><span class="p">):</span>
+        <span class="n">parse_source</span> <span class="o">=</span> <span class="p">(</span><span class="n">parse_ipynb</span> <span class="k">if</span> <span class="n">ipynb</span> <span class="ow">and</span> <span class="n">filename</span><span class="p">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">'.ipynb'</span><span class="p">)</span>
+                        <span class="k">else</span> <span class="n">parse_python</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">root</span> <span class="o">=</span> <span class="n">parse_source</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">OSError</span><span class="p">:</span>
+            <span class="n">logging</span><span class="p">.</span><span class="n">exception</span><span class="p">(</span><span class="s">'skipped'</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">SyntaxError</span><span class="p">:</span>
+            <span class="n">logging</span><span class="p">.</span><span class="n">exception</span><span class="p">(</span><span class="s">'failed to parse "{}"; skipped'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">all_imports</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">yield_imports</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">greedy</span><span class="p">))</span>
+    <span class="n">all_imports</span> <span class="o">=</span> <span class="n">itertools</span><span class="p">.</span><span class="n">chain</span><span class="p">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">all_imports</span><span class="p">)</span>
+    <span class="n">all_imports</span> <span class="o">=</span> <span class="n">filter_local</span><span class="p">(</span><span class="n">all_imports</span><span class="p">,</span> <span class="n">rootpkg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">include_installed</span><span class="p">:</span>
+        <span class="n">all_imports</span> <span class="o">=</span> <span class="n">filter_installed</span><span class="p">(</span><span class="n">all_imports</span><span class="p">)</span>
+    <span class="n">all_imports</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">all_imports</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">all_imports</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">logging</span><span class="p">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s">'%(levelname)s: %(message)s'</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">make_parser</span><span class="p">().</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">.</span><span class="nb">all</span><span class="p">:</span>
+        <span class="n">all_imports</span> <span class="o">=</span> <span class="n">produce_results</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">filenames</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">files_from</span><span class="p">,</span>
+                                      <span class="n">args</span><span class="p">.</span><span class="n">greedy</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">rootpkg</span><span class="p">,</span>
+                                      <span class="n">args</span><span class="p">.</span><span class="n">include_installed</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">ipynb</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">all_imports</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">all_imports</span><span class="p">)))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">min_imports</span> <span class="o">=</span> <span class="n">produce_results</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">filenames</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">files_from</span><span class="p">,</span>
+                                      <span class="bp">False</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">rootpkg</span><span class="p">,</span>
+                                      <span class="n">args</span><span class="p">.</span><span class="n">include_installed</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">ipynb</span><span class="p">)</span>
+        <span class="n">max_imports</span> <span class="o">=</span> <span class="n">produce_results</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">filenames</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">files_from</span><span class="p">,</span>
+                                      <span class="bp">True</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">rootpkg</span><span class="p">,</span>
+                                      <span class="n">args</span><span class="p">.</span><span class="n">include_installed</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">ipynb</span><span class="p">)</span>
+        <span class="n">extra_imports</span> <span class="o">=</span> <span class="n">max_imports</span> <span class="o">-</span> <span class="n">min_imports</span>
+        <span class="n">printed_min_imports</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">min_imports</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">'# minimal imports:'</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">min_imports</span><span class="p">)))</span>
+            <span class="n">printed_min_imports</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="n">extra_imports</span><span class="p">:</span>
+            <span class="c1"># pretty formatting purpose
+</span>            <span class="k">if</span> <span class="n">printed_min_imports</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">()</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">'# additional possible imports:'</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">extra_imports</span><span class="p">)))</span>
+
+    <span class="n">logging</span><span class="p">.</span><span class="n">shutdown</span><span class="p">()</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">'__main__'</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>需要注意的是，程序的输出并不一定是PyPI上包的名字（例如，<code class="language-plaintext highlighter-rouge">import bs4</code>然而<code class="language-plaintext highlighter-rouge">pip install beautifulsoup4</code>）。</p>
+
+<hr>
+
+<p>类似项目：<a href="https://github.com/bndr/pipreqs">pipreqs</a>。核心代码是几乎一样的，但包装得不同。</p>
+
+  </div>
+<a class="u-url" href="/2022/02/13/list-imported-python-modules-using-ast.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

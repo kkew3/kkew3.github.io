@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Apache Ant 扩展教程 | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="Apache Ant 扩展教程">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="Apache Ant 致力于成为一款灵活方便的构建工具，尽管对 Java 支持更多，也可以通过一些第三方库来支持其它语言的构建，甚至一些常规维护任务。鉴于Apache Ant 使用 XML 作为配置语言，以描述性见长，而无法处理过于复杂的过程逻辑，因此便有了著名的 Ant-Contrib 扩展包（主页见这里）的用武之地。Ant-Contrib 的使用固然增加了 Apache Ant 的可编程性，但以笔者的观点看，违背了 Apache Ant 的设计初衷，同时 XML 本身即使具有了编程能力，传统编程语言的逻辑表现力绝非 XML 可比。事实上，通过其官方 API 扩展 Apache Ant 使其完成用户定制功能，从长远来看，具有更好的简洁性、健壮性、可维护性和稳定性，只不过相对亲切的 XML，阅读 API 的艰巨任务掩盖了扩展 Apache Ant 的优势罢了。">
+<meta property="og:description" content="Apache Ant 致力于成为一款灵活方便的构建工具，尽管对 Java 支持更多，也可以通过一些第三方库来支持其它语言的构建，甚至一些常规维护任务。鉴于Apache Ant 使用 XML 作为配置语言，以描述性见长，而无法处理过于复杂的过程逻辑，因此便有了著名的 Ant-Contrib 扩展包（主页见这里）的用武之地。Ant-Contrib 的使用固然增加了 Apache Ant 的可编程性，但以笔者的观点看，违背了 Apache Ant 的设计初衷，同时 XML 本身即使具有了编程能力，传统编程语言的逻辑表现力绝非 XML 可比。事实上，通过其官方 API 扩展 Apache Ant 使其完成用户定制功能，从长远来看，具有更好的简洁性、健壮性、可维护性和稳定性，只不过相对亲切的 XML，阅读 API 的艰巨任务掩盖了扩展 Apache Ant 的优势罢了。">
+<link rel="canonical" href="https://kkew3.github.io/2016/12/27/apache-ant-extension-tutorial.html">
+<meta property="og:url" content="https://kkew3.github.io/2016/12/27/apache-ant-extension-tutorial.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2016-12-27T07:23:04+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Apache Ant 扩展教程">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2016-12-27T07:23:04+00:00","datePublished":"2016-12-27T07:23:04+00:00","description":"Apache Ant 致力于成为一款灵活方便的构建工具，尽管对 Java 支持更多，也可以通过一些第三方库来支持其它语言的构建，甚至一些常规维护任务。鉴于Apache Ant 使用 XML 作为配置语言，以描述性见长，而无法处理过于复杂的过程逻辑，因此便有了著名的 Ant-Contrib 扩展包（主页见这里）的用武之地。Ant-Contrib 的使用固然增加了 Apache Ant 的可编程性，但以笔者的观点看，违背了 Apache Ant 的设计初衷，同时 XML 本身即使具有了编程能力，传统编程语言的逻辑表现力绝非 XML 可比。事实上，通过其官方 API 扩展 Apache Ant 使其完成用户定制功能，从长远来看，具有更好的简洁性、健壮性、可维护性和稳定性，只不过相对亲切的 XML，阅读 API 的艰巨任务掩盖了扩展 Apache Ant 的优势罢了。","headline":"Apache Ant 扩展教程","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2016/12/27/apache-ant-extension-tutorial.html"},"url":"https://kkew3.github.io/2016/12/27/apache-ant-extension-tutorial.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Apache Ant 扩展教程</h1>
+    <span><a href="https://kkew3.github.io/tags/dev--java"><code class="highlighter-rouge"><nobr>dev/java</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2016-12-27T07:23:04+00:00" itemprop="datePublished">Dec 27, 2016 at 07:23:04
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Apache Ant 致力于成为一款灵活方便的构建工具，尽管对 Java 支持更多，也可以通过一些第三方库来支持其它语言的构建，甚至一些常规维护任务。鉴于Apache Ant 使用 XML 作为配置语言，以描述性见长，而无法处理过于复杂的过程逻辑，因此便有了著名的 Ant-Contrib 扩展包（主页见<a href="http://ant-contrib.sourceforge.net/">这里</a>）的用武之地。Ant-Contrib 的使用固然增加了 Apache Ant 的可编程性，但以笔者的观点看，违背了 Apache Ant 的设计初衷，同时 XML 本身即使具有了编程能力，传统编程语言的逻辑表现力绝非 XML 可比。事实上，通过其官方 API 扩展 Apache Ant 使其完成用户定制功能，从长远来看，具有更好的简洁性、健壮性、可维护性和稳定性，只不过相对亲切的 XML，阅读 API 的艰巨任务掩盖了扩展 Apache Ant 的优势罢了。</p>
+
+<hr>
+
+<p>Apache Ant 构建文件由两部分元素组成，分别是 <code class="language-plaintext highlighter-rouge">Task</code>（任务） 和 <code class="language-plaintext highlighter-rouge">DataType</code>（数据类型）。通常而言，类型表示一个资源集合，如<code class="language-plaintext highlighter-rouge">Fileset</code>（文件集合）；任务用于执行某些操作。虽然任务和类型有很多不同点，但两者从 Java 类结构上看又有很多相似之处。例如：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">packagePath</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.tools.ant.Task</span><span class="o">;</span>  <span class="c1">// 任务都继承自这里</span>
+<span class="kn">import</span> <span class="nn">org.apache.tools.ant.BuildException</span><span class="o">;</span>
+
+<span class="cm">/*
+ * 使用 Java Bean 规范定义 XML 属性，属性名从 getter/setter 名中推测得到。
+ * 若要添加子元素，需要使用 addXXX(YYYY e) 方法。XXX 为子元素的 XML 元素名
+ * （在 XML 中不分大小写，但在 Java 中的命名要符合 Java Bean 规范）；
+ * YYYY 为其实际的 Java 类名。
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyTask</span> <span class="kd">extends</span> <span class="nc">Task</span> <span class="o">{</span>
+    
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">myStringAttribute</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">myIntAttribute</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">File</span> <span class="n">myFileAttribute</span><span class="o">;</span>
+    
+    <span class="kd">private</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">SelfDefinedSubElement</span><span class="o">&gt;</span> <span class="n">l</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">MyTask</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">SelfDefinedSubElement</span><span class="o">&gt;();</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getMyStringAttribute</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">myStringAttribute</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="c1">// 其它两个 getters ...</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setMyStringAttribute</span><span class="o">(</span><span class="nc">String</span> <span class="n">myStringAttribute</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">myStringAttribute</span> <span class="o">=</span> <span class="n">myStringAttribute</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="c1">// 其它两个 setters ...</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">addSelfDefinedElement</span><span class="o">(</span><span class="nc">SelfDefinedSubElement</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">l</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="cm">/*
+     * 在这里开始执行任务。DataType 没有这个方法；但 DataType 有获取引用
+     * 的方法，即在一个地方使用属性 id 标志数据类型然后在另一个地方用 refid
+     * 获得其引用。详询 Apache Ant API
+     */</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">execute</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">myStringAttribute</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">BuildException</span><span class="o">(</span><span class="s">"myStringAttribute not set"</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="c1">// 其它输入检查 ...</span>
+
+        <span class="c1">// 要完成的操作 ...</span>
+    <span class="o">}</span>  
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>这是一个任务，一个 <code class="language-plaintext highlighter-rouge">Java</code> 文件。</p>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 在这里定义 MyTask 在 XML 里的元素名
+</span><span class="py">nameUsedByMyTaskInBuildfile</span><span class="p">=</span><span class="s">packagePath.MyTask</span>
+<span class="py">selfDefinedElement</span><span class="p">=</span><span class="s">它的全限定类路径</span>
+</code></pre></div></div>
+
+<p>这是任务声明，一个 <code class="language-plaintext highlighter-rouge">propertes</code> 文件。</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;target</span> <span class="na">name=</span><span class="s">"XXX"</span><span class="nt">&gt;</span>
+  <span class="c">&lt;!-- some other tasks --&gt;</span>
+  <span class="nt">&lt;nameUsedByMyTaskInBuildfile</span> <span class="na">myStringAttribute=</span><span class="s">"stringValue"</span>
+                               <span class="na">myFileAttribute=</span><span class="s">"C:\Users"</span>
+                               <span class="na">myIntAttribute=</span><span class="s">"5"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;selfDefinedElement</span> <span class="na">someAttributes=</span><span class="s">""</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;/nameUsedByMyTaskInBuildfile&gt;</span>
+  <span class="c">&lt;!-- some other tasks --&gt;</span>
+<span class="nt">&lt;/target&gt;</span>
+</code></pre></div></div>
+
+<p>这是该任务所对应的一个可能的 XML 示例。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">anotherPackagePath</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.tools.ant.types.DataType</span><span class="o">;</span>  <span class="c1">// 数据类型继承自这里</span>
+<span class="kn">import</span> <span class="nn">org.apache.tools.ant.BuildException</span><span class="o">;</span>
+
+<span class="cm">/*
+ * 说明与任务说明相同
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyType</span> <span class="kd">extends</span> <span class="nc">DataType</span> <span class="o">{</span>
+    
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">myStringAttribute</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">myIntAttribute</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">File</span> <span class="n">myFileAttribute</span><span class="o">;</span>
+    
+    <span class="kd">private</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">AnotherSelfDefinedSubElement</span><span class="o">&gt;</span> <span class="n">l</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">MyTask</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">AnotherSelfDefinedSubElement</span><span class="o">&gt;();</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getMyStringAttribute</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">myStringAttribute</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="c1">// 其它两个 getters ...</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setMyStringAttribute</span><span class="o">(</span><span class="nc">String</span> <span class="n">myStringAttribute</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">myStringAttribute</span> <span class="o">=</span> <span class="n">myStringAttribute</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="c1">// 其它两个 setters ...</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">addAnotherSelfDefinedElement</span><span class="o">(</span><span class="nc">AnotherSelfDefinedSubElement</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">l</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>这是一个数据类型，一个 <code class="language-plaintext highlighter-rouge">Java</code> 文件。</p>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">nameUsedByMyTypeInBuildfile</span><span class="p">=</span><span class="s">anotherPackagePath.MyType</span>
+<span class="py">anotherSelfDefinedElement</span><span class="p">=</span><span class="s">它的全限定类路径</span>
+</code></pre></div></div>
+
+<p>这是数据类型声明，一个 <code class="language-plaintext highlighter-rouge">propertes</code> 文件。</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;nameUsedByMyTypeInBuildfile</span> <span class="na">myStringAttribute=</span><span class="s">"stringValue"</span>
+                             <span class="na">myFileAttribute=</span><span class="s">"C:\Users"</span>
+                             <span class="na">myIntAttribute=</span><span class="s">"5"</span>
+                             <span class="na">id=</span><span class="s">"my.id"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;anotherSelfDefinedElement</span> <span class="na">someAttributes=</span><span class="s">""</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/nameUsedByMyTypeInBuildfile&gt;</span>
+</code></pre></div></div>
+
+<p>这是该数据类型所对应的一个可能的 XML 示例。</p>
+
+<hr>
+
+<dl>
+  <dt>相关阅读：</dt>
+  <dd><a href="http://wangbaoaiboy.blog.163.com/blog/static/521119102012123111216547/">Apache Ant API 的基本使用方法</a></dd>
+  <dd>
+<a href="http://download.csdn.net/detail/Javazzk001/343069">Apache Ant API</a>（这是一个下载地址，Apache Ant 不提供官方的在线 API）</dd>
+</dl>
+
+  </div>
+<a class="u-url" href="/2016/12/27/apache-ant-extension-tutorial.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

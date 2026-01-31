@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>从另一台计算机 SSH 连接到 WSL2 服务器 | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="从另一台计算机 SSH 连接到 WSL2 服务器">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="原理">
+<meta property="og:description" content="原理">
+<link rel="canonical" href="https://kkew3.github.io/2023/07/05/connect-to-wsl2-from-another-machine-within-wlan.html">
+<meta property="og:url" content="https://kkew3.github.io/2023/07/05/connect-to-wsl2-from-another-machine-within-wlan.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2023-07-05T04:59:03+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="从另一台计算机 SSH 连接到 WSL2 服务器">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2023-07-05T04:59:03+00:00","datePublished":"2023-07-05T04:59:03+00:00","description":"原理","headline":"从另一台计算机 SSH 连接到 WSL2 服务器","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2023/07/05/connect-to-wsl2-from-another-machine-within-wlan.html"},"url":"https://kkew3.github.io/2023/07/05/connect-to-wsl2-from-another-machine-within-wlan.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">从另一台计算机 SSH 连接到 WSL2 服务器</h1>
+    <span><a href="https://kkew3.github.io/tags/dev--network"><code class="highlighter-rouge"><nobr>dev/network</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2023-07-05T04:59:03+00:00" itemprop="datePublished">Jul 5, 2023 at 04:59:03
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="原理">原理</h2>
+
+<ol>
+  <li>在 Windows 上设置防火墙允许接入端口 (本文暂定为 4000)</li>
+  <li>在 Windows 上设置端口转发从 4000 至 WSL2 的 IP 地址的端口 22 (即 SSH 的默认端口)</li>
+  <li>在 WSL2 中设置 SSH 服务器, 监听其端口 22</li>
+  <li>从另一台计算机 SSH 到 Windows 的 IP 地址的端口 4000</li>
+</ol>
+
+<h2 id="具体流程">具体流程</h2>
+
+<h3 id="设置-wsl2-中的-ssh-服务器">设置 WSL2 中的 SSH 服务器</h3>
+
+<p><em>以下命令在 WSL2 的终端中执行</em></p>
+
+<p>安装 <code class="language-plaintext highlighter-rouge">openssh-server</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo apt update
+sudo apt install openssh-server
+</code></pre></div></div>
+
+<p>设置开机启动 <code class="language-plaintext highlighter-rouge">systemd</code>.
+方法是在 <code class="language-plaintext highlighter-rouge">/etc/wsl.conf</code> 中写入:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[boot]
+systemd=true
+</code></pre></div></div>
+
+<p>可以直接用 <code class="language-plaintext highlighter-rouge">vim</code>, <code class="language-plaintext highlighter-rouge">nano</code> 等编辑, 也可</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span> <span class="nb">echo</span> <span class="s1">'[boot]'</span><span class="p">;</span> <span class="nb">echo</span> <span class="s1">'systemd=true'</span><span class="p">;</span> <span class="o">}</span> | <span class="nb">sudo tee</span> /etc/wsl.conf
+</code></pre></div></div>
+
+<p>但注意不要覆盖已存在的 <code class="language-plaintext highlighter-rouge">/etc/wsl.conf</code> 文件.</p>
+
+<p><em>以下命令在 Windows 终端中执行 (可能需要管理员权限)</em></p>
+
+<p>关闭 WSL2:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wsl --shutdown
+</code></pre></div></div>
+
+<p><em>以下命令在 WSL2 的终端中执行</em></p>
+
+<p>然后打开 WSL2, 执行</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>service ssh status
+</code></pre></div></div>
+
+<p>如果输出中包含 “Active: active (running)”, 说明 SSH 服务器安装成功.
+否则, 可以尝试以下命令手动开始 ssh 服务.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>service ssh start
+</code></pre></div></div>
+
+<h3 id="设置-windows-防火墙以允许从其它计算机接入端口-例如-4000">设置 Windows 防火墙以允许从其它计算机接入端口 (例如 4000)</h3>
+
+<p><em>以下命令在 Windows 终端中执行 (需要管理员权限)</em></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netsh advfirewall firewall add rule name="WSL SSH" dir=in action=allow protocol=TCP localport=4000
+</code></pre></div></div>
+
+<p>其中 <code class="language-plaintext highlighter-rouge">name="WSL SSH"</code> 部分的名字可任选.
+如果输出为 “确定” (或其它 locale 下的同等含义的输出), 说明设置成功.
+日后若想删除可以去控制面板的 “高级安全 Windows Defender 防火墙” 的 “入站规则” 中查看/编辑/删除.</p>
+
+<h3 id="设置-windows-的端口转发">设置 Windows 的端口转发</h3>
+
+<p><em>以下命令在 Windows 终端中执行 (需要管理员权限)</em></p>
+
+<p>查看 WSL2 的 IP 地址:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wsl hostname -I
+</code></pre></div></div>
+
+<p>本文假设该 IP 地址为 <code class="language-plaintext highlighter-rouge">172.21.199.198</code>.
+旧版本的 <code class="language-plaintext highlighter-rouge">wsl</code> 可能会返回两个 IP 地址, 此时选择第一个.</p>
+
+<p>设置从 4000 (见上文) 到 22 的端口转发:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netsh interface portproxy add v4tov4 listenaddress=0.0.0.0 listenport=4000 connectaddress=172.21.199.198 connectport=22
+</code></pre></div></div>
+
+<p>确定设置成功:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netsh interface portproxy show v4tov4
+</code></pre></div></div>
+
+<h3 id="查看-windows-的-ip-地址和-wsl-的用户名">查看 Windows 的 IP 地址和 WSL 的用户名</h3>
+
+<p><em>以下命令在 Windows 终端中执行</em></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ipconfig
+</code></pre></div></div>
+
+<p>在 “无线局域网适配器 WLAN:” 一节中可见 “IPv4 地址”, 本文为 <code class="language-plaintext highlighter-rouge">192.168.0.105</code>.</p>
+
+<p><em>以下命令在 WSL2 的终端中执行</em></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>echo "$USER"
+</code></pre></div></div>
+
+<p>可得 WSL 用户名, 本文为 <code class="language-plaintext highlighter-rouge">ubuntu</code>.</p>
+
+<h3 id="从另一台计算机-ssh-接入">从另一台计算机 SSH 接入</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh <span class="nt">-p</span> 4000 ubuntu@192.168.0.105
+</code></pre></div></div>
+
+<p>会提示输入密码, 此时输入 WSL2 的密码即可.</p>
+
+<h3 id="免密码登录-适用于-macos">免密码登录 (适用于 macOS)</h3>
+
+<p><em>以下命令在 macOS 终端中执行</em></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh-copy-id <span class="nt">-p</span> 4000 ubuntu@192.168.0.105
+</code></pre></div></div>
+
+<p>按提示确认并输入密码.
+然后打开 <code class="language-plaintext highlighter-rouge">~/.ssh/config</code>, 并输入以下内容</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Host my-wsl
+  User ubuntu
+  Port 4000
+  HostName 192.168.0.105
+  IdentityFile ~/.ssh/id_rsa
+  UseKeychain yes
+</code></pre></div></div>
+
+<p>其中 <code class="language-plaintext highlighter-rouge">Host my-wsl</code> 处的名字随意.
+<code class="language-plaintext highlighter-rouge">UseKeychain yes</code> 是免密码的关键所在.
+<code class="language-plaintext highlighter-rouge">ubuntu</code>, <code class="language-plaintext highlighter-rouge">4000</code>, <code class="language-plaintext highlighter-rouge">192.168.0.105</code> 三个值的选用见上文.</p>
+
+<p>然后就可以</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh my-wsl
+</code></pre></div></div>
+
+<p>登录 Windows 的 WSL2 了.</p>
+
+<h2 id="脚本">脚本</h2>
+
+<h3 id="自动更新-windows-的端口转发">自动更新 Windows 的端口转发</h3>
+
+<p>WSL 的 IP 地址可能会变化, 因此每次重启 Windows 后可能需要更新端口转发规则.
+Powershell 脚本:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$wsl_ip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">wsl</span><span class="w"> </span><span class="nx">hostname</span><span class="w"> </span><span class="nt">-I</span><span class="w">
+</span><span class="n">netsh</span><span class="w"> </span><span class="nx">interface</span><span class="w"> </span><span class="nx">portproxy</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="nx">v4tov4</span><span class="w"> </span><span class="nx">listenaddress</span><span class="o">=</span><span class="mf">0.0</span><span class="o">.</span><span class="nf">0</span><span class="o">.</span><span class="nf">0</span><span class="w"> </span><span class="n">listenport</span><span class="o">=</span><span class="mi">4000</span><span class="w"> </span><span class="n">connectaddress</span><span class="o">=</span><span class="nv">$wsl_ip</span><span class="w"> </span><span class="n">connectport</span><span class="o">=</span><span class="mi">22</span><span class="w">
+</span></code></pre></div></div>
+
+<p>运行时需要管理员权限.</p>
+
+<h2 id="参考">参考</h2>
+
+<ul>
+  <li><a href="https://medium.com/geekculture/enable-ssh-access-into-wsl-from-a-remote-computer-f2e4a962430">这篇博客</a></li>
+  <li><a href="https://learn.microsoft.com/en-us/windows/wsl/networking#accessing-a-wsl-2-distribution-from-your-local-area-network-lan">微软 WSL 文档</a></li>
+  <li><a href="https://learn.microsoft.com/en-us/windows-server/networking/technologies/netsh/netsh-interface-portproxy">微软 netsh 文档</a></li>
+</ul>
+
+  </div>
+<a class="u-url" href="/2023/07/05/connect-to-wsl2-from-another-machine-within-wlan.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

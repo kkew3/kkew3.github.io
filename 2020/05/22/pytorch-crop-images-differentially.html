@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>PyTorch crop images differentially | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="PyTorch crop images differentially">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="Intro">
+<meta property="og:description" content="Intro">
+<link rel="canonical" href="https://kkew3.github.io/2020/05/22/pytorch-crop-images-differentially.html">
+<meta property="og:url" content="https://kkew3.github.io/2020/05/22/pytorch-crop-images-differentially.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2020-05-22T18:24:21+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="PyTorch crop images differentially">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2020-05-22T18:24:21+00:00","datePublished":"2020-05-22T18:24:21+00:00","description":"Intro","headline":"PyTorch crop images differentially","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2020/05/22/pytorch-crop-images-differentially.html"},"url":"https://kkew3.github.io/2020/05/22/pytorch-crop-images-differentially.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+<script>MathJax={"tex":{"inlineMath":[["$","$"],["\\(","\\)"]],"displayMath":[["$$","$$"],["\\[","\\]"]]},"svg":{"fontCache":"global"}}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">PyTorch crop images differentially</h1>
+    <span><a href="https://kkew3.github.io/tags/dev--pytorch"><code class="highlighter-rouge"><nobr>dev/pytorch</nobr></code></a> | <a href="https://kkew3.github.io/tags/math--la"><code class="highlighter-rouge"><nobr>math/linear algebra</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-05-22T18:24:21+00:00" itemprop="datePublished">May 22, 2020 at 18:24:21
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="intro">Intro</h2>
+
+<p><a href="https://pytorch.org">PyTorch</a> provides a variety of means to crop images. For example, <a href="https://pytorch.org/docs/stable/torchvision/transforms.html">torchvision.transforms</a> provides several functions to crop <code class="language-plaintext highlighter-rouge">PIL</code> images; <a href="https://discuss.pytorch.org/t/how-to-crop-image-tensor-in-model/8409/3">PyTorch Forum</a> provides an answer of how to crop image in a differentiable way (differentiable with respect to the image). However, sometimes we need a fully differentiable approach for the <em>cropping</em> action itself. How shall we implement that?</p>
+
+<h2 id="theory-affine-transformation">Theory: Affine transformation</h2>
+
+<p>Before reaching the answer, we need first to learn about the image coordinate system in PyTorch. It is a left-handed Cartesian system origined at the middle of an image. The coordinate has been normalized to range $[-1,1]$, where $(-1,-1)$ indicates the top-left corner, and $(1,1)$ indicates the bottom-right corner, as pointed out by <a href="https://pytorch.org/docs/stable/nn.functional.html#grid-sample">the doc</a>.</p>
+
+<p>Let $(x,y)$ be the top-left corner of the cropped image with respect to the coordinate of the original image; likewise, we denote $(x’,y’)$ as the bottom-right corner of the cropped image. It’s clear that $(x,y)$ corresponds to $(-1,-1)$ with respect to the cropped image coordinate system, and $(x’,y’)$ corresponds to $(1,1)$. We’d like a function $f$ that maps from the cropped image system to the original image system for every point in the cropped image. Since only scaling and translation are involved, the function $f$ can be parameterized by an affine transformation matrix $\Theta$ such that</p>
+
+\[\Theta =
+\begin{pmatrix}
+\theta_{11} &amp; 0 &amp; \theta_{13}\\
+0 &amp; \theta_{22} &amp; \theta_{23}\\
+0 &amp; 0 &amp; 1\\
+\end{pmatrix}\]
+
+<p>where $\theta_{12}=\theta_{21}=0$ since skewing is not involved. Denote $\mathbf{u}_H$ as the homogeneous coordinate of $\mathbf{u}=\begin{pmatrix}u &amp; v\\ \end{pmatrix}^\intercal$ such that $\mathbf{u}_H=\begin{pmatrix}\mathbf{u}^\intercal&amp;1\end{pmatrix}^\intercal$, $\Theta$ maps $\mathbf{u}_H$ with respect to the cropped image system to $\mathbf{x}_H$ with respect to the original image system, i.e. $\mathbf{x}_H = \Theta \mathbf{u}_H$. Thus,</p>
+
+\[\begin{pmatrix}
+x &amp; x'\\
+y &amp; y'\\
+1 &amp; 1
+\end{pmatrix} =
+\begin{pmatrix}
+\theta_{11} &amp; 0 &amp; \theta_{13}\\
+0 &amp; \theta_{22} &amp; \theta_{23}\\
+0 &amp; 0 &amp; 1\\
+\end{pmatrix}
+\begin{pmatrix}
+-1 &amp; 1\\
+-1 &amp; 1\\
+1 &amp; 1\\
+\end{pmatrix}\]
+
+<p>Solving the equations,</p>
+
+\[\Theta =
+\begin{pmatrix}
+\frac{x'-x}{2} &amp; 0 &amp; \frac{x'+x}{2}\\
+0 &amp; \frac{y'-y}{2} &amp; \frac{y'+y}{2}\\
+0 &amp; 0 &amp; 1\\
+\end{pmatrix}\]
+
+<p>where $x’\ge x, y’ \ge y$.</p>
+
+<h2 id="coding-time">Coding time</h2>
+
+<p>We’ll need two functions:</p>
+
+<ol>
+  <li>
+<a href="https://pytorch.org/docs/stable/nn.functional.html#affine-grid"><code class="language-plaintext highlighter-rouge">torch.nn.functional.affine_grid</code></a> to convert the $\Theta$ parameterization to $f$</li>
+  <li>
+<a href="https://pytorch.org/docs/stable/nn.functional.html#grid-sample"><code class="language-plaintext highlighter-rouge">torch.nn.functional.grid_sample</code></a> to find the corresponding original image coordinate from each cropped image coordinate</li>
+</ol>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="n">F</span>
+
+<span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">224</span><span class="p">,</span> <span class="mi">224</span>  <span class="c1"># batch size, input channels
+</span>                              <span class="c1"># original image height and width
+# Let `I` be our original image
+</span><span class="n">I</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
+<span class="c1"># Set the (x,y) and (x',y') to define the rectangular region to crop
+</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span>  <span class="c1"># some examplary random coordinates;
+</span><span class="n">x_</span><span class="p">,</span> <span class="n">y_</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.8</span>  <span class="c1"># in practice, (x,y,x_,y_) might be predicted
+</span>                   <span class="c1"># as a tensor in the computation graph
+# Set the affine parameters
+</span><span class="n">theta</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">tensor</span><span class="p">([</span>
+    <span class="p">[(</span><span class="n">x_</span><span class="o">-</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>       <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">x_</span><span class="o">+</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>
+    <span class="p">[</span>       <span class="mi">0</span><span class="p">,(</span><span class="n">y_</span><span class="o">-</span><span class="n">y</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">y_</span><span class="o">+</span><span class="n">y</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>
+<span class="p">]).</span><span class="n">unsqueeze_</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="n">expand</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="c1"># compute the flow field;
+# where size is the output size (scaling involved)
+# `align_corners` option must be the same throughout the code
+</span><span class="n">f</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="n">affine_grid</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="n">W</span><span class="o">//</span><span class="mi">2</span><span class="p">),</span> <span class="n">align_corners</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">I_cropped</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="n">grid_sample</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">align_corners</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="read-also">Read also</h2>
+
+<ul>
+  <li><a href="https://discuss.pytorch.org/t/cropping-a-minibatch-of-images-each-image-a-bit-differently/12247">https://discuss.pytorch.org/t/cropping-a-minibatch-of-images-each-image-a-bit-differently/12247</a></li>
+</ul>
+
+  </div>
+<a class="u-url" href="/2020/05/22/pytorch-crop-images-differentially.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /pip/
+Sitemap: https://kkew3.github.io/sitemap.xml

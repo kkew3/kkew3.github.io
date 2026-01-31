@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Leverage Ollama in iTerm2 AI integration | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="Leverage Ollama in iTerm2 AI integration">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="Introduction">
+<meta property="og:description" content="Introduction">
+<link rel="canonical" href="https://kkew3.github.io/2024/06/13/leverage-ollama-in-iterm2-ai-integration.html">
+<meta property="og:url" content="https://kkew3.github.io/2024/06/13/leverage-ollama-in-iterm2-ai-integration.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2024-06-13T14:46:53+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Leverage Ollama in iTerm2 AI integration">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-06-13T14:46:53+00:00","datePublished":"2024-06-13T14:46:53+00:00","description":"Introduction","headline":"Leverage Ollama in iTerm2 AI integration","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2024/06/13/leverage-ollama-in-iterm2-ai-integration.html"},"url":"https://kkew3.github.io/2024/06/13/leverage-ollama-in-iterm2-ai-integration.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Leverage Ollama in iTerm2 AI integration</h1>
+    <span><a href="https://kkew3.github.io/tags/os--macos"><code class="highlighter-rouge"><nobr>os/macOS</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2024-06-13T14:46:53+00:00" itemprop="datePublished">Jun 13, 2024 at 14:46:53
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="introduction">Introduction</h2>
+
+<p>Recently, <a href="https://iterm2.com/">iTerm2</a> released version <a href="https://iterm2.com/downloads/stable/iTerm2-3_5_0.changelog">3.5.0</a>, which includes generative AI integration in OpenAI API.
+<a href="https://ollama.com/">Ollama</a> is an open platform for large language models (LLM).
+Starting from February 2024, Ollama has built-in <a href="https://ollama.com/blog/openai-compatibility">support</a> of OpenAI chat completions API.
+Putting them together, we can <a href="https://gitlab.com/gnachman/iterm2/-/issues/11455">now</a> ask AI to compose commands for us seamlessly in iTerm2 interface, using Ollama bot locally.</p>
+
+<h2 id="configuration">Configuration</h2>
+
+<p>Here are the steps to start using the AI integration in iTerm2:</p>
+
+<ol>
+  <li>Install the AI plugin from <a href="https://iterm2.com/ai-plugin.html">iTerm2 site</a>.</li>
+  <li>In iTerm2 preferences, under <code class="language-plaintext highlighter-rouge">General</code> section and <code class="language-plaintext highlighter-rouge">AI</code> tab, enter “OpenAI API key” with anything non-empty, fill in the <a href="https://gitlab.com/gnachman/iterm2/-/wikis/AI-Prompt">AI prompt</a>, specify the model and the custom URL.</li>
+</ol>
+
+<p>For example, mine is like below:</p>
+
+<ul>
+  <li>OpenAI API key: <code class="language-plaintext highlighter-rouge">abc</code>
+</li>
+  <li>AI prompt: <code class="language-plaintext highlighter-rouge">Return commands suitable for copy/pasting into \(shell) on \(uname). Do NOT include commentary NOR Markdown triple-backtick code blocks as your whole response will be copied into my terminal automatically. If not otherwise specified, you should always give at most one line of command. The command should do this: \(ai.prompt)</code>.</li>
+  <li>Model: <code class="language-plaintext highlighter-rouge">codegemma:instruct</code>.</li>
+  <li>Token limit: <code class="language-plaintext highlighter-rouge">16384</code>.</li>
+  <li>Custom URL: <code class="language-plaintext highlighter-rouge">http://localhost/v1/chat/completions</code>.</li>
+  <li>Use legacy “completions” API: false.</li>
+</ul>
+
+<p>Remarks:</p>
+
+<ul>
+  <li>If your Ollama runs on a server in WLAN, e.g. at IP address <code class="language-plaintext highlighter-rouge">192.168.0.107</code>, just replace the <code class="language-plaintext highlighter-rouge">localhost</code> in custom URL with that IP address.</li>
+  <li>Don’t forget to start Ollama by <code class="language-plaintext highlighter-rouge">ollama serve</code> before using iTerm2’s AI integration.</li>
+</ul>
+
+<h2 id="workflow">Workflow</h2>
+
+<p>My favorite iTerm2 workflow after the configuration above:</p>
+
+<ol>
+  <li>Press <code class="language-plaintext highlighter-rouge">command + shift + .</code> to activate the composer.</li>
+  <li>Specify my need in plain English, and press <code class="language-plaintext highlighter-rouge">command + y</code> to send the input text to Ollama.</li>
+  <li>After a few seconds, the text should be replaced by Ollama’s response.</li>
+  <li>Press <code class="language-plaintext highlighter-rouge">shift + enter</code> to send the response to the terminal.</li>
+</ol>
+
+<p>A demo:</p>
+
+<p><img src="/assets/posts_imgs/2024-06-13/iterm2-ai-demo.gif" alt="demo"></p>
+
+  </div>
+<a class="u-url" href="/2024/06/13/leverage-ollama-in-iterm2-ai-integration.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

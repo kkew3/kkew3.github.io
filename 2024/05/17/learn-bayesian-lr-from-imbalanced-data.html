@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Learn Bayesian Logistic regression from imbalanced data | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="Learn Bayesian Logistic regression from imbalanced data">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="Dataset">
+<meta property="og:description" content="Dataset">
+<link rel="canonical" href="https://kkew3.github.io/2024/05/17/learn-bayesian-lr-from-imbalanced-data.html">
+<meta property="og:url" content="https://kkew3.github.io/2024/05/17/learn-bayesian-lr-from-imbalanced-data.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2024-05-17T03:21:31+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Learn Bayesian Logistic regression from imbalanced data">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-05-17T03:21:31+00:00","datePublished":"2024-05-17T03:21:31+00:00","description":"Dataset","headline":"Learn Bayesian Logistic regression from imbalanced data","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2024/05/17/learn-bayesian-lr-from-imbalanced-data.html"},"url":"https://kkew3.github.io/2024/05/17/learn-bayesian-lr-from-imbalanced-data.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+<script>MathJax={"tex":{"inlineMath":[["$","$"],["\\(","\\)"]],"displayMath":[["$$","$$"],["\\[","\\]"]]},"svg":{"fontCache":"global"}}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Learn Bayesian Logistic regression from imbalanced data</h1>
+    <span><a href="https://kkew3.github.io/tags/ml--bayes"><code class="highlighter-rouge"><nobr>machine learning/bayesian</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2024-05-17T03:21:31+00:00" itemprop="datePublished">May 17, 2024 at 03:21:31
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="dataset">Dataset</h2>
+
+<p><img src="/assets/posts_imgs/2024-05-17/dataset.png" alt="toy 2d dataset"></p>
+
+<p>Obviously, this is an imbalanced dataset.
+A dumb classifier may assign “yellow” to all points and yield apparently satisfactory accuracy.</p>
+
+<h2 id="bayesian-logistic-regression">Bayesian Logistic regression</h2>
+
+<p>Denote the $k$-th component of the softmax of $\boldsymbol z$ as:</p>
+
+\[\mathcal S_k(\boldsymbol z) \triangleq \frac{\exp(z_k)}{\sum_{k'}\exp(z_{k'})}\,.\]
+
+<p>The likelihood is:</p>
+
+\[p(y=k \mid \boldsymbol x, \mathbf W, \boldsymbol b) = \mathcal S_k(\mathbf W \boldsymbol x + \boldsymbol b)\,,\]
+
+<p>where matrix $\mathbf W$ consists of $K$ weight vector $\boldsymbol w_k \in \mathbb R^d$, $\boldsymbol x \in \mathbb R^d$, and $\boldsymbol b \in \mathbb R^K$.</p>
+
+<p>For now, assign an uninformative Gaussian prior:</p>
+
+\[\forall k,\ \boldsymbol w_k \sim \mathcal N(0, \mathbf I)\,,\quad b_k \sim \mathcal N(0, 1)\,.
+\tag{1}\]
+
+<p>The posterior (given the dataset $\mathcal D$) is:</p>
+
+\[p(\mathbf W, \boldsymbol b \mid \mathcal D) \propto \prod_{k=1}^K p(\boldsymbol w_k) p(b_k) \prod_{j=1}^m p(y_j \mid \boldsymbol x_j, \mathbf W, \boldsymbol b)\,.
+\tag{2.1}\]
+
+<p>The predictive posterior is:</p>
+
+\[p(y \mid \boldsymbol x, \mathcal D) = \int p(y \mid \boldsymbol x, \mathbf W, \boldsymbol b) p(\mathbf W, \boldsymbol b \mid \mathcal D)\,\mathrm d \mathbf W \mathrm d \boldsymbol b\,.
+\tag{2.2}\]
+
+<p>Although both (2.1) and (2.2) are intractable, we may find $q(\mathbf W, \boldsymbol b) \approx p(\mathbf W, \boldsymbol b \mid \mathcal D)$ by variational inference, and estimate the predictive posterior by Monte Carlo after plugging in $q$.
+Since such procedure is out of scope, we won’t include details about it.</p>
+
+<p>Let’s see the decision boundary and the uncertainty (measured by entropy) of the Bayesian LR:</p>
+
+<p><img src="/assets/posts_imgs/2024-05-17/uninformative-db.png" alt="uninformative decision boundary"></p>
+
+<p><img src="/assets/posts_imgs/2024-05-17/uninformative-unc.png" alt="uninformative uncertainty"></p>
+
+<p>The model learns to be a dumb classifier!</p>
+
+<p>We may apply rescaling (a.k.a. threshold shifting) to the learned classifier, by dividing the predictive posterior by the class prior (i.e. the proportion of samples of class $k$ in all samples), and use it to make prediction.
+The rescaled decision boundary and uncertainty are:</p>
+
+<p><img src="/assets/posts_imgs/2024-05-17/uninformative-rescaled-db.png" alt="uninformative rescaled decision boundary"></p>
+
+<p><img src="/assets/posts_imgs/2024-05-17/uninformative-rescaled-unc.png" alt="uninformative rescaled uncertainty"></p>
+
+<p>This benefits the minority class, but deteriorates the overall accuracy <em>a lot</em>.</p>
+
+<h2 id="strengthen-the-prior">Strengthen the prior</h2>
+
+<p>It turns out that if we strengthen the prior (by increasing its precision, or equivalently, decreasing its variance) of the intercepts in (1), things become much better.
+The new prior is:</p>
+
+\[\forall k,\ b_k \sim \mathcal N(0, 10^{-6})\,.
+\tag{3}\]
+
+<p>What we just encode into the prior reads:</p>
+
+<blockquote>
+  <p>I’m pretty sure that the two class weigh the same, despite the “purple” class appears inferior.</p>
+</blockquote>
+
+<p>The result plots are:</p>
+
+<p><img src="/assets/posts_imgs/2024-05-17/precise-uninformative-db.png" alt="precise uninformative decision boundary"></p>
+
+<p><img src="/assets/posts_imgs/2024-05-17/precise-uninformative-unc.png" alt="precise uninformative uncertainty"></p>
+
+<h2 id="bias-the-prior">Bias the prior</h2>
+
+<p>What if we go further by biasing the classifier a little towards the minority class ($k=0$, “purple”)?
+The new prior is:</p>
+
+\[b_0 \sim \mathcal N(2, 10^{-6})\,,\quad b_1 \sim \mathcal N(0, 10^{-6})\,.
+\tag{4}\]
+
+<p>This prior reads:</p>
+
+<blockquote>
+  <p>I’m pretty sure there’re even a bit more “purple” class than “yellow” class a priori, despite they’re not sampled as much in the dataset.</p>
+</blockquote>
+
+<p>The plots are now:</p>
+
+<p><img src="/assets/posts_imgs/2024-05-17/precise-biased-db.png" alt="precise biased decision boundary"></p>
+
+<p><img src="/assets/posts_imgs/2024-05-17/precise-biased-unc.png" alt="precise biased uncertainty"></p>
+
+<p>Pefect!</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>In this post, we see that under Bayesian framework, Bayesian LR is able to naturally combat imbalanced dataset by adjusting its prior belief.</p>
+
+<p>This <a href="https://github.com/kkew3/bayeslr-imbalanced">codebase</a> generates all the figures in the post.</p>
+
+<h2 id="appendix">Appendix</h2>
+
+<p>Features and labels of the toy dataset.</p>
+
+<p>The features:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array([[-0.46601866,  1.18801609],
+       [ 0.53858625,  0.60716392],
+       [-0.97431137,  0.69753311],
+       [-1.09220402,  0.87799492],
+       [-2.03843356,  0.28665154],
+       [-0.34062009,  0.79352777],
+       [-1.16225216,  0.79350459],
+       [ 0.19419328,  1.60986703],
+       [ 0.41018415,  1.54828838],
+       [-0.61113336,  0.99020048],
+       [ 0.08837677,  0.95373644],
+       [-1.77183232, -0.12717568],
+       [-0.54560628,  1.07613052],
+       [-1.69901425,  0.55489764],
+       [-0.7449788 ,  0.7519103 ],
+       [-1.84473763,  0.55248995],
+       [-0.50824943,  1.08964891],
+       [-1.35655196,  0.7102918 ],
+       [-0.71295569,  0.38030989],
+       [ 0.0582823 ,  1.35158484],
+       [-2.74743505, -0.18849513],
+       [-2.36125827, -0.22542297],
+       [ 0.28512568,  1.52124326],
+       [-0.67059538,  0.61188467],
+       [-1.08310962,  0.57068698],
+       [-1.59421684,  0.32055693],
+       [-0.58608561,  0.98441983],
+       [ 0.91449962,  1.74231742],
+       [-1.78271812,  0.25676529],
+       [-0.30880495,  0.98633121],
+       [-0.80196522,  0.56542478],
+       [-1.64551419,  0.2527351 ],
+       [ 0.88404065,  1.80009243],
+       [ 0.07752252,  1.19103008],
+       [ 0.01499115,  1.35642701],
+       [-1.37772455,  0.58176578],
+       [-0.9893581 ,  0.6000557 ],
+       [-0.20708577,  0.97773425],
+       [-0.97487675,  0.67788572],
+       [-0.84898247,  0.76214066],
+       [-2.87107864,  0.01823837],
+       [-1.52762479,  0.15224236],
+       [-1.19066619,  0.61716677],
+       [-0.78719074,  1.22733157],
+       [ 0.37887222,  1.38907542],
+       [-0.29892079,  1.20534091],
+       [-1.21904812,  0.45126808],
+       [-0.01954643,  1.00443244],
+       [-2.7534539 , -0.41174779],
+       [ 0.00290918,  1.19376387],
+       [-0.3465645 ,  0.97372693],
+       [-0.38706669,  0.98612011],
+       [-0.3909804 ,  1.1737113 ],
+       [ 0.67985963,  1.57038317],
+       [-1.5574845 ,  0.38938231],
+       [-0.70276487,  0.84873314],
+       [-0.77152456,  1.24328845],
+       [-0.78685252,  0.71866813],
+       [-1.58251503,  0.47314274],
+       [-0.86990291,  1.01246542],
+       [-0.76296641,  1.03057172],
+       [-1.46908977,  0.50048994],
+       [ 0.41590518,  1.35808005],
+       [-0.23171796,  0.97466644],
+       [-0.35599838,  1.05651836],
+       [-1.86300113,  0.31105633],
+       [-1.06979785,  0.89343042],
+       [ 0.89051152,  1.36968058],
+       [-1.64250124,  0.5395521 ],
+       [ 0.19072792,  1.39594182],
+       [-0.68980859,  1.51412568],
+       [-0.66216014,  0.94064958],
+       [-1.98324693,  0.36500688],
+       [-1.77543305,  0.48759471],
+       [ 0.99143992,  1.53242166],
+       [-2.03402523,  0.27661546],
+       [-0.98138839,  0.86047666],
+       [ 0.86594322,  1.60352598],
+       [-1.25510995,  0.40788484],
+       [-1.28207069,  0.55164356],
+       [-0.50983219,  1.05505834],
+       [ 0.98003606,  0.56171673],
+       [-1.86097117,  0.44004685],
+       [-1.09945843,  0.63380337],
+       [-1.44294885,  0.18391039],
+       [-1.60512757,  0.25456073],
+       [ 0.5505329 ,  1.63447114],
+       [-1.13622159,  0.87658095],
+       [-0.18029101,  0.98458234],
+       [-1.48031015,  0.3667454 ],
+       [ 0.94295697,  1.51965296],
+       [-1.94413955,  0.257857  ],
+       [-1.92812486, -0.15406208],
+       [-0.28437139,  0.8520255 ],
+       [-0.95551392,  0.28517945],
+       [-1.44252631,  0.5455637 ],
+       [-0.22064889,  1.33439538],
+       [-1.52749019,  0.50443876],
+       [ 0.757785  ,  0.42124458],
+       [-0.49536512,  0.9627005 ]])
+</code></pre></div></div>
+
+<p>The labels:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array([1,
+       0,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       0,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       0,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       0,
+       1,
+       1,
+       1,
+       1,
+       0,
+       1,
+       1,
+       0,
+       1])
+</code></pre></div></div>
+
+  </div>
+<a class="u-url" href="/2024/05/17/learn-bayesian-lr-from-imbalanced-data.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

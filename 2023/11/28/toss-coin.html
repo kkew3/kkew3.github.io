@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Estimate the head probability of a coin | Kaiwen’s personal website</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="Estimate the head probability of a coin">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="The problem">
+<meta property="og:description" content="The problem">
+<link rel="canonical" href="https://kkew3.github.io/2023/11/28/toss-coin.html">
+<meta property="og:url" content="https://kkew3.github.io/2023/11/28/toss-coin.html">
+<meta property="og:site_name" content="Kaiwen’s personal website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2023-11-28T11:55:37+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Estimate the head probability of a coin">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2023-11-28T11:55:37+00:00","datePublished":"2023-11-28T11:55:37+00:00","description":"The problem","headline":"Estimate the head probability of a coin","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkew3.github.io/2023/11/28/toss-coin.html"},"url":"https://kkew3.github.io/2023/11/28/toss-coin.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="https://kkew3.github.io/feed.xml" title="Kaiwen's personal website">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2YQN8LEHLR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2YQN8LEHLR');
+</script>
+<script>MathJax={"tex":{"inlineMath":[["$","$"],["\\(","\\)"]],"displayMath":[["$$","$$"],["\\[","\\]"]]},"svg":{"fontCache":"global"}}</script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Kaiwen's personal website</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/docs/">Docs</a><a class="page-link" href="/about/">About</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Estimate the head probability of a coin</h1>
+    <span><a href="https://kkew3.github.io/tags/math--prob"><code class="highlighter-rouge"><nobr>math/probability</nobr></code></a></span>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2023-11-28T11:55:37+00:00" itemprop="datePublished">Nov 28, 2023 at 11:55:37
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="the-problem">The problem</h2>
+
+<p>Toss a coin $T$ times.
+Let $X=\{x_1,\dots,x_T\} \in \{+,-\}^T$ be the result.
+Let $N_+ = \sum_{t=1}^T\mathbb I(x_t=+)$, $N_- = \sum_{t=1}^T\mathbb I(x_t=-)$.
+Let $P(x=+ \mid \theta)$ be the probability that the coin shows head in a toss.
+How to estimate $\theta$ from $X$?</p>
+
+<h2 id="mle">MLE</h2>
+
+\[\arg\max \log P(X \mid \theta) = \arg\max \big(N_+\log\theta + N_-\log(1-\theta)\big)\,.\]
+
+<p>Taking derivative w.r.t. $\theta$ and letting it equal to zero yields</p>
+
+\[\theta = \frac{N_+}{N_+ + N_-}\,.\]
+
+<p>As can be easily observed, it overfit when there’s not enough data(, e.g. when $N_+=6$, $N_-=0$).</p>
+
+<h2 id="map">MAP</h2>
+
+<p>Apply a beta prior $P(\theta \mid a, b) = \mathrm{Beta}(\theta \mid a, b)$.
+Set $a = b = 2$ so that it’s proper.</p>
+
+\[\arg\max \log P(\theta \mid X, a, b) = \arg\max \big(\log P(\theta \mid a, b) + \log P(X \mid \theta)\big)\,.\]
+
+<p>Similarly, this yields</p>
+
+\[\theta = \frac{N_+ + a - 1}{N_+ + N_- + a + b - 2} = \frac{N_+ + 1}{N_+ + N_- + 2}\,.\]
+
+<p>This is also called Laplace smoothing.</p>
+
+<h2 id="full-bayesian">Full Bayesian</h2>
+
+<p>Apply a prior $P(\theta \mid a, b) = \mathrm{Beta}(\theta \mid a, b)$, and find the posterior:</p>
+
+\[P(\theta \mid X, a, b) = \frac{P(\theta \mid a, b) P(X \mid \theta)}{\int_0^1 P(\theta \mid a, b) P(X \mid \theta) \mathrm d \theta}\,.\]
+
+<p>To address the integral, notice that</p>
+
+\[\int_0^1 x^\alpha (1-x)^\beta \mathrm dx = B(\alpha+1,\beta+1) = \frac{\Gamma(\alpha+1)\Gamma(\beta+1)}{\Gamma(\alpha+\beta+2)}\,,\]
+
+<p>where $B(\cdot,\cdot)$ is the beta function, and $\Gamma(\cdot)$ is the gamma function.
+Therefore,</p>
+
+\[P(\theta \mid X, a, b) = \mathrm{Beta}(\theta \mid N_+ + a, N_- + b)\,.\]
+
+<p>Now it’s straightforward to estimate the uncertainty in $\theta$ given $a$ and $b$.</p>
+
+<h2 id="empirical-bayes">Empirical Bayes</h2>
+
+<p>Here we abuse the term “empirical Bayes” since it original refers to a graphic model like this:</p>
+
+<p><img src="/assets/posts_imgs/2023-11-28/classic_empirical_bayes.jpg" alt="empirical bayes"></p>
+
+<p>Whereas the model we are using is like this:</p>
+
+<p><img src="/assets/posts_imgs/2023-11-28/coin_with_prior.jpg" alt="coin model"></p>
+
+<p>Since the derivation is similar (use of EM), we’ll continue with that notation.</p>
+
+<p>Again, apply a beta prior $P(\theta \mid a, b)$, but now we regard $(a,b)$ as unknown parameters.
+By EM, the auxiliary function $Q$ is,</p>
+
+\[\log P(X \mid a, b) \ge Q(P, \tilde P) = \int_0^1 P(\theta \mid X, a^{(t-1)}, b^{(t-1)}) \log \tilde P(X, \theta \mid a, b) \mathrm d \theta\,,\]
+
+<p>where at E-step, we have already computed $P(\theta \mid X, a^{(t-1)}, b^{(t-1)})$.
+Factorizing the logarithm,</p>
+
+\[\log \tilde P(X,\theta \mid a,b) = \log \tilde P(\theta \mid a,b) + \log \tilde P(X \mid \theta)\,,\]
+
+<p>we notece that the second term on the r.h.s. does not rely on $a,b$.
+Therefore, we need only to optimize over the first term.
+So now the auxiliary function reduces to</p>
+
+\[\begin{aligned}
+Q(P, \tilde P)
+&amp;= \int_0^1 P(\theta \mid X, a^{(t-1)},b^{(t-1)}) \log \tilde P(\theta \mid a, b)\\
+&amp;= \int_0^1 \mathrm{Beta}(\theta \mid N_+ + a^{(t-1)}, N_- + b^{(t-1)}) \log \mathrm{Beta}(\theta \mid a, b)\,.\\
+\end{aligned}\]
+
+<p>Taking partial derivative w.r.t. $a$ on both sides:</p>
+
+\[\begin{aligned}
+\frac{\partial Q}{\partial a}
+&amp;= \frac{\partial}{\partial a} \int_0^1 \mathrm{Beta}(\theta \mid N_++a^{(t-1)},N_-+b^{(t-1)}) \log \mathrm{Beta}(\theta \mid a,b)\\
+&amp;= \frac{\partial}{\partial a}\int_0^1 \mathrm{Beta}(\theta \mid N_++a^{(t-1)},N_-+b^{(t-1)}) [(a-1)\log\theta + (b-1)\log(1-\theta) - \log B(a,b)] \mathrm d \theta\\
+&amp;= \int_0^1 \mathrm{Beta}(\theta \mid N_++a^{(t-1)},N_-+b^{(t-1)}) \frac{\partial}{\partial a} [(a-1)\log\theta + (b-1)\log(1-\theta) - \log B(a,b)] \mathrm d \theta\\
+&amp;= \int_0^1 \mathrm{Beta}(\theta \mid N_++a^{(t-1)},N_-+b^{(t-1)}) \left[\log\theta - \frac{\partial}{\partial a}\log B(a,b)\right] \mathrm d\theta\\
+&amp;= \int_0^1 \mathrm{Beta}(\theta \mid N_++a^{(t-1)},N_-+b^{(t-1)}) \log\theta \,\mathrm d\theta - \frac{\partial}{\partial a}\log B(a,b)\int_0^1 \mathrm{Beta}(\theta \mid N_++a^{(t-1)},N_-+b^{(t-1)}) \,\mathrm d\theta\\
+&amp;= \frac{1}{B(N_++a^{(t-1)},N_-+b^{(t-1)})} \int_0^1 \theta^{N_++a^{(t-1)}-1} (1-\theta)^{N_-+b^{(t-1)}-1} \log\theta \,\mathrm d\theta - \frac{\partial}{\partial a} \log B(a,b)\,.\\
+\end{aligned}\]
+
+<p>Notice that</p>
+
+\[\int_0^1 x^{\alpha-1} (1-x)^{\beta-1} \log x \,\mathrm d x = B(\alpha,\beta)(\psi(\alpha)-\psi(\alpha+\beta))\,,\]
+
+<p>where $\psi(x) \triangleq \frac{\partial}{\partial x}\log\Gamma(x)$.
+We may using the same notation $\psi$ to expand the log-derivative of beta function.
+Thus,</p>
+
+\[\frac{\partial Q}{\partial a} = \psi(N_++a^{(t-1)})-\psi(N_++a^{(t-1)}+N_-+b^{(t-1)}) - (\psi(a) - \psi(a+b))\,.\]
+
+<p>Similarly,</p>
+
+\[\frac{\partial Q}{\partial b} = \psi(N_-+b^{(t-1)}) - \psi(N_++a^{(t-1)}+N_-+b^{(t-1)}) - (\psi(b)-\psi(a+b))\,.\]
+
+<p>Setting initial value $a^{(0)}=b^{(0)}=1$, we may find optimal solution for $a$ and $b$.</p>
+
+<p><strong>BUT REALLY</strong>, <em>here</em> we may compute directly $\log P(X \mid a, b)$ due to the conjugate beta prior!</p>
+
+<p>It turns out that</p>
+
+\[L(a,b) \triangleq \log P(X \mid a, b) = \log\frac{B(N_++a,N_-+b)}{B(a,b)}\,.\]
+
+<p>Hence,</p>
+
+\[\begin{cases}
+\frac{\partial L}{\partial a} = \psi(N_++a) + \psi(a+b) - \psi(a) - \psi(N_++N_-+a+b)\\
+\frac{\partial L}{\partial b} = \psi(N_-+b) + \psi(a+b) - \psi(b) - \psi(N_++N_-+a+b)\\
+\end{cases}\]
+
+<p>Coding time:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">digamma</span><span class="p">,</span> <span class="n">betaln</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span>
+
+<span class="c1"># the log-likelihood
+</span><span class="k">def</span> <span class="nf">fun</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">x</span>
+    <span class="c1"># the minus sign is because we are doing gradient descent (not ascent)
+</span>    <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">betaln</span><span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="n">a</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">-</span> <span class="n">betaln</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">jac</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">x</span>
+    <span class="c1"># the minus sign is because we are doing gradient descent (not ascent)
+</span>    <span class="n">ja</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">digamma</span><span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">digamma</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">-</span> <span class="n">digamma</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+           <span class="o">-</span> <span class="n">digamma</span><span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="n">n</span> <span class="o">+</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">))</span>
+    <span class="n">jb</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">digamma</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">+</span> <span class="n">digamma</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">-</span> <span class="n">digamma</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+           <span class="o">-</span> <span class="n">digamma</span><span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="n">n</span> <span class="o">+</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([</span><span class="n">ja</span><span class="p">,</span> <span class="n">jb</span><span class="p">])</span>
+
+<span class="c1"># Suppose N+ = 6 and N- = 0:
+</span><span class="k">print</span><span class="p">(</span><span class="n">minimize</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s">'L-BFGS-B'</span><span class="p">,</span> <span class="n">jac</span><span class="o">=</span><span class="n">jac</span><span class="p">,</span>
+               <span class="n">bounds</span><span class="o">=</span><span class="p">[(</span><span class="mf">1e-10</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="mf">1e-10</span><span class="p">,</span> <span class="bp">None</span><span class="p">)]))</span>
+</code></pre></div></div>
+
+<p>The optimization result is:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>message: CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_&lt;=_PGTOL
+  success: True
+   status: 0
+      fun: 1.6934720292738348e-10
+        x: [ 1.817e+00  1.000e-10]
+      nit: 2
+      jac: [-5.917e-11  1.693e+00]
+     nfev: 3
+     njev: 3
+ hess_inv: &lt;2x2 LbfgsInvHessProduct with dtype=float64&gt;
+</code></pre></div></div>
+
+<p>From the result, the mean of the prior distribution goes to 1.0 (from left), the mode does not exists, and the density at 1.0 goes to infinity.
+Such prior will drive $\theta$ to 1.
+We observe that the model has severly overfit, exactly the same case if we were using simple <a href="mle"><strong>MLE</strong></a>.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>In conclusion, data-driven approach to set hyperparameters (e.g. empirical Bayes) (, at least in this example,) works only when there are enough well-sampled data.</p>
+
+  </div>
+<a class="u-url" href="/2023/11/28/toss-coin.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kaiwen's personal website</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kaiwen's personal website</li>
+<li><a class="u-email" href="mailto:kps6326@hotmail.com">kps6326@hotmail.com</a></li>
+</ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/kkew3"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkew3</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>My blogs and research reports.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
